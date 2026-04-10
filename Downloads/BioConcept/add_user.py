@@ -83,8 +83,8 @@ def push_and_enroll_employee(ip, new_user_id, new_name):
 
 # Run the test
 target_ip = "192.168.10.100"     # CHANGE THIS to your store device IP
-test_hr_id = "420001"      # Must be strictly numeric
-test_name = "Carl Cabral"  # Max 24 characters usually
+test_hr_id = "420002"      # Must be strictly numeric
+test_name = "Carlos Cabral"  # Max 24 characters usually
 
 if test_connectivity(target_ip):
     push_and_enroll_employee(target_ip, test_hr_id, test_name)
