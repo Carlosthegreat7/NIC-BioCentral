@@ -82,7 +82,7 @@ def push_and_enroll_employee(ip, new_user_id, new_name):
             print(f"[{ip}] Connection cleanly severed.")
 
 # Run the test
-target_ip = "10.x.x.x"     # CHANGE THIS to your store device IP
+target_ip = "192.168.10.100"     # CHANGE THIS to your store device IP
 test_hr_id = "420001"      # Must be strictly numeric
 test_name = "Carl Cabral"  # Max 24 characters usually
 
