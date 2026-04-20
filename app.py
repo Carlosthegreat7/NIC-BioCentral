@@ -9,14 +9,10 @@ import os
 import ldap
 import pyodbc
 
-
-
 @app.route('/statuschk', methods=['GET', 'POST'])
 def statuschk():
 	d = "Site is OK"
 	return jsonify(d)
-
-
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
@@ -28,7 +24,6 @@ def index():
 		print("username", username)
 
 		conn = ldap.initialize(app.config['LDAP_PROVIDER_URL'])
-
 
 		today = datetime.today().strftime("%Y-%m-%d %H:%M:%S")
 
@@ -46,10 +41,7 @@ def index():
 
 						session['sdr_curr_user_username']	  = user[0][0].upper()
 						session['username']                   = user[0][0].upper()
-						# session['sdr_curr_user_email']	      = user[0][1]
-						# session['sdr_curr_user_active']	      = user[0][2]
 						session['sdr_curr_user_role']		  = user[0][3]
-						# session['sdr_curr_user_dept']		  = user[0][4]
 						session['sdr_loggedin']			      = True
 						session['sdr_usertype']				  = 'Head Office'
 						print(today, session['sdr_usertype'], session['sdr_curr_user_username'])
@@ -71,7 +63,6 @@ def index():
 				sql_comm_strng2 = 'SELECT * FROM portal_store_users WITH (NOLOCK)' \
 								'WHERE bcc = ?'
 				store = MIS_SysDev_cursor.execute(sql_comm_strng2, (username) ).fetchall()
-				# print(today, "store", store)
 
 				if store is not None and len(store) > 0:
 					domain_username = store[0][1]
@@ -85,15 +76,12 @@ def index():
 						session['sdr_curr_user_role']		  = ''
 						session['sdr_loggedin']			      = True
 						session['sdr_usertype']				  = 'Store'
-						# session['earliest_missing_date']	  = '2025-06-23'
 
 						today						  		  = date.today()
 						ante_date_int						  = store[0][4]
 						ante_date_dt						  = (today - timedelta(days=ante_date_int))
-						print("ante_date_dt", ante_date_dt, type(ante_date_dt))
 						session['ante_date_int']			  = ante_date_int
 						session['ante_date']				  = ante_date_dt
-						session['earliest_missing_date'] 	  = generate_earliest_missing_date(ante_date_int)
 						print(today, session['sdr_usertype'], session['sdr_curr_user_username'])
 
 						next_page = request.args.get('next')
@@ -108,7 +96,6 @@ def index():
 				else:
 					flash("Invalid SDR Portal Login - username does not exists !")
 					return redirect(url_for('index',_external=True))
-
 
 		except pyodbc.Error as e:
 			flash(f"Error: {e}")
@@ -126,19 +113,13 @@ def index():
 
 	return render_template('home.html')
 
-
-
 @app.route('/logout')
 @loggedin_required()
 def logout():
-	# print("logout", session['sdr_loggedin'])
-
 	session.pop('sdr_loggedin', None)
 	session.pop('sdr_curr_user_username', None)
 	session.pop('username', None)
-	# session.pop('sdr_curr_user_active', None)
 	session.pop('sdr_curr_user_role', None)
-	# session.pop('sdr_curr_user_dept', None)
 	session.pop('sdr_usertype', None)
 	if 'earliest_missing_date' in session:
 		session.pop('earliest_missing_date', None)
@@ -149,9 +130,5 @@ def logout():
 
 	return redirect(url_for('index',_external=True))
 
-
-
 if __name__ == '__main__':
 	app.run()
-	# print("SDR Portal: 722")
-	# serve(app, host='mgsvr06.mgroup.local', port=722, threads=30, connection_limit=1000)

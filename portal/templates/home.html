@@ -81,7 +81,7 @@
     border: 1px solid rgba(255, 255, 255, 0.1);
   }
 
-  /* --- Unified Pop-In Animation --- */
+  /* --- Pop-In Animation --- */
   @keyframes popIn {
     0% {
       opacity: 0;
@@ -317,28 +317,28 @@
 
   <div class="dashboard-content">
 
-    <div class="welcome-header">
+    <div class="welcome-header pop-in-container">
       <h1 class="welcome-title">Welcome back, {{ session.get('username', 'User').split('.')[0] | title }}!</h1>
       <p class="welcome-subtitle">Select a button to manage device connections and employee data.</p>
     </div>
 
     <div class="wireframe-grid">
-      <div class="bio-card" onclick="window.location.href='/connect_device'">
+      <div class="bio-card pop-in-container stagger-1" onclick="window.location.href='/connect_device'">
         <div class="bio-card-label">Connect to a Store Device</div>
         <div class="wireframe-x"></div>
       </div>
 
-      <div class="bio-card" onclick="window.location.href='/register_employee'">
+      <div class="bio-card pop-in-container stagger-2" onclick="window.location.href='/register_employee'">
         <div class="bio-card-label">Register new employee</div>
         <div class="wireframe-x"></div>
       </div>
 
-      <div class="bio-card" onclick="window.location.href='/move_registration'">
+      <div class="bio-card pop-in-container stagger-3" onclick="window.location.href='/move_registration'">
         <div class="bio-card-label">Copy Employee Data</div>
         <div class="wireframe-x"></div>
       </div>
 
-      <div class="bio-card" onclick="window.location.href='/reset_time'">
+      <div class="bio-card pop-in-container stagger-4" onclick="window.location.href='/reset_time'">
         <div class="bio-card-label">Sync Device's Time</div>
         <div class="wireframe-x"></div>
       </div>

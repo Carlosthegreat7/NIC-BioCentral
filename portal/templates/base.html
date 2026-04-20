@@ -89,7 +89,7 @@
             border-color: rgba(255, 255, 255, 0.3);
         }
 
-        /* The Animated Floating Menu */
+        /* Animated Floating Menu */
         .custom-dropdown-menu {
             position: absolute;
             top: 125%;
@@ -104,7 +104,7 @@
             padding: 0.5rem 0;
             z-index: 1060;
 
-            /* Smooth Popping Animation Physics */
+            /* Smooth Popping Animation */
             opacity: 0;
             visibility: hidden;
             transform: translateY(-10px) scale(0.95);
@@ -112,7 +112,6 @@
             transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
 
-        /* Trigger Animation via JS Class */
         .custom-dropdown-menu.show {
             opacity: 1;
             visibility: visible;
@@ -217,14 +216,13 @@
             var dropdownMenu = document.getElementById('optionsDropdownMenu');
 
             if (toggleBtn && dropdownMenu) {
-                // Click event on the button
                 toggleBtn.addEventListener('click', function (e) {
                     e.stopPropagation(); // Prevent document click listener from firing immediately
                     dropdownMenu.classList.toggle('show');
                     toggleBtn.classList.toggle('active');
                 });
 
-                // Close dropdown when clicking anywhere outside of it
+
                 document.addEventListener('click', function (e) {
                     if (!toggleBtn.contains(e.target) && !dropdownMenu.contains(e.target)) {
                         dropdownMenu.classList.remove('show');
