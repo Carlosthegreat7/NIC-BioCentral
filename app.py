@@ -31,7 +31,7 @@ def index():
 
 		conn = ldap.initialize(app.config['LDAP_PROVIDER_URL'])
 
-		# today = date.today().strftime("%Y-%m-%d")
+
 		today = datetime.today().strftime("%Y-%m-%d %H:%M:%S")
 
 		try:
@@ -41,9 +41,6 @@ def index():
 			sql_comm_strng = 'SELECT a."username", a."email", a."active", a."role", a."dept" ' \
     						'FROM dbo."portal_users" a with (NOLOCK) where a."username"=? '
 			user = MIS_SysDev_cursor.execute(sql_comm_strng, (username) ).fetchall()
-			# print(today, "head office", user)
-
-			# head office login
 			if user is not None and len(user) > 0:
 				if user[0][2] == 1:
 					try:
