@@ -1,4 +1,3 @@
-# RR 06-10-2025
 from flask import session, jsonify, request, render_template, redirect, url_for, flash
 from portal import app, loggedin_required
 # from portal.functions import generate_earliest_missing_date
@@ -21,7 +20,6 @@ def statuschk():
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
-	# print("index", session['sdr_loggedin'])
 	rule = request.url_rule
 
 	if request.method == 'POST' and 'username' in request.form and 'password' in request.form:
@@ -47,6 +45,7 @@ def index():
 						conn.simple_bind_s("MGROUP\\"+username, password)
 
 						session['sdr_curr_user_username']	  = user[0][0].upper()
+						session['username']                   = user[0][0].upper()
 						# session['sdr_curr_user_email']	      = user[0][1]
 						# session['sdr_curr_user_active']	      = user[0][2]
 						session['sdr_curr_user_role']		  = user[0][3]
@@ -81,6 +80,7 @@ def index():
 						conn.simple_bind_s("MGROUP\\"+domain_username, password)
 
 						session['sdr_curr_user_username'] 	  = username.upper()
+						session['username']                   = username.upper()
 						session['sdr_curr_user_company'] 	  = store[0][3]
 						session['sdr_curr_user_role']		  = ''
 						session['sdr_loggedin']			      = True
@@ -135,6 +135,7 @@ def logout():
 
 	session.pop('sdr_loggedin', None)
 	session.pop('sdr_curr_user_username', None)
+	session.pop('username', None)
 	# session.pop('sdr_curr_user_active', None)
 	session.pop('sdr_curr_user_role', None)
 	# session.pop('sdr_curr_user_dept', None)

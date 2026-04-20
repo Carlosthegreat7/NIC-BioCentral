@@ -14,17 +14,44 @@
   /* --- Pure CSS Master Wrapper --- */
   .dashboard-wrapper {
     flex: 1;
-    /* Instructs wrapper to take all exact space between header and footer */
     display: flex;
     align-items: center;
-    /* Locks grid vertically to the center */
     justify-content: center;
-    /* Locks grid horizontally to the center */
     width: 100%;
     padding: 2rem;
     box-sizing: border-box;
     overflow: hidden;
-    /* Kills the phantom horizontal scrollbar entirely */
+  }
+
+  /* --- Inner Dashboard Flex Column --- */
+  .dashboard-content {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    max-width: 1400px;
+    gap: 1.5rem;
+  }
+
+  /* --- Welcome Message Typography --- */
+  .welcome-header {
+    width: 100%;
+    text-align: left;
+    padding-left: 1rem;
+  }
+
+  .welcome-title {
+    font-size: 2.2rem;
+    font-weight: 600;
+    color: #ffffff;
+    margin: 0 0 0.5rem 0;
+    letter-spacing: 0.5px;
+  }
+
+  .welcome-subtitle {
+    font-size: 1.1rem;
+    color: #a0a0a0;
+    margin: 0;
+    font-weight: 400;
   }
 
   /* --- Login Screen Styles --- */
@@ -54,13 +81,51 @@
     border: 1px solid rgba(255, 255, 255, 0.1);
   }
 
+  /* --- Unified Pop-In Animation --- */
+  @keyframes popIn {
+    0% {
+      opacity: 0;
+      transform: scale(0.9) translateY(30px);
+    }
+
+    100% {
+      opacity: 1;
+      transform: scale(1) translateY(0);
+    }
+  }
+
+  .pop-in-container {
+    animation: popIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+
+  .stagger-1 {
+    animation-delay: 0.1s;
+    opacity: 0;
+  }
+
+  .stagger-2 {
+    animation-delay: 0.2s;
+    opacity: 0;
+  }
+
+  .stagger-3 {
+    animation-delay: 0.3s;
+    opacity: 0;
+  }
+
+  .stagger-4 {
+    animation-delay: 0.4s;
+    opacity: 0;
+  }
+
   .pop-up-left {
-    animation: popUpAnim 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    animation: popIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    animation-delay: 0.1s;
   }
 
   .pop-up-right {
-    animation: popUpAnim 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-    animation-delay: 0.15s;
+    animation: popIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    animation-delay: 0.25s;
   }
 
   @keyframes popUpAnim {
@@ -83,26 +148,40 @@
     gap: 1.25rem;
   }
 
+  /* Inputs & Bulletproof Autofill Overrides */
   .minimal-input {
     width: 85%;
     padding: 14px 24px;
     border: 1px solid rgba(255, 255, 255, 0.2);
     border-radius: 50px;
     background: var(--input-bg);
-    color: var(--text-main);
+    color: #ffffff !important;
     font-size: 1rem;
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif !important;
     transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
     outline: none;
+    caret-color: #ffffff;
   }
 
   .minimal-input::placeholder {
     color: #a0a0a0;
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
   }
 
   .minimal-input:focus {
     transform: scale(1.04);
     border-color: rgba(255, 255, 255, 0.5);
     background: rgba(255, 255, 255, 0.15);
+  }
+
+  .minimal-input:-webkit-autofill,
+  .minimal-input:-webkit-autofill:hover,
+  .minimal-input:-webkit-autofill:focus,
+  .minimal-input:-webkit-autofill:active {
+    -webkit-box-shadow: 0 0 0px 1000px #222230 inset !important;
+    -webkit-text-fill-color: #ffffff !important;
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif !important;
+    transition: background-color 5000s ease-in-out 0s;
   }
 
   .minimal-btn {
@@ -115,6 +194,7 @@
     color: #ffffff;
     font-size: 1rem;
     font-weight: 500;
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif !important;
     cursor: pointer;
     transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
   }
@@ -130,19 +210,14 @@
     grid-template-columns: repeat(4, 1fr);
     gap: 2rem;
     width: 100%;
-    max-width: 1400px;
-    /* Limits width to maintain the tall pillar look from the wireframe */
     height: 60vh;
-    /* Enforces exactly 60% of the screen height */
     min-height: 400px;
-    /* Safety fallback for tiny displays */
   }
 
   .bio-card {
     background: rgba(255, 255, 255, 0.05);
     border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 40px;
-    /* Increased rounding to match wireframe pills exactly */
     padding: 2.5rem 1.5rem;
     display: flex;
     flex-direction: column;
@@ -174,14 +249,6 @@
     color: #ffffff;
     line-height: 1.4;
     margin-bottom: auto;
-  }
-
-  .bio-card-subtext {
-    display: block;
-    font-size: 0.85rem;
-    color: #a0a0a0;
-    margin-top: 6px;
-    font-weight: 400;
   }
 
   .wireframe-x {
@@ -220,53 +287,67 @@
 </div>
 
 <div class="dashboard-wrapper">
+
   {% if not session['sdr_loggedin'] %}
 
   <div class="biocentral-login-wrapper">
     <div class="bento-card pop-up-left">
       <form id="login-form" method="POST" class="minimal-form">
-        <input type="text" name="username" class="minimal-input" placeholder="Username" required>
-        <input type="password" name="password" class="minimal-input" placeholder="Password" required>
+        <input type="text" name="username" class="minimal-input" placeholder="Username" spellcheck="false"
+          autocomplete="nope" required>
+        <input type="password" name="password" class="minimal-input" placeholder="Password" spellcheck="false"
+          autocomplete="new-password" required>
         <button type="submit" class="minimal-btn">Login</button>
       </form>
     </div>
 
-    <div class="bento-card pop-up-right" style="padding: 0;">
-      <div class="wireframe-x" style="margin: 20px; height: calc(100% - 40px); width: calc(100% - 40px);">
+    <div class="bento-card pop-up-right">
+      <div
+        style="background-color: #ffffff; width: 240px; height: 240px; border-radius: 28px; display: flex; justify-content: center; align-items: center; padding: 1rem; box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4); margin-bottom: 1.5rem;">
+        <img src="{{ url_for('static', filename='BioLogoNIC.png') }}" alt="NIC BioCentral Logo"
+          style="width: 100%; height: auto; object-fit: contain;">
+      </div>
+      <div style="font-size: 1.4rem; font-weight: 600; color: #ffffff; letter-spacing: 0.5px;">
+        NIC BioCentral
       </div>
     </div>
   </div>
 
   {% else %}
 
-  <div class="wireframe-grid">
-    <div class="bio-card" onclick="window.location.href='/connect-device'">
-      <div class="bio-card-label">Connect to a Store Device</div>
-      <div class="wireframe-x"></div>
+  <div class="dashboard-content">
+
+    <div class="welcome-header">
+      <h1 class="welcome-title">Welcome back, {{ session.get('username', 'User').split('.')[0] | title }}!</h1>
+      <p class="welcome-subtitle">Select a button to manage device connections and employee data.</p>
     </div>
 
-    <div class="bio-card" onclick="window.location.href='/register-employee'">
-      <div class="bio-card-label">Register new employee</div>
-      <div class="wireframe-x"></div>
-    </div>
-
-    <div class="bio-card" onclick="window.location.href='/move-registration'">
-      <div class="bio-card-label">
-        Copy Employee Data
-        <!-- <span class="bio-card-subtext">(copy employee data)</span> -->
+    <div class="wireframe-grid">
+      <div class="bio-card" onclick="window.location.href='/connect_device'">
+        <div class="bio-card-label">Connect to a Store Device</div>
+        <div class="wireframe-x"></div>
       </div>
-      <div class="wireframe-x"></div>
+
+      <div class="bio-card" onclick="window.location.href='/register_employee'">
+        <div class="bio-card-label">Register new employee</div>
+        <div class="wireframe-x"></div>
+      </div>
+
+      <div class="bio-card" onclick="window.location.href='/move_registration'">
+        <div class="bio-card-label">Copy Employee Data</div>
+        <div class="wireframe-x"></div>
+      </div>
+
+      <div class="bio-card" onclick="window.location.href='/reset_time'">
+        <div class="bio-card-label">Sync Device's Time</div>
+        <div class="wireframe-x"></div>
+      </div>
     </div>
 
-    <div class="bio-card" onclick="window.location.href='/reset-time'">
-      <div class="bio-card-label">Sync Device's Time</div>
-      <div class="wireframe-x"></div>
-    </div>
   </div>
-
   {% endif %}
-</div>
 
+</div>
 <script>
   const loginForm = document.getElementById('login-form');
   if (loginForm) {

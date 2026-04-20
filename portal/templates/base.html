@@ -154,8 +154,15 @@
 <body>
     {% if session['sdr_loggedin'] %}
     <header class="bento-header shadow-sm">
-        <div class="header-brand">NIC BioCentral</div>
-
+        <a href="{{ url_for('index') }}" class="header-brand d-flex align-items-center"
+            style="text-decoration: none; color: inherit;">
+            <div
+                style="background-color: #ffffff; padding: 5px; border-radius: 8px; margin-right: 12px; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 4px rgba(0,0,0,0.3);">
+                <img src="{{ url_for('static', filename='newtrendslogo.png') }}" alt="Newtrends Logo"
+                    style="height: 20px; width: auto;">
+            </div>
+            NIC BioCentral
+        </a>
         <div class="custom-dropdown">
             <div class="custom-pill-btn" id="optionsToggleBtn">
                 Options
