@@ -1,0 +1,134 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="bg-blob blob-purple"></div>
+<div class="bg-blob blob-blue"></div>
+
+<div id="loading-overlay">
+  <div class="spinner-premium mb-3"></div>
+  <h5 class="font-weight-bold" style="letter-spacing: 2px; color: var(--primary-color);">AUTHENTICATING</h5>
+</div>
+
+<div class="container">
+  {% if not session['sdr_loggedin'] %}
+  <div class="login-wrapper">
+    <div class="login-card text-center">
+      <img src="{{ url_for('static', filename='newtrendslogo.png') }}" width="80" class="mb-4">
+      <h2 style="font-weight: 900; letter-spacing: -1.5px; color: var(--dark-text);">Welcome Back</h2>
+      <p class="text-muted mb-4 small">Secure Access to DSRT Portal</p>
+
+      <form id="login-form" method="POST">
+
+        <div class="position-relative mb-3">
+          <i class="fas fa-user position-absolute text-muted"
+            style="top: 50%; left: 20px; transform: translateY(-50%); z-index: 10;"></i>
+          <input type="text" name="username" class="form-control rounded-pill login-input"
+            style="padding-left: 50px; padding-right: 20px;" placeholder="Username" required>
+        </div>
+
+        <div class="position-relative mb-3">
+          <i class="fas fa-lock position-absolute text-muted"
+            style="top: 50%; left: 20px; transform: translateY(-50%); z-index: 10;"></i>
+          <input type="password" name="password" class="form-control rounded-pill login-input"
+            style="padding-left: 50px; padding-right: 20px;" placeholder="Password" required>
+        </div>
+
+        <button type="submit" class="btn-bento-primary w-100 mt-3 shadow-sm">
+          Sign In to Dashboard
+        </button>
+      </form>
+    </div>
+  </div>
+
+  {% else %}
+  <div class="hero-cover">
+    <div class="brand-logo-frame">
+      <img src="{{ url_for('static', filename='newtrendslogo.png') }}" alt="NIC Logo"
+        style="max-width: 100%; object-fit: contain;">
+    </div>
+    <div class="hero-text">
+      <h1><span id="dynamic-greeting">Hello</span>, {{ session['sdr_curr_user_username'].split('.')[0].title() }}!</h1>
+
+      <p class="mb-0 opacity-75">Managed Services Environment | <span
+          class="badge badge-light text-primary rounded-pill px-3">{{ session['sdr_usertype'] }}</span></p>
+
+      <div id="live-clock" class="mt-2 small text-uppercase font-weight-bold"
+        style="opacity: 0.7; letter-spacing: 1px;"></div>
+    </div>
+  </div>
+
+  <div class="dashboard-grid">
+    <a href="{{ url_for('transactions.transaction_generator') }}" class="action-tile">
+      <i class="fas fa-file-invoice-dollar"></i>
+      <h5>New Template</h5>
+      <p>Generate price mapping templates</p>
+    </a>
+
+    <a href="{{ url_for('admin_management') }}" class="action-tile">
+      <i class="fas fa-layer-group"></i>
+      <h5>SM Master</h5>
+      <p>Maintain standard product mappings</p>
+    </a>
+
+    <a href="{{ url_for('rds_mng.admin_management_rds') }}" class="action-tile">
+      <i class="fas fa-barcode"></i>
+      <h5>RDS Master</h5>
+      <p>Configure RDS vendor mappings</p>
+    </a>
+  </div>
+  {% endif %}
+</div>
+
+<script>
+  // Login Loading Overlay
+  const loginForm = document.getElementById('login-form');
+  if (loginForm) {
+    loginForm.addEventListener('submit', () => {
+      document.getElementById('loading-overlay').style.display = 'flex';
+    });
+  }
+
+  // Dynamic Greeting & Clock Logic
+  function updateDashboardTime() {
+    const now = new Date();
+    const greetingElement = document.getElementById('dynamic-greeting');
+    const clockElement = document.getElementById('live-clock');
+
+    // 1. Update Greeting (Morning/Afternoon/Evening)
+    if (greetingElement) {
+      const hours = now.getHours();
+      let greetingText = "Hello";
+
+      if (hours >= 5 && hours < 12) {
+        greetingText = "Good Morning";
+      } else if (hours >= 12 && hours < 18) {
+        greetingText = "Good Afternoon";
+      } else {
+        greetingText = "Good Evening";
+      }
+      greetingElement.innerText = greetingText;
+    }
+
+    // 2. Update Clock (Date | Time)
+    if (clockElement) {
+      // Format: Mon, Jan 01 | 12:00:00 PM
+      const options = {
+        weekday: 'short',
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit'
+      };
+      // Insert a separator pipe for style
+      clockElement.innerText = now.toLocaleDateString('en-US', options).replace(',', ' |');
+    }
+  }
+
+  // Run on load and then every second
+  if (document.getElementById('dynamic-greeting')) {
+    updateDashboardTime();
+    setInterval(updateDashboardTime, 1000);
+  }
+</script>
+{% endblock %}

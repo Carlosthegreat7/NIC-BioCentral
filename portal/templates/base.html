@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+
+<head>
+    <meta charset="utf-8">
+    <title>DSRT</title>
+
+    <link rel="icon" href="{{ url_for('static', filename='Newtrends.png') }}" type="image/x-icon">
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='bootstrap/css/bootstrap.min.css') }}">
+    <script src="{{ url_for('static', filename='bootstrap/js/jquery-3.3.1.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='bootstrap/js/popper.js') }}"></script>
+    <script src="{{ url_for('static', filename='bootstrap/js/bootstrap.min.js') }}"></script>
+
+    <meta name='viewport' content='width=device-width, initial-scale=1'>
+    <link rel="stylesheet" href="{{ url_for('static', filename='bootstrap/css/all.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='bootstrap/css/fontawesome.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='bootstrap/fontawesome-free-6.7.2-web/css/all.css') }}">
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='main.css') }}">
+
+</head>
+
+<body>
+    {% if session['sdr_loggedin'] %}
+    <nav class="navbar navbar-expand-lg navbar-bento shadow-sm">
+        <div class="container">
+            <a class="navbar-brand d-flex align-items-center" href="{{ url_for('index') }}">
+                <img src="{{ url_for('static', filename='newtrendslogo.png') }}" width="35" class="mr-2">
+                <span style="font-weight: 900; letter-spacing: -1px; color: #1a1a1a;">Department Store Requests
+                    Template</span>
+            </a>
+
+            <button class="navbar-toggler border-0" type="button" data-toggle="collapse" data-target="#navbarContent">
+                <i class="fas fa-bars"></i>
+            </button>
+
+            <div class="collapse navbar-collapse" id="navbarContent">
+                <ul class="navbar-nav ml-auto align-items-center">
+                    <li class="nav-item">
+                        <a class="nav-link nav-link-bento" href="{{ url_for('transactions.transaction_generator') }}">
+                            <i class="fas fa-plus-circle mr-1"></i> Generate New Template
+                        </a>
+                    </li>
+
+                    <li class="nav-item dropdown">
+                        <a class="nav-link nav-link-bento dropdown-toggle" href="#" id="masterDropdown" role="button"
+                            data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            Master Codes
+                        </a>
+                        <div class="dropdown-menu dropdown-menu-right dropdown-bento animate slideIn"
+                            aria-labelledby="masterDropdown">
+                            <a class="dropdown-item dropdown-item-bento" href="{{ url_for('admin_management') }}">
+                                <i class="fas fa-database mr-2"></i> Manage Codes for SM
+                            </a>
+                            <a class="dropdown-item dropdown-item-bento"
+                                href="{{ url_for('rds_mng.admin_management_rds') }}">
+                                <i class="fas fa-store mr-2"></i> Manage Codes for RDS
+                            </a>
+                        </div>
+                    </li>
+
+                    <li class="nav-item ml-lg-3">
+                        <a class="btn btn-sm rounded-pill px-4 btn-logout" href="{{ url_for('logout') }}">
+                            <i class="fas fa-power-off mr-1"></i> Logout
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+    <div style="height: 85px;"></div>
+    {% endif %}
+
+    {% for mess in get_flashed_messages() %}
+    <div class="container mt-3">
+        <div class="alert alert-primary alert-dismissible fade show border-0 alert-glass" role="alert">
+            {{ mess }}
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+    </div>
+    {% endfor %}
+
+    <button id="backToTop" title="Go to top"><i class="fas fa-chevron-up"></i></button>
+
+    {% block content %}{% endblock %}
+
+    <footer class="page-footer font-small py-4 mt-5">
+        <div class="footer-copyright text-center text-muted small">
+            © 2026 MIS Department |
+            <span id="companySignature" style="cursor: pointer; user-select: none;">
+                Newtrends International Corporation
+            </span>
+        </div>
+    </footer>
+
+    <script>
+        // Scroll to Top logic
+        var backToTopBtn = document.getElementById("backToTop");
+        window.onscroll = function () {
+            if (document.body.scrollTop > 300 || document.documentElement.scrollTop > 300) {
+                backToTopBtn.style.display = "flex";
+            } else {
+                backToTopBtn.style.display = "none";
+            }
+        };
+        backToTopBtn.onclick = function () {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        };
+
+        $(document).ready(function () {
+            // Ensures dropdowns work
+            $('.dropdown-toggle').dropdown();
+
+            // --- CARLOS THE GREAT EASTER EGG ---
+
+
+            // Typewriter Effect Variables
+            var isAnimating = false;
+
+            $('#companySignature').click(function () {
+                if (isAnimating) return; // Prevent spam clicking
+                isAnimating = true;
+
+                var $this = $(this);
+                var originalText = "Newtrends International Corporation";
+                var devText = "Developed By: CarlosTheGreat";
+
+                // Step 1: "Untype" the original text
+                var deleteInterval = setInterval(function () {
+                    var currentText = $this.text();
+                    if (currentText.length > 0) {
+                        $this.text(currentText.slice(0, -1));
+                    } else {
+                        clearInterval(deleteInterval);
+
+                        // Step 2: "Type" the new text
+                        $this.css('color', '#007bff').css('font-weight', 'bold'); // Change style
+                        var i = 0;
+                        var typeInterval = setInterval(function () {
+                            $this.text(devText.substring(0, i + 1));
+                            i++;
+                            if (i === devText.length) {
+                                clearInterval(typeInterval);
+
+                                // Step 3: Wait and revert
+                                setTimeout(function () {
+                                    $this.text(originalText)
+                                        .css('color', '')
+                                        .css('font-weight', '');
+                                    isAnimating = false;
+                                }, 3000);
+                            }
+                        }, 50); // Speed of typing
+                    }
+                }, 30); // Speed of deleting
+            });
+        });
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,27 @@
+# Python bytecode and cache
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Environment variables (Crucial for security)
+.env
+venv/
+env/
+
+# Dependencies
+node_modules/
+vendor/
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# IDE settings
+.vscode/
+.idea/
+# Python LDAP binary wheel
+python_ldap-3.3.1-cp38-cp38-win_amd64.whl
+*.whl
+
+
+flask/
