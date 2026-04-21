@@ -1,8 +1,10 @@
 {% extends "base.html" %}
 
 {% block content %}
+<script src="https://unpkg.com/lucide@latest"></script>
+<script src="{{ url_for('static', filename='js/lucide.min.js') }}"></script>
 <style>
-    /* --- Pop-In Animation --- */
+    /* --- Pop-In Animation (Synced with Home) --- */
     @keyframes popIn {
         0% {
             opacity: 0;
@@ -19,7 +21,6 @@
         animation: popIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
     }
 
-    /* Staggered delays for internal elements */
     .stagger-1 {
         animation-delay: 0.1s;
         opacity: 0;
@@ -30,35 +31,337 @@
         opacity: 0;
     }
 
-    /* --- Page Layout --- */
+    /* --- Manager Layout --- */
     .manager-wrapper {
         flex: 1;
+        width: 100%;
+        padding: 2rem;
         display: flex;
         flex-direction: column;
         align-items: center;
-        justify-content: center;
-        width: 100%;
-        padding: 2rem;
-        box-sizing: border-box;
     }
 
-    .manager-card {
-        background: rgba(255, 255, 255, 0.05);
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        border-radius: 40px;
-        padding: 3rem;
+    .header-section {
         width: 100%;
         max-width: 1200px;
-        backdrop-filter: blur(12px);
-        -webkit-backdrop-filter: blur(12px);
-        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-end;
+        margin-bottom: 2rem;
+    }
+
+    /* --- Filter & Add Buttons --- */
+    .filter-group {
+        display: flex;
+        gap: 1rem;
+    }
+
+    .filter-btn {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        color: #fff;
+        padding: 0.6rem 1.2rem;
+        border-radius: 50px;
+        cursor: pointer;
+        transition: 0.3s;
+    }
+
+    .filter-btn.active {
+        background: rgba(255, 255, 255, 0.2);
+        border-color: #fff;
+    }
+
+    .add-device-btn {
+        background: #fff;
+        color: #000;
+        border: none;
+        padding: 0.8rem 1.5rem;
+        border-radius: 50px;
+        font-weight: 600;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    /* --- Mini-Bento Card Grid --- */
+    .device-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 1.5rem;
+        width: 100%;
+        max-width: 1200px;
+    }
+
+    .mini-bento-card {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 30px;
+        padding: 1.5rem;
+        backdrop-filter: blur(10px);
+        transition: transform 0.3s ease;
+    }
+
+    .mini-bento-card:hover {
+        transform: translateY(-10px);
+        border-color: rgba(255, 255, 255, 0.3);
+    }
+
+    .badge {
+        padding: 4px 12px;
+        border-radius: 50px;
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+    }
+
+    .badge-rustans {
+        background: #eab308;
+        color: #000;
+    }
+
+    /* Gold/Yellow */
+    .badge-rds {
+        background: #3b82f6;
+        color: #fff;
+    }
+
+    /* --- Glassmorphic Modal --- */
+    .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.6);
+        backdrop-filter: blur(15px);
+        display: none;
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+    }
+
+    .modal-card {
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 40px;
+        padding: 3rem;
+        width: 450px;
+        box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
+    }
+
+    .form-input {
+        width: 100%;
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        padding: 12px 20px;
+        border-radius: 50px;
+        color: #fff;
+        margin-bottom: 1rem;
     }
 </style>
 
 <div class="manager-wrapper">
-    <div class="manager-card pop-in-container">
-        <h2 class="welcome-title pop-in-container stagger-1">Device Manager</h2>
-        <p class="welcome-subtitle pop-in-container stagger-2">Configure and monitor ZKTeco biometric terminals.</p>
+    <div class="header-section pop-in-container">
+        <div>
+            <h2 class="welcome-title stagger-1">Device Manager</h2>
+            <p class="welcome-subtitle stagger-2">Monitoring terminals for RUSTANS & RDS</p>
+        </div>
+        <button class="add-device-btn" onclick="openModal()">
+            <i data-lucide="plus"></i> Add Device
+        </button>
+    </div>
+
+    <!-- <div class="header-section pop-in-container stagger-2" style="justify-content: flex-start; gap: 1rem;">
+        <button class="filter-btn active" onclick="filterDevices('ALL')">All</button>
+        <button class="filter-btn" onclick="filterDevices('RUSTANS')">Rustans</button>
+        <button class="filter-btn" onclick="filterDevices('RDS')">RDS</button>
+        <button class="filter-btn" onclick="filterDevices('SM')">SM</button>
+        <button class="filter-btn" onclick="filterDevices('RDS')">RDS</button>
+        <button class="filter-btn" onclick="filterDevices('RDS')">RDS</button>
+        <button class="filter-btn" onclick="filterDevices('RDS')">RDS</button>
+
+    </div> -->
+
+    <div id="device-container" class="device-grid pop-in-container stagger-2">
     </div>
 </div>
+
+<div id="device-modal" class="modal-overlay">
+    <div class="modal-card pop-in-container">
+        <h3 style="margin-bottom: 1.5rem;">Device Details</h3>
+        <form id="device-form">
+            <input type="hidden" id="device_id" name="device_id">
+
+            <input type="text" id="bcc" name="bcc" placeholder="Device Name / Store Location (BCC)" class="form-input"
+                required>
+
+            <input type="text" id="ip_address" name="ip_address" placeholder="IP Address (e.g. 192.168.1.201)"
+                class="form-input" required>
+
+            <input type="text" id="comms_key" name="comms_key" placeholder="Comms Key (Default: 0)" class="form-input"
+                value="0">
+
+            <input type="text" id="chain_type" name="chain_type" class="form-input" placeholder="Device's Location">
+
+            <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
+                <button type="button" class="minimal-btn" style="background: rgba(255,0,0,0.2); margin-top:0;"
+                    onclick="closeModal()">Cancel</button>
+                <button type="submit" class="minimal-btn" style="background: #fff; color: #000; margin-top:0;">Save
+                    Device</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        lucide.createIcons();
+    });
+
+    // Run this as soon as the page loads
+    document.addEventListener('DOMContentLoaded', () => {
+        loadDevices();
+        setupFormHandler();
+    });
+
+    // --- 1. Fetch and Display Devices ---
+    function loadDevices() {
+        fetch('/api/get-devices')
+            .then(response => response.json())
+            .then(res => {
+                if (res.status === 'success') {
+                    const container = document.getElementById('device-container');
+                    container.innerHTML = ''; // Clear loading state or old data
+
+                    res.data.forEach(device => {
+                        // Logic Gate for Badges
+                        const badgeClass = device.chain_type === 'RUSTANS' ? 'badge-rustans' : 'badge-rds';
+
+                        // Prevent quotes in strings from breaking the HTML onclick handler
+                        const safeDeviceData = JSON.stringify(device).replace(/'/g, "&#39;").replace(/"/g, "&quot;");
+
+
+                        // LAST SEEN DRAFT
+                        // <div style="font-size: 0.95rem; color: #ccc;">
+                        //             <p style="margin: 6px 0;"><strong>IP:</strong> ${device.ip_address}</p>
+                        //             <p style="margin: 6px 0;"><strong>Last Seen:</strong> ${device.last_seen}</p>
+                        //         </div>
+                        const card = `
+                            <div class="mini-bento-card">
+                                <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 1rem;">
+                                    <div>
+                                        <h3 style="margin: 0; font-size: 1.2rem; color: #fff;">${device.bcc}</h3>
+                                        <span class="badge ${badgeClass}" style="margin-top: 0.5rem; display: inline-block;">${device.chain_type}</span>
+                                    </div>
+                                    <div style="display: flex; gap: 0.8rem;">
+                                        <button onclick="openModal(${safeDeviceData})" style="background: none; border: none; color: #a0a0a0; cursor: pointer; transition: color 0.3s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#a0a0a0'">
+                                            <i data-lucide="edit" style="width: 20px; height: 20px;"></i>
+                                        </button>
+                                        <button onclick="deleteDevice(${device.device_id})" style="background: none; border: none; color: #ff4d4d; cursor: pointer; transition: color 0.3s;" onmouseover="this.style.color='#ff9999'" onmouseout="this.style.color='#ff4d4d'">
+                                            <i data-lucide="trash-2" style="width: 20px; height: 20px;"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div style="font-size: 0.95rem; color: #ccc;">
+                                    <p style="margin: 6px 0;"><strong>IP Address:</strong> ${device.ip_address}</p>
+                                    
+                                </div>
+                            </div>
+                        `;
+                        container.insertAdjacentHTML('beforeend', card);
+                    });
+
+                    // Re-initialize Lucide icons for the newly injected dynamic HTML
+                    lucide.createIcons();
+                } else {
+                    alert("Error loading devices: " + res.message);
+                }
+            })
+            .catch(err => console.error("Fetch error:", err));
+    }
+
+    // --- 2. Modal Handling (Add vs Edit) ---
+    function openModal(device = null) {
+        const form = document.getElementById('device-form');
+
+        if (device) {
+            // EDIT MODE: Populate fields
+            document.getElementById('device_id').value = device.device_id;
+            document.getElementById('bcc').value = device.bcc;
+            document.getElementById('ip_address').value = device.ip_address;
+            document.getElementById('comms_key').value = device.comms_key;
+            document.getElementById('chain_type').value = device.chain_type;
+        } else {
+            // ADD MODE: Clear fields
+            form.reset();
+            document.getElementById('device_id').value = '';
+            document.getElementById('comms_key').value = '0'; // Default handshake key
+        }
+
+        document.getElementById('device-modal').style.display = 'flex';
+    }
+
+    function closeModal() {
+        document.getElementById('device-modal').style.display = 'none';
+        document.getElementById('device-form').reset();
+    }
+
+    // --- 3. Form Submission (Save/Update) ---
+    function setupFormHandler() {
+        const form = document.getElementById('device-form');
+        form.addEventListener('submit', function (e) {
+            e.preventDefault(); // Stop default HTML submission
+
+            // Optional: Show a loading state on the button here
+            const submitBtn = form.querySelector('button[type="submit"]');
+            const originalText = submitBtn.innerText;
+            submitBtn.innerText = "Verifying...";
+            submitBtn.disabled = true;
+
+            const formData = new FormData(form);
+
+            fetch('/api/save-device', {
+                method: 'POST',
+                body: formData
+            })
+                .then(response => response.json())
+                .then(res => {
+                    if (res.status === 'success') {
+                        closeModal();
+                        loadDevices(); // Refresh the grid to show the new device
+                    } else {
+                        alert(res.message); // Will show the Socket Handshake error if offline
+                    }
+                })
+                .catch(err => console.error("Save error:", err))
+                .finally(() => {
+                    submitBtn.innerText = originalText;
+                    submitBtn.disabled = false;
+                });
+        });
+    }
+
+    // --- 4. Deletion ---
+    function deleteDevice(deviceId) {
+        if (!confirm("Are you sure you want to delete this terminal?")) return;
+
+        const formData = new FormData();
+        formData.append('device_id', deviceId);
+
+        fetch('/api/delete-device', {
+            method: 'POST',
+            body: formData
+        })
+            .then(response => response.json())
+            .then(res => {
+                if (res.status === 'success') {
+                    loadDevices(); // Refresh the grid
+                } else {
+                    alert("Error deleting device: " + res.message);
+                }
+            })
+            .catch(err => console.error("Delete error:", err));
+    }
+</script>
 {% endblock %}
