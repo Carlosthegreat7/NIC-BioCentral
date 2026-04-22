@@ -1,118 +1,188 @@
 from flask import session, jsonify, request, render_template, redirect, url_for, flash
 from portal import app, loggedin_required
 from datetime import datetime, timedelta, date
+from urllib.parse import urlparse, urljoin
 import ldap
 import pyodbc
 
+# ==========================================
+# SECURITY HELPER: Prevent Open Redirects
+# ==========================================
+def is_safe_url(target):
+    """Ensures the 'next' redirect URL is on the same domain."""
+    ref_url  = urlparse(request.host_url)
+    test_url = urlparse(urljoin(request.host_url, target))
+    return test_url.scheme in ('http', 'https') and ref_url.netloc == test_url.netloc
+
+# ==========================================
+# STATUS CHECK
+# ==========================================
 @app.route('/statuschk', methods=['GET', 'POST'])
 def statuschk():
-    return jsonify("Site is OK")
+    return jsonify({"status": "Site is OK"})
 
+# ==========================================
+# MAIN LOGIN LOGIC
+# ==========================================
 @app.route('/', methods=['GET', 'POST'])
 def index():
-    rule = request.url_rule
+    # UX: If already logged in, skip the login page entirely
+    if session.get('sdr_loggedin'):
+        return redirect(url_for('home'))
 
-    if request.method == 'POST' and 'username' in request.form and 'password' in request.form:
-        username = request.form['username']
-        password = request.form['password']
-        
-        # Initialize variables for cleanup to avoid UnboundLocalError
+    if request.method == 'POST':
+        username = request.form.get('username', '').strip()
+        password = request.form.get('password', '')
+
+        # Guard against empty submissions
+        if not username or not password:
+            flash("Username and password are required.")
+            return redirect(url_for('index'))
+
+        # FIX 3: Read 'next' from the form (hidden field) OR query string.
+        # On a POST, request.args is empty — the 'next' param must come
+        # from a hidden input rendered in the login template, e.g.:
+        #   <input type="hidden" name="next" value="{{ request.args.get('next', '') }}">
+        next_page = request.form.get('next') or request.args.get('next')
+
         MIS_SysDev_connect = None
-        MIS_SysDev_cursor = None
+        MIS_SysDev_cursor  = None
+        ldap_conn          = None
 
         try:
-            # REVERTED: Use the Head Office Connection String from config
-            # This ensures we query the database containing the portal_users and portal_store_users tables
-            MIS_SysDev_connect = pyodbc.connect(app.config['MIS_SysDev'] + "app=" + rule.rule)
-            MIS_SysDev_cursor = MIS_SysDev_connect.cursor()
+            # 1. Establish Database Connection
+            rule = request.url_rule.rule if request.url_rule else '/'
+            MIS_SysDev_connect = pyodbc.connect(f"{app.config['MIS_SysDev']}app={rule}")
+            MIS_SysDev_cursor  = MIS_SysDev_connect.cursor()
+
+            # 2. Establish LDAP Connection
+            ldap_conn = ldap.initialize(app.config['LDAP_PROVIDER_URL'])
+            ldap_conn.set_option(ldap.OPT_PROTOCOL_VERSION, 3)
+            ldap_conn.set_option(ldap.OPT_REFERRALS, 0)
 
             today_full = datetime.today().strftime("%Y-%m-%d %H:%M:%S")
-            conn = ldap.initialize(app.config['LDAP_PROVIDER_URL'])
 
-            # 1. Attempt Head Office Login
-            sql_ho = 'SELECT a."username", a."email", a."active", a."role", a."dept" ' \
-                     'FROM dbo."portal_users" a WITH (NOLOCK) WHERE a."username"=?'
-            # FIX: Ensure parameter is a tuple (username,) for pyodbc
-            user = MIS_SysDev_cursor.execute(sql_ho, (username,)).fetchall()
+            # ── Head Office Login ──────────────────────────────────────
+            sql_ho = """
+                SELECT username, email, active, role, dept
+                FROM dbo.portal_users WITH (NOLOCK)
+                WHERE username = ?
+            """
+            user = MIS_SysDev_cursor.execute(sql_ho, (username,)).fetchone()
 
-            if user and len(user) > 0:
-                if user[0][2] == 1:
-                    try:
-                        conn.simple_bind_s("MGROUP\\" + username, password)
-                        session.update({
-                            'sdr_curr_user_username': user[0][0].upper(),
-                            'username': user[0][0].upper(),
-                            'sdr_curr_user_role': user[0][3],
-                            'sdr_loggedin': True,
-                            'sdr_usertype': 'Head Office'
-                        })
-                        
-                        print(today_full, session['sdr_usertype'], session['sdr_curr_user_username'])
-                        next_page = request.args.get('next')
-                        return redirect(next_page) if next_page else redirect(url_for('index', _external=True))
-                    except ldap.INVALID_CREDENTIALS:
-                        flash("Invalid Head Office Domain Credentials")
-                        return redirect(url_for('index', _external=True))
-                else:
+            if user:
+                if user[2] != 1:
                     flash("SDR Portal Login is deactivated!")
-                    return redirect(url_for('index', _external=True))
+                    return redirect(url_for('index'))
 
-            # 2. Fallback: Check Store Users (BCC Login)
-            else:
-                sql_store = 'SELECT * FROM portal_store_users WITH (NOLOCK) WHERE bcc = ?'
-                # FIX: Ensure parameter is a tuple (username,)
-                store = MIS_SysDev_cursor.execute(sql_store, (username,)).fetchall()
+                try:
+                    ldap_conn.simple_bind_s(f"MGROUP\\{username}", password)
+                except ldap.INVALID_CREDENTIALS:
+                    flash("Invalid Head Office Domain Credentials.")
+                    return redirect(url_for('index'))
 
-                if store and len(store) > 0:
-                    domain_user = store[0][1]
-                    try:
-                        conn.simple_bind_s("MGROUP\\" + domain_user, password)
-                        
-                        today_date = date.today()
-                        ante_days = store[0][4]
-                        
-                        session.update({
-                            'sdr_curr_user_username': username.upper(),
-                            'username': username.upper(),
-                            'sdr_curr_user_company': store[0][3],
-                            'sdr_curr_user_role': '',
-                            'sdr_loggedin': True,
-                            'sdr_usertype': 'Store',
-                            'ante_date_int': ante_days,
-                            'ante_date': (today_date - timedelta(days=ante_days))
-                        })
+                session.update({
+                    'sdr_curr_user_username': user[0].upper(),
+                    'username':               user[0].upper(),
+                    'sdr_curr_user_role':     user[3],
+                    'sdr_loggedin':           True,
+                    'sdr_usertype':           'Head Office',
+                })
 
-                        print(today_full, session['sdr_usertype'], session['sdr_curr_user_username'])
-                        next_page = request.args.get('next')
-                        return redirect(next_page) if next_page else redirect(url_for('index', _external=True))
-                    except ldap.INVALID_CREDENTIALS:
-                        flash("Invalid Store Domain Credentials")
-                        return redirect(url_for('index', _external=True))
-                else:
-                    flash("Invalid Login - Username does not exist!")
-                    return redirect(url_for('index', _external=True))
+                print(f"{today_full} - {session['sdr_usertype']} - {session['sdr_curr_user_username']}")
+
+                if next_page and is_safe_url(next_page):
+                    return redirect(next_page)
+                return redirect(url_for('home'))
+
+            # ── Store / BCC Login ──────────────────────────────────────
+            sql_store = """
+                SELECT bcc, domain_username, store_name, company, ante_date
+                FROM portal_store_users WITH (NOLOCK)
+                WHERE bcc = ?
+            """
+            store = MIS_SysDev_cursor.execute(sql_store, (username,)).fetchone()
+
+            if not store:
+                flash("Invalid Login - Username does not exist!")
+                return redirect(url_for('index'))
+
+            domain_user = store[1]
+            ante_days   = store[4]
+
+            try:
+                ldap_conn.simple_bind_s(f"MGROUP\\{domain_user}", password)
+            except ldap.INVALID_CREDENTIALS:
+                flash("Invalid Store Domain Credentials.")
+                return redirect(url_for('index'))
+
+            # FIX 2: Convert date to ISO string before storing in session.
+            # date objects are not JSON-serialisable and will raise TypeError
+            # when Flask tries to sign the session cookie.
+            ante_date_obj = date.today() - timedelta(days=ante_days)
+
+            session.update({
+                'sdr_curr_user_username': username.upper(),
+                'username':               username.upper(),
+                'sdr_curr_user_company':  store[3],
+                'sdr_curr_user_role':     '',
+                'sdr_loggedin':           True,
+                'sdr_usertype':           'Store',
+                'ante_date_int':          ante_days,
+                'ante_date':              ante_date_obj.isoformat(),  # e.g. "2025-03-01"
+            })
+
+            print(f"{today_full} - {session['sdr_usertype']} - {session['sdr_curr_user_username']}")
+
+            if next_page and is_safe_url(next_page):
+                return redirect(next_page)
+            return redirect(url_for('home'))
 
         except pyodbc.Error as e:
-            flash(f"Database Connectivity Error: {e}")
-            return redirect(url_for('index', _external=True))
+            print(f"DB Error: {e}")
+            flash("Database Connectivity Error. Please contact IT.")
+            return redirect(url_for('index'))
+
+        except ldap.LDAPError as e:
+            print(f"LDAP Error: {e}")
+            flash("Active Directory Connectivity Error.")
+            return redirect(url_for('index'))
+
         except Exception as e:
-            flash(f"System Error: {e}")
-            return redirect(url_for('index', _external=True))
+            print(f"System Error: {e}")
+            flash("An unexpected System Error occurred.")
+            return redirect(url_for('index'))
+
         finally:
-            # Safe cleanup: only close if connection was established
+            # Always close connections to prevent resource leaks
             if MIS_SysDev_cursor:
                 MIS_SysDev_cursor.close()
             if MIS_SysDev_connect:
                 MIS_SysDev_connect.close()
+            if ldap_conn:
+                try:
+                    ldap_conn.unbind_s()
+                except Exception:
+                    pass
 
     return render_template('home.html')
 
+# ==========================================
+# HOME (post-login landing page)
+# ==========================================
+@app.route('/home')
+@loggedin_required()
+def home():
+    return render_template('home.html')
+
+# ==========================================
+# LOGOUT
+# ==========================================
 @app.route('/logout')
 @loggedin_required()
 def logout():
-    # Securely clears all keys (including ante_date and login flags) at once
     session.clear()
-    return redirect(url_for('index', _external=True))
+    return redirect(url_for('index'))
 
 if __name__ == '__main__':
     app.run()

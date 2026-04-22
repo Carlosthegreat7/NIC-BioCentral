@@ -56,3 +56,6 @@ app.config['MIS_SysDev_connect'] = 'MIS_SysDev'
 
 from routes.store_crud import store_crud_bp
 app.register_blueprint(store_crud_bp)
+
+from routes.audit_log import audit_log_bp
+app.register_blueprint(audit_log_bp)
