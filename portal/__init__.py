@@ -60,10 +60,8 @@ app.register_blueprint(store_crud_bp)
 from routes.audit_log import audit_log_bp
 app.register_blueprint(audit_log_bp)
 
-<<<<<<< HEAD
 from routes.device_sync import sync_time_bp
 app.register_blueprint(sync_time_bp)
-=======
+
 from routes.get_employees import get_employees_bp
 app.register_blueprint(get_employees_bp)
->>>>>>> dfb0d2c2a60cf900672a1113dec54ccc299f67ca
