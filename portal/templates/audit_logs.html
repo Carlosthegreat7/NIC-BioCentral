@@ -3,570 +3,605 @@
 {% block title %}System Audit Logs{% endblock %}
 
 {% block content %}
+<script src="https://unpkg.com/lucide@latest"></script>
+<script src="{{ url_for('static', filename='js/lucide.min.js') }}"></script>
 <style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    /* --- Shared Variables & Base Styles --- */
+    :root {
+        --bg-page: #f3f4f6;
+        --bg-surface: #ffffff;
+        --bg-muted: #f9fafb;
+        --bg-hover: #f3f4f6;
+        --border: #e5e7eb;
+        --text-primary: #111827;
+        --text-secondary: #6b7280;
+        --text-muted: #9ca3af;
+        --blue-bg: #eff6ff;
+        --blue-text: #1d4ed8;
+        --green-bg: #f0fdf4;
+        --green-text: #15803d;
+        --red-bg: #fef2f2;
+        --red-text: #b91c1c;
+        --yellow-bg: #fffbeb;
+        --yellow-text: #b45309;
+        --gray-bg: #f3f4f6;
+        --gray-text: #374151;
+        --radius-sm: 6px;
+        --radius-md: 8px;
+        --radius-lg: 12px;
+        --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
+    }
 
-  :root {
-    --bg-page:       #f3f4f6;
-    --bg-surface:    #ffffff;
-    --bg-muted:      #f9fafb;
-    --bg-hover:      #f3f4f6;
-    --border:        #e5e7eb;
-    --text-primary:  #111827;
-    --text-secondary:#6b7280;
-    --text-muted:    #9ca3af;
-    --blue-bg:       #eff6ff;
-    --blue-text:     #1d4ed8;
-    --green-bg:      #f0fdf4;
-    --green-text:    #15803d;
-    --red-bg:        #fef2f2;
-    --red-text:      #b91c1c;
-    --yellow-bg:     #fffbeb;
-    --yellow-text:   #b45309;
-    --gray-bg:       #f3f4f6;
-    --gray-text:     #374151;
-    --radius-sm:     6px;
-    --radius-md:     8px;
-    --radius-lg:     12px;
-    --shadow-sm:     0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
-  }
+    /* --- Pop-In Animation --- */
+    @keyframes popIn {
+        0% { opacity: 0; transform: scale(0.9) translateY(20px); }
+        100% { opacity: 1; transform: scale(1) translateY(0); }
+    }
+    .pop-in-container { animation: popIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+    .stagger-1 { animation: popIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards; animation-delay: 0.1s; opacity: 0; }
+    .stagger-2 { animation: popIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards; animation-delay: 0.2s; opacity: 0; }
 
-  body { background: var(--bg-page); font-family: 'Inter', ui-sans-serif, system-ui, sans-serif; }
+    /* --- Manager Layout --- */
+    .manager-wrapper { flex: 1; width: 100%; padding: 2rem; display: flex; flex-direction: column; align-items: center; font-family: 'Inter', ui-sans-serif, system-ui, sans-serif; }
 
-  /* ── Page Layout ── */
-  .audit-page { padding: 2rem 2.5rem; max-width: 1400px; }
+    /* --- Page Header --- */
+    @keyframes slideInLeft {
+        from { opacity: 0; transform: translateX(-20px); }
+        to   { opacity: 1; transform: translateX(0); }
+    }
+    @keyframes fadeUp {
+        from { opacity: 0; transform: translateY(10px); }
+        to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes pulse-ring {
+        0%   { box-shadow: 0 0 0 0 rgba(109,40,217,0.25); }
+        70%  { box-shadow: 0 0 0 8px rgba(109,40,217,0); }
+        100% { box-shadow: 0 0 0 0 rgba(109,40,217,0); }
+    }
 
-  /* ── Top Bar ── */
-  .topbar {
-    display: flex; justify-content: space-between; align-items: flex-start;
-    margin-bottom: 1.5rem;
-  }
-  .topbar-left { display: flex; align-items: center; gap: 12px; }
-  .topbar-icon {
-    width: 40px; height: 40px; border-radius: var(--radius-md);
-    background: var(--blue-bg); border: 1px solid #bfdbfe;
-    display: flex; align-items: center; justify-content: center;
-    color: var(--blue-text);
-  }
-  .topbar-icon svg { width: 18px; height: 18px; }
-  .topbar-title { font-size: 1.125rem; font-weight: 600; color: var(--text-primary); }
-  .topbar-sub   { font-size: 0.8125rem; color: var(--text-secondary); margin-top: 2px; }
-  .topbar-actions { display: flex; gap: 8px; }
+    .page-header-bar {
+        width: 100%;
+        max-width: 1400px;
+        background: var(--bg-surface);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        margin-bottom: 1.75rem;
+        display: flex;
+        align-items: center;
+        padding: 1.5rem 2rem;
+        gap: 2rem;
+        box-shadow: 0 1px 4px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.04);
+        animation: fadeUp 0.5s cubic-bezier(0.16,1,0.3,1) forwards;
+        position: relative;
+        overflow: hidden;
+    }
+    .page-header-bar::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background-image: radial-gradient(circle, #e5e7eb 1px, transparent 1px);
+        background-size: 20px 20px;
+        opacity: 0.35;
+        pointer-events: none;
+    }
 
-  /* ── Buttons ── */
-  .btn {
-    display: inline-flex; align-items: center; gap: 6px;
-    font-size: 0.8125rem; font-weight: 500; padding: 7px 14px;
-    border-radius: var(--radius-md); cursor: pointer;
-    border: 1px solid var(--border); background: var(--bg-surface);
-    color: var(--text-primary); text-decoration: none;
-    transition: background .15s, border-color .15s;
-    white-space: nowrap;
-  }
-  .btn:hover { background: var(--bg-muted); }
-  .btn svg { width: 13px; height: 13px; flex-shrink: 0; }
-  .btn-primary {
-    background: var(--text-primary); color: var(--bg-surface);
-    border-color: transparent;
-  }
-  .btn-primary:hover { background: #1f2937; }
+    .header-icon-wrap {
+        position: relative;
+        flex-shrink: 0;
+        width: 56px; height: 56px;
+        background: linear-gradient(135deg, #6d28d9, #4f46e5);
+        border-radius: 14px;
+        display: flex; align-items: center; justify-content: center;
+        box-shadow: 0 4px 14px rgba(109,40,217,0.35);
+        animation: pulse-ring 2.5s ease-out 0.8s infinite;
+        z-index: 1;
+    }
+    .header-icon-wrap i { width: 26px; height: 26px; color: #fff; }
 
-  /* ── Stats Row ── */
-  .stats-row {
-    display: grid; grid-template-columns: repeat(4, 1fr);
-    gap: 12px; margin-bottom: 1.5rem;
-  }
-  .stat-card {
-    background: var(--bg-surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-lg);
-    padding: 1rem 1.25rem;
-  }
-  .stat-label { font-size: 0.75rem; color: var(--text-secondary); font-weight: 500; margin-bottom: 4px; }
-  .stat-value { font-size: 1.5rem; font-weight: 600; color: var(--text-primary); line-height: 1.2; }
-  .stat-sub { font-size: 0.75rem; color: var(--text-muted); margin-top: 4px; display: flex; align-items: center; gap: 4px; }
-  .stat-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+    .page-header-left {
+        display: flex; flex-direction: column; gap: 3px;
+        flex: 1; z-index: 1;
+    }
+    .welcome-title {
+        font-size: 1.4rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        letter-spacing: -0.025em;
+        line-height: 1.2;
+        animation: slideInLeft 0.4s cubic-bezier(0.16,1,0.3,1) 0.05s both;
+    }
+    .welcome-subtitle {
+        font-size: 0.8125rem;
+        color: var(--text-secondary);
+        animation: slideInLeft 0.4s cubic-bezier(0.16,1,0.3,1) 0.1s both;
+    }
 
-  /* ── Table Card ── */
-  .table-card {
-    background: var(--bg-surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-lg);
-    box-shadow: var(--shadow-sm);
-    overflow: hidden;
-    margin-bottom: 2rem;
-  }
+    .header-divider {
+        width: 1px; height: 52px;
+        background: var(--border);
+        flex-shrink: 0; z-index: 1;
+    }
 
-  /* ── Filter Bar ── */
-  .filter-bar {
-    display: flex; align-items: center; gap: 8px;
-    padding: 12px 16px;
-    border-bottom: 1px solid var(--border);
-    background: var(--bg-muted);
-  }
-  .filter-bar svg { width: 14px; height: 14px; color: var(--text-muted); flex-shrink: 0; }
-  .filter-input {
-    flex: 1; font-size: 0.8125rem; padding: 6px 10px;
-    border-radius: var(--radius-md); border: 1px solid var(--border);
-    background: var(--bg-surface); color: var(--text-primary);
-    outline: none; transition: border-color .15s;
-  }
-  .filter-input:focus { border-color: #93c5fd; box-shadow: 0 0 0 3px rgba(147,197,253,.2); }
-  .filter-select {
-    font-size: 0.8125rem; padding: 6px 10px;
-    border-radius: var(--radius-md); border: 1px solid var(--border);
-    background: var(--bg-surface); color: var(--text-primary);
-    cursor: pointer; outline: none;
-  }
-  .filter-count {
-    font-size: 0.75rem; color: var(--text-muted);
-    white-space: nowrap; padding: 0 4px;
-  }
+    .page-header-stats {
+        display: flex;
+        gap: 12px;
+        flex-shrink: 0;
+        z-index: 1;
+        animation: fadeUp 0.4s cubic-bezier(0.16,1,0.3,1) 0.15s both;
+    }
+    .stat-chip {
+        display: flex; align-items: center; gap: 10px;
+        padding: 10px 16px;
+        border-radius: 12px;
+        border: 1px solid var(--border);
+        background: var(--bg-muted);
+        min-width: 120px;
+        transition: transform 0.15s, box-shadow 0.15s;
+        cursor: default;
+    }
+    .stat-chip:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+    .stat-chip-icon { width: 34px; height: 34px; border-radius: 9px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .stat-chip-icon i { width: 16px; height: 16px; }
+    .stat-chip-body { display: flex; flex-direction: column; gap: 1px; }
+    .stat-chip-value { font-size: 1.25rem; font-weight: 700; line-height: 1.1; color: var(--text-primary); }
+    .stat-chip-label { font-size: 0.6875rem; font-weight: 500; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.06em; white-space: nowrap; }
 
-  /* ── Table ── */
-  .audit-table { width: 100%; border-collapse: collapse; table-layout: fixed; }
-  .audit-table thead th {
-    font-size: 0.6875rem; font-weight: 600; letter-spacing: .07em;
-    text-transform: uppercase; color: var(--text-secondary);
-    padding: 10px 16px; text-align: left;
-    background: var(--bg-muted);
-    border-bottom: 1px solid var(--border);
-  }
-  .audit-table tbody tr {
-    border-bottom: 1px solid var(--border);
-    transition: background .1s;
-  }
-  .audit-table tbody tr:last-child { border-bottom: none; }
-  .audit-table tbody tr.is-clickable { cursor: pointer; }
-  .audit-table tbody tr.is-clickable:hover td { background: var(--bg-hover); }
-  .audit-table tbody td {
-    padding: 11px 16px; font-size: 0.8125rem;
-    color: var(--text-primary); vertical-align: middle;
-  }
+    .chip-purple { background: #f5f3ff; border-color: #ddd6fe; }
+    .chip-purple .stat-chip-icon { background: #ede9fe; }
+    .chip-purple .stat-chip-icon i { color: #7c3aed; }
+    .chip-purple .stat-chip-value { color: #6d28d9; }
 
-  /* ── Timestamp Cell ── */
-  .ts-date { font-weight: 500; font-size: 0.8125rem; }
-  .ts-time { font-size: 0.75rem; color: var(--text-secondary); margin-top: 1px; font-family: ui-monospace, monospace; }
+    .chip-blue { background: #eff6ff; border-color: #bfdbfe; }
+    .chip-blue .stat-chip-icon { background: #dbeafe; }
+    .chip-blue .stat-chip-icon i { color: #2563eb; }
+    .chip-blue .stat-chip-value { color: #1d4ed8; }
 
-  /* ── User Cell ── */
-  .user-chip { display: flex; align-items: center; gap: 8px; }
-  .avatar {
-    width: 30px; height: 30px; border-radius: 50%; flex-shrink: 0;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 0.6875rem; font-weight: 600; letter-spacing: .02em;
-  }
-  .av-blue   { background: var(--blue-bg);   color: var(--blue-text); }
-  .av-green  { background: var(--green-bg);  color: var(--green-text); }
-  .av-yellow { background: var(--yellow-bg); color: var(--yellow-text); }
-  .av-red    { background: var(--red-bg);    color: var(--red-text); }
-  .av-gray   { background: var(--gray-bg);   color: var(--gray-text); }
-  .user-name { font-weight: 500; }
+    /* Header action buttons group */
+    .header-actions {
+        display: flex; gap: 8px;
+        flex-shrink: 0; z-index: 1;
+        animation: fadeUp 0.4s cubic-bezier(0.16,1,0.3,1) 0.2s both;
+    }
 
-  /* ── Badge ── */
-  .badge {
-    display: inline-flex; align-items: center; gap: 5px;
-    font-size: 0.6875rem; font-weight: 600; padding: 3px 9px;
-    border-radius: 20px; white-space: nowrap;
-  }
-  .badge-dot { width: 5px; height: 5px; border-radius: 50%; flex-shrink: 0; }
-  .badge-success { background: var(--green-bg);  color: var(--green-text); }
-  .badge-danger  { background: var(--red-bg);    color: var(--red-text); }
-  .badge-warning { background: var(--yellow-bg); color: var(--yellow-text); }
-  .badge-info    { background: var(--blue-bg);   color: var(--blue-text); }
-  .badge-neutral { background: var(--gray-bg);   color: var(--gray-text); }
+    /* --- Toolbar --- */
+    .toolbar { width: 100%; max-width: 1400px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; gap: 12px; }
+    .search-group { display: flex; gap: 8px; flex: 1; }
+    .search-wrapper { position: relative; width: 350px; }
+    .search-icon { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--text-muted); width: 16px; height: 16px; }
+    .search-input { width: 100%; padding: 8px 12px 8px 36px; font-size: 0.875rem; border-radius: var(--radius-md); border: 1px solid var(--border); background: var(--bg-surface); color: var(--text-primary); outline: none; transition: border-color .15s, box-shadow .15s; }
+    .search-input:focus { border-color: var(--blue-text); box-shadow: 0 0 0 3px rgba(29, 78, 216, 0.1); }
+    .filter-select { font-size: 0.875rem; padding: 8px 12px; border-radius: var(--radius-md); border: 1px solid var(--border); background: var(--bg-surface); color: var(--text-primary); cursor: pointer; outline: none; min-width: 150px; }
 
-  /* ── Details Cell ── */
-  .detail-text {
-    font-size: 0.8125rem; color: var(--text-secondary);
-    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-    max-width: 100%; display: block;
-  }
+    /* --- Buttons --- */
+    .btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; font-size: 0.875rem; font-weight: 500; padding: 8px 16px; border-radius: var(--radius-md); cursor: pointer; border: 1px solid var(--border); background: var(--bg-surface); color: var(--text-primary); transition: background .15s; text-decoration: none; }
+    .btn:hover:not(:disabled) { background: var(--bg-muted); }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .btn-primary { background: var(--text-primary); color: var(--bg-surface); border-color: transparent; }
+    .btn-primary:hover:not(:disabled) { background: #1f2937; }
+    .btn i { width: 16px; height: 16px; }
 
-  /* ── Device Cell ── */
-  .device-wrap { display: flex; align-items: center; gap: 6px; }
-  .device-info .device-name { font-weight: 500; font-size: 0.8125rem; }
-  .device-info .device-meta { font-size: 0.6875rem; color: var(--text-secondary); font-family: ui-monospace, monospace; margin-top: 1px; }
-  .device-arrow {
-    margin-left: auto; width: 20px; height: 20px; border-radius: 4px;
-    background: var(--blue-bg); color: var(--blue-text);
-    display: flex; align-items: center; justify-content: center;
-    font-size: 0.625rem; flex-shrink: 0;
-  }
-  .device-none { color: var(--text-muted); opacity: .4; }
+    /* --- Table Card --- */
+    .table-container { width: 100%; max-width: 1400px; }
+    .table-card { background: var(--bg-surface); border: 1px solid var(--border); border-radius: var(--radius-lg); box-shadow: var(--shadow-sm); overflow: hidden; }
+    .audit-table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+    .audit-table thead th { font-size: 0.6875rem; font-weight: 600; letter-spacing: .07em; text-transform: uppercase; color: var(--text-secondary); padding: 12px 16px; text-align: left; background: var(--bg-surface); border-bottom: 1px solid var(--border); cursor: pointer; user-select: none; transition: background 0.2s; }
+    .audit-table thead th:hover { background: var(--bg-muted); color: var(--text-primary); }
+    .th-content { display: flex; align-items: center; gap: 4px; }
+    .sort-icon { width: 14px; height: 14px; opacity: 0.3; }
+    .sort-active { opacity: 1; color: var(--blue-text); }
+    
+    .audit-table tbody tr { border-bottom: 1px solid var(--border); transition: background .1s; }
+    .audit-table tbody tr:nth-child(even) { background-color: var(--bg-muted); }
+    .audit-table tbody tr:last-child { border-bottom: none; }
+    .audit-table tbody tr.is-clickable { cursor: pointer; }
+    .audit-table tbody tr:hover td { background: #f3f4f6; }
+    .audit-table tbody td { padding: 12px 16px; font-size: 0.8125rem; color: var(--text-primary); vertical-align: middle; }
 
-  /* ── Empty State ── */
-  .empty-state {
-    text-align: center; padding: 3.5rem 1rem;
-    color: var(--text-secondary); font-size: 0.875rem;
-  }
-  .empty-state svg { margin-bottom: 10px; color: var(--text-muted); }
+    /* --- Table Cell Formatting --- */
+    .ts-date { font-weight: 500; font-size: 0.8125rem; }
+    .ts-time { font-size: 0.75rem; color: var(--text-secondary); margin-top: 2px; font-family: ui-monospace, monospace; }
+    
+    .user-chip { display: flex; align-items: center; gap: 10px; }
+    .avatar { width: 32px; height: 32px; border-radius: 50%; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 600; letter-spacing: .02em; }
+    .av-blue { background: var(--blue-bg); color: var(--blue-text); border: 1px solid #bfdbfe; }
+    .av-green { background: var(--green-bg); color: var(--green-text); border: 1px solid #bbf7d0; }
+    .av-yellow { background: var(--yellow-bg); color: var(--yellow-text); border: 1px solid #fde68a; }
+    .av-red { background: var(--red-bg); color: var(--red-text); border: 1px solid #fecaca; }
+    .av-gray { background: var(--gray-bg); color: var(--gray-text); border: 1px solid var(--border); }
+    .user-name { font-weight: 500; }
 
-  /* ── Modal ── */
-  .modal-overlay {
-    display: none; position: fixed; inset: 0;
-    background: rgba(0,0,0,.35); z-index: 200;
-    align-items: center; justify-content: center;
-  }
-  .modal-overlay.open { display: flex; }
-  .modal-box {
-    background: var(--bg-surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-lg);
-    box-shadow: 0 20px 60px rgba(0,0,0,.15);
-    width: 440px; max-width: 95%;
-    animation: modal-in .18s ease;
-  }
-  @keyframes modal-in { from { opacity:0; transform: scale(.96) translateY(8px); } to { opacity:1; transform: none; } }
-  .modal-head {
-    display: flex; align-items: center; justify-content: space-between;
-    padding: 14px 18px; border-bottom: 1px solid var(--border);
-  }
-  .modal-head-left { display: flex; align-items: center; gap: 8px; }
-  .modal-head-icon { color: var(--blue-text); }
-  .modal-head-icon svg { width: 15px; height: 15px; }
-  .modal-title { font-size: 0.875rem; font-weight: 600; color: var(--text-primary); }
-  .modal-close {
-    width: 26px; height: 26px; border-radius: var(--radius-sm);
-    border: 1px solid var(--border); background: transparent;
-    cursor: pointer; color: var(--text-secondary);
-    display: flex; align-items: center; justify-content: center;
-    font-size: 0.875rem; transition: background .12s;
-  }
-  .modal-close:hover { background: var(--bg-muted); }
-  .modal-body { padding: 0; }
-  .modal-row {
-    display: flex; align-items: flex-start; gap: 16px;
-    padding: 11px 18px; border-bottom: 1px solid var(--border);
-  }
-  .modal-row:last-child { border-bottom: none; }
-  .modal-row-label { font-size: 0.75rem; color: var(--text-secondary); font-weight: 500; width: 100px; flex-shrink: 0; padding-top: 1px; }
-  .modal-row-val   { font-size: 0.8125rem; color: var(--text-primary); font-weight: 500; word-break: break-all; }
-  .modal-row-val code {
-    font-family: ui-monospace, monospace; font-size: 0.75rem;
-    background: var(--bg-muted); padding: 2px 6px;
-    border-radius: 4px; border: 1px solid var(--border); font-weight: 400;
-  }
-  .modal-foot {
-    padding: 10px 18px; border-top: 1px solid var(--border);
-    display: flex; justify-content: flex-end;
-    background: var(--bg-muted); border-radius: 0 0 var(--radius-lg) var(--radius-lg);
-  }
+    .badge { display: inline-flex; align-items: center; gap: 5px; font-size: 0.6875rem; font-weight: 600; padding: 4px 10px; border-radius: 20px; white-space: nowrap; }
+    .badge-dot { width: 5px; height: 5px; border-radius: 50%; flex-shrink: 0; }
+    .badge-success { background: var(--green-bg); color: var(--green-text); border: 1px solid #bbf7d0; }
+    .badge-success .badge-dot { background: var(--green-text); }
+    .badge-danger { background: var(--red-bg); color: var(--red-text); border: 1px solid #fecaca; }
+    .badge-danger .badge-dot { background: var(--red-text); }
+    .badge-warning { background: var(--yellow-bg); color: var(--yellow-text); border: 1px solid #fde68a; }
+    .badge-warning .badge-dot { background: var(--yellow-text); }
+    .badge-info { background: var(--blue-bg); color: var(--blue-text); border: 1px solid #bfdbfe; }
+    .badge-info .badge-dot { background: var(--blue-text); }
+    .badge-neutral { background: var(--gray-bg); color: var(--gray-text); border: 1px solid var(--border); }
+    .badge-neutral .badge-dot { background: var(--gray-text); }
 
-  /* ── Spinner (for real fetch) ── */
-  .spinner {
-    display: flex; align-items: center; justify-content: center; padding: 2.5rem;
-  }
-  .spinner-ring {
-    width: 28px; height: 28px; border: 2.5px solid var(--border);
-    border-top-color: var(--blue-text); border-radius: 50%;
-    animation: spin .7s linear infinite;
-  }
-  @keyframes spin { to { transform: rotate(360deg); } }
+    .detail-text { font-size: 0.8125rem; color: var(--text-secondary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; display: block; }
+    
+    .device-wrap { display: flex; align-items: center; gap: 8px; justify-content: space-between; }
+    .device-info { display: flex; flex-direction: column; }
+    .device-name { font-weight: 500; font-size: 0.8125rem; }
+    .device-meta { font-size: 0.6875rem; color: var(--text-secondary); font-family: ui-monospace, monospace; margin-top: 2px; }
+    .device-arrow { color: var(--text-muted); opacity: 0.5; transition: 0.2s; }
+    tr.is-clickable:hover .device-arrow { opacity: 1; color: var(--blue-text); transform: translateX(2px); }
+
+    /* --- Pagination Wrapper --- */
+    .pagination-wrapper { display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; border-top: 1px solid var(--border); background: var(--bg-surface); }
+    .page-info { font-size: 0.8125rem; color: var(--text-secondary); }
+    .pagination-controls { display: flex; gap: 8px; }
+
+    /* --- Modal --- */
+    .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); backdrop-filter: blur(4px); display: none; justify-content: center; align-items: center; z-index: 1000; }
+    .modal-card { background: var(--bg-surface); border: 1px solid var(--border); border-radius: var(--radius-lg); width: 450px; box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25); overflow: hidden; }
+    .modal-head { padding: 16px 24px; border-bottom: 1px solid var(--border); font-size: 1rem; font-weight: 600; color: var(--text-primary); display: flex; justify-content: space-between; align-items: center; }
+    .modal-body { padding: 0; }
+    .modal-row { display: flex; align-items: flex-start; gap: 16px; padding: 16px 24px; border-bottom: 1px solid var(--border); }
+    .modal-row:last-child { border-bottom: none; }
+    .modal-row-label { font-size: 0.75rem; color: var(--text-secondary); font-weight: 600; text-transform: uppercase; width: 110px; flex-shrink: 0; padding-top: 2px; }
+    .modal-row-val { font-size: 0.875rem; color: var(--text-primary); font-weight: 500; word-break: break-all; }
+    .modal-row-val code { font-family: ui-monospace, monospace; font-size: 0.8125rem; background: var(--bg-muted); padding: 4px 8px; border-radius: var(--radius-sm); border: 1px solid var(--border); font-weight: 400; }
+    .modal-foot { padding: 16px 24px; background: var(--bg-muted); border-top: 1px solid var(--border); display: flex; justify-content: flex-end; }
+    
+    .spinner-container { padding: 3rem; display: flex; justify-content: center; }
+    .spinner-ring { width: 32px; height: 32px; border: 3px solid var(--border); border-top-color: var(--blue-text); border-radius: 50%; animation: spin .8s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
 </style>
 
-<div class="audit-page">
-
-  {# ── Top Bar ── #}
-  <div class="topbar">
-    <div class="topbar-left">
-      <div class="topbar-icon">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-        </svg>
-      </div>
-      <div>
-        <div class="topbar-title">System Audit Logs</div>
-        <div class="topbar-sub">Review system access and device actions</div>
-      </div>
-    </div>
-    <div class="topbar-actions">
-      <button class="btn" onclick="window.location.reload()">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
-          <path d="M21 2v6h-6M3 12a9 9 0 0115-6.7L21 8M3 22v-6h6M21 12a9 9 0 01-15 6.7L3 16"/>
-        </svg>
-        Refresh
-      </button>
-      <a href="#" class="btn btn-primary">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
-          <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/>
-        </svg>
-        Export CSV
-      </a>
-    </div>
-  </div>
-
-  {# ── Stats Row ── #}
-  {% set total = logs | length %}
-  {% set ns = namespace(success=0, failures=0, device_set=[]) %}
-  {% for log in logs %}
-    {% set act = log[5] | upper %}
-    {% if 'SUCCESS' in act or 'ADDED' in act %}{% set ns.success = ns.success + 1 %}{% endif %}
-    {% if 'FAILED' in act or 'DENIED' in act %}{% set ns.failures = ns.failures + 1 %}{% endif %}
-    {% if log[7] and log[7] not in ns.device_set %}{% set ns.device_set = ns.device_set + [log[7]] %}{% endif %}
-  {% endfor %}
-  {% set success  = ns.success %}
-  {% set failures = ns.failures %}
-  {% set devices  = ns.device_set | length %}
-
-  <div class="stats-row">
-    <div class="stat-card">
-      <div class="stat-label">Total events</div>
-      <div class="stat-value">{{ total }}</div>
-      <div class="stat-sub">Last 24 hours</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-label">Unique devices</div>
-      <div class="stat-value">{{ devices }}</div>
-      <div class="stat-sub">Across all branches</div>
-    </div>
-  </div>
-
-  {# ── Table Card ── #}
-  <div class="table-card">
-
-    {# Filter Bar #}
-    <div class="filter-bar">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
-        <circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/>
-      </svg>
-      <input class="filter-input" type="text" id="searchInput" placeholder="Search user, action, device, details…" oninput="filterTable()" />
-      <select class="filter-select" id="actionFilter" onchange="filterTable()">
-        <option value="">All actions</option>
-        <option value="DENIED">Denied</option>
-        <option value="EDITED">Edited</option>
-        <option value="UPDATE">Updated</option>
-        <option value="ADDED">Added</option>
-      </select>
-      <span class="filter-count" id="rowCount">{{ logs | length }} records</span>
-    </div>
-
-    {# Table #}
-    <div style="overflow-x: auto;">
-      <table class="audit-table" id="auditTable">
-        <thead>
-          <tr>
-            <th style="width: 130px;">Timestamp</th>
-            <th style="width: 160px;">User</th>
-            <th style="width: 140px;">Action</th>
-            <th>Details</th>
-            <th style="width: 195px;">Device / Branch</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% if logs %}
-            {% for log in logs %}
-              {# log tuple: (id, timestamp, username, type, device_id, action, details, device_name, ip, branch) #}
-              {% set is_device = log[3] == 'DEVICE' and log[7] %}
-              {% set act_upper = log[5] | upper %}
-
-              {# Determine badge category #}
-              {% if 'SUCCESS' in act_upper or 'ADDED' in act_upper %}
-                {% set badge_cls = 'badge-success' %}
-              {% elif 'FAILED' in act_upper or 'DENIED' in act_upper %}
-                {% set badge_cls = 'badge-danger' %}
-              {% elif 'LOGOUT' in act_upper %}
-                {% set badge_cls = 'badge-neutral' %}
-              {% elif 'EDITED' in act_upper or 'UPDATE' in act_upper %}
-                {% set badge_cls = 'badge-warning' %}
-              {% else %}
-                {% set badge_cls = 'badge-info' %}
-              {% endif %}
-
-              {# Avatar color from username first char #}
-              {% set av_map = {'a':'av-green','b':'av-blue','c':'av-yellow','d':'av-red','e':'av-green','f':'av-blue','g':'av-yellow','h':'av-red','i':'av-green','j':'av-blue','k':'av-yellow','l':'av-red','m':'av-green','n':'av-blue','o':'av-yellow','p':'av-red','q':'av-green','r':'av-blue','s':'av-yellow','t':'av-red','u':'av-green','v':'av-blue','w':'av-yellow','x':'av-red','y':'av-green','z':'av-blue'} %}
-              {% set av_cls = av_map.get((log[2][0] | lower), 'av-gray') %}
-
-              <tr class="{{ 'is-clickable' if is_device else '' }}"
-                  data-action="{{ act_upper }}"
-                  data-search="{{ [log[1], log[2], log[5], log[6], log[7] or '', log[8] or '', log[9] or ''] | join(' ') | lower }}"
-                  {% if is_device %}onclick="showDeviceModal('{{ log[4] }}')"{% endif %}>
-
-                {# Timestamp #}
-                <td>
-                  {% if log[1] and log[1] != 'N/A' %}
-                    {% set parts = log[1].split(' ') %}
-                    <div class="ts-date">{{ parts[0] }}</div>
-                    <div class="ts-time">{{ parts[1] if parts|length > 1 else '' }}</div>
-                  {% else %}
-                    <span style="color:var(--text-muted);">N/A</span>
-                  {% endif %}
-                </td>
-
-                {# User #}
-                <td>
-                  <div class="user-chip">
-                    <div class="avatar {{ av_cls }}">{{ log[2][:2] | upper }}</div>
-                    <span class="user-name">{{ log[2] }}</span>
-                  </div>
-                </td>
-
-                {# Action Badge #}
-                <td>
-                  <span class="badge {{ badge_cls }}">
-                    <span class="badge-dot"></span>
-                    {{ log[5] }}
-                  </span>
-                </td>
-
-                {# Details #}
-                <td>
-                  <span class="detail-text" title="{{ log[6] }}">{{ log[6] }}</span>
-                </td>
-
-                {# Device / Branch #}
-                <td>
-                  {% if log[7] %}
-                    <div class="device-wrap">
-                      <div class="device-info">
-                        <div class="device-name">{{ log[7] }}</div>
-                        <div class="device-meta">{{ log[8] }} &bull; {{ log[9] }}</div>
-                      </div>
-                      {% if is_device %}
-                        <div class="device-arrow">↗</div>
-                      {% endif %}
-                    </div>
-                  {% else %}
-                    <span class="device-none">—</span>
-                  {% endif %}
-                </td>
-
-              </tr>
-            {% endfor %}
-          {% else %}
-            <tr id="emptyInitial">
-              <td colspan="5">
-                <div class="empty-state">
-                  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
-                  <div>No audit records found</div>
+<div class="manager-wrapper">
+    <div class="page-header-bar">
+        <div class="header-icon-wrap">
+            <i data-lucide="shield-check"></i>
+        </div>
+        <div class="page-header-left">
+            <h2 class="welcome-title">System Audit Logs</h2>
+            <p class="welcome-subtitle">Review system access, modifications, and device actions.</p>
+        </div>
+        <div class="header-divider"></div>
+        <div class="page-header-stats">
+            <div class="stat-chip chip-purple">
+                <div class="stat-chip-icon"><i data-lucide="list-checks"></i></div>
+                <div class="stat-chip-body">
+                    <span class="stat-chip-value" id="statTotal">0</span>
+                    <span class="stat-chip-label">Total Events</span>
                 </div>
-              </td>
-            </tr>
-          {% endif %}
-        </tbody>
-      </table>
+            </div>
+            <div class="stat-chip chip-blue">
+                <div class="stat-chip-icon"><i data-lucide="monitor"></i></div>
+                <div class="stat-chip-body">
+                    <span class="stat-chip-value" id="statDevices">0</span>
+                    <span class="stat-chip-label">Unique Devices</span>
+                </div>
+            </div>
+        </div>
+        <div class="header-divider"></div>
+        <div class="header-actions">
+            <button class="btn" onclick="window.location.reload()">
+                <i data-lucide="refresh-cw"></i> Refresh
+            </button>
+            <a href="#" class="btn btn-primary">
+                <i data-lucide="download"></i> Export CSV
+            </a>
+        </div>
     </div>
 
-    {# JS-injected empty state #}
-    <div id="jsEmptyState" style="display:none;">
-      <div class="empty-state">
-        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
-        <div>No records match your search</div>
-      </div>
+    <div class="toolbar stagger-2">
+        <div class="search-group">
+            <div class="search-wrapper">
+                <i data-lucide="search" class="search-icon"></i>
+                <input type="text" id="searchInput" class="search-input" placeholder="Search user, action, details...">
+            </div>
+            <select class="filter-select" id="actionFilter">
+                <option value="">All Actions</option>
+                <option value="UPDATED">Updated</option>
+                <option value="DELETED">Deleted</option>
+                <option value="REGISTERED">Registered</option>
+            </select>
+        </div>
     </div>
 
-  </div>{# /table-card #}
-</div>{# /audit-page #}
+    <div class="table-container pop-in-container stagger-2">
+        <div class="table-card">
+            <table class="audit-table" id="auditTable">
+                <thead>
+                    <tr>
+                        <th style="width: 150px;" onclick="sortTable('timestamp', 0)">
+                            <div class="th-content">Timestamp <i data-lucide="chevrons-up-down" class="sort-icon" id="icon-0"></i></div>
+                        </th>
+                        <th style="width: 200px;" onclick="sortTable('username', 1)">
+                            <div class="th-content">User <i data-lucide="chevrons-up-down" class="sort-icon" id="icon-1"></i></div>
+                        </th>
+                        <th style="width: 140px;" onclick="sortTable('action', 2)">
+                            <div class="th-content">Action <i data-lucide="chevrons-up-down" class="sort-icon" id="icon-2"></i></div>
+                        </th>
+                        <th onclick="sortTable('details', 3)">
+                            <div class="th-content">Details <i data-lucide="chevrons-up-down" class="sort-icon" id="icon-3"></i></div>
+                        </th>
+                        <th style="width: 220px;" onclick="sortTable('device_name', 4)">
+                            <div class="th-content">Device / Branch <i data-lucide="chevrons-up-down" class="sort-icon" id="icon-4"></i></div>
+                        </th>
+                    </tr>
+                </thead>
+                <tbody id="audit-tbody">
+                </tbody>
+            </table>
 
-{# ── Device Detail Modal ── #}
-<div class="modal-overlay" id="deviceModal" onclick="closeModalOnBg(event)">
-  <div class="modal-box">
-    <div class="modal-head">
-      <div class="modal-head-left">
-        <span class="modal-head-icon">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
-            <rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/>
-          </svg>
-        </span>
-        <span class="modal-title" id="modalTitle">Device properties</span>
-      </div>
-      <!-- <button class="modal-close" onclick="closeModal()">✕</button> -->
+            <div class="pagination-wrapper">
+                <div class="page-info" id="pageInfo">Showing 0 to 0 of 0 entries</div>
+                <div class="pagination-controls">
+                    <button class="btn" id="btnPrev" onclick="changePage(-1)">Previous</button>
+                    <button class="btn" id="btnNext" onclick="changePage(1)">Next</button>
+                </div>
+            </div>
+        </div>
     </div>
-    <div class="modal-body" id="modalBody">
-      <div class="spinner"><div class="spinner-ring"></div></div>
-    </div>
-    <div class="modal-foot">
-      <button class="btn" onclick="closeModal()">Close</button>
-    </div>
-  </div>
 </div>
 
-<script>
-(function () {
-  /* ── Client-side search & filter ── */
-  function filterTable() {
-    const q   = document.getElementById('searchInput').value.toLowerCase().trim();
-    const act = document.getElementById('actionFilter').value.toUpperCase();
-    const rows = document.querySelectorAll('#auditTable tbody tr[data-search]');
-    let visible = 0;
+<div id="deviceModal" class="modal-overlay">
+    <div class="modal-card pop-in-container">
+        <div class="modal-head">
+            <span id="modalTitle">Device Properties</span>
+        </div>
+        <div class="modal-body" id="modalBody">
+            <div class="spinner-container"><div class="spinner-ring"></div></div>
+        </div>
+        <div class="modal-foot">
+            <button type="button" class="btn" onclick="closeModal()">Close</button>
+        </div>
+    </div>
+</div>
 
-    rows.forEach(function (row) {
-      const matchQ   = !q   || row.dataset.search.includes(q);
-      const matchAct = !act || row.dataset.action.includes(act);
-      const show = matchQ && matchAct;
-      row.style.display = show ? '' : 'none';
-      if (show) visible++;
+<div id="audit-data" data-logs='{{ logs | tojson | safe }}' style="display: none;"></div>
+
+<script>
+    // 1. Parse JSON from Flask safely
+    const rawDataElement = document.getElementById('audit-data');
+    const rawLogs = JSON.parse(rawDataElement.getAttribute('data-logs') || '[]');
+
+    // 2. Map Array of Arrays into Objects
+    let globalLogs = rawLogs.map(log => ({
+        id: log[0],
+        timestamp: log[1] || 'N/A',
+        username: log[2] || 'System',
+        type: log[3],
+        device_id: log[4],
+        action: log[5] || 'UNKNOWN',
+        details: log[6] || '',
+        device_name: log[7] || '',
+        ip: log[8] || '',
+        branch: log[9] || ''
+    }));
+
+    let currentSortCol = 'timestamp';
+    let sortAscending = false; // Default sort latest first
+    let currentPage = 1;
+    const itemsPerPage = 15; // Show slightly more for logs
+
+    // Avatar Color Map
+    const avMap = {'a':'av-green','b':'av-blue','c':'av-yellow','d':'av-red','e':'av-green','f':'av-blue','g':'av-yellow','h':'av-red','i':'av-green','j':'av-blue','k':'av-yellow','l':'av-red','m':'av-green','n':'av-blue','o':'av-yellow','p':'av-red','q':'av-green','r':'av-blue','s':'av-yellow','t':'av-red','u':'av-green','v':'av-blue','w':'av-yellow','x':'av-red','y':'av-green','z':'av-blue'};
+
+    document.addEventListener("DOMContentLoaded", function () {
+        lucide.createIcons();
+        updateStats(globalLogs);
+        
+        // Initial Sort setup (arrow down on timestamp)
+        const activeIcon = document.getElementById('icon-0');
+        activeIcon.setAttribute('data-lucide', 'chevron-down');
+        activeIcon.classList.add('sort-active');
+        lucide.createIcons();
+
+        renderTable();
+
+        document.getElementById('searchInput').addEventListener('input', function() { currentPage = 1; renderTable(); });
+        document.getElementById('actionFilter').addEventListener('change', function() { currentPage = 1; renderTable(); });
+
+        document.getElementById('deviceModal').addEventListener('click', function(e) {
+            if (e.target === this) closeModal();
+        });
     });
 
-    document.getElementById('rowCount').textContent = visible + ' record' + (visible !== 1 ? 's' : '');
-    document.getElementById('jsEmptyState').style.display = visible === 0 ? '' : 'none';
-  }
+    // --- Dynamic Stats ---
+    function updateStats(dataset) {
+        document.getElementById('statTotal').innerText = dataset.length;
+        
+        let uniqueDevices = new Set();
+        
+        dataset.forEach(log => {
+            if (log.device_name) uniqueDevices.add(log.device_name);
+        });
 
-  document.getElementById('searchInput').addEventListener('input', filterTable);
-  document.getElementById('actionFilter').addEventListener('change', filterTable);
+        document.getElementById('statDevices').innerText = uniqueDevices.size;
+    }
 
-  /* ── Device Modal ── */
-  window.showDeviceModal = function (deviceId) {
-    if (!deviceId || deviceId === 'None') return;
+    // --- Table Rendering Logic ---
+    function renderTable() {
+        const tbody = document.getElementById('audit-tbody');
+        tbody.innerHTML = '';
+        const term = document.getElementById('searchInput').value.toLowerCase();
+        const actionFilter = document.getElementById('actionFilter').value.toUpperCase().trim();
 
-    var overlay = document.getElementById('deviceModal');
-    var body    = document.getElementById('modalBody');
-    var title   = document.getElementById('modalTitle');
+        let filtered = globalLogs.filter(log => {
+            const matchQ = !term || 
+                log.username.toLowerCase().includes(term) || 
+                log.action.toLowerCase().includes(term) || 
+                log.details.toLowerCase().includes(term) ||
+                log.device_name.toLowerCase().includes(term);
+            const logAction = (log.action || '').toUpperCase().trim();
+            const matchAct = !actionFilter || logAction.includes(actionFilter) || actionFilter.includes(logAction);
+            return matchQ && matchAct;
+        });
 
-    title.textContent = 'Loading…';
-    body.innerHTML = '<div class="spinner"><div class="spinner-ring"></div></div>';
-    overlay.classList.add('open');
-
-    fetch('/audit-logs/device/' + encodeURIComponent(deviceId))
-      .then(function (res) { return res.json(); })
-      .then(function (d) {
-        if (d.error) {
-          body.innerHTML = '<div style="padding:1.25rem 1.125rem; color:var(--red-text);">' + d.error + '</div>';
-          title.textContent = 'Error';
-          return;
+        if (currentSortCol) {
+            filtered.sort((a, b) => {
+                let valA = String(a[currentSortCol]).toLowerCase();
+                let valB = String(b[currentSortCol]).toLowerCase();
+                if (valA < valB) return sortAscending ? -1 : 1;
+                if (valA > valB) return sortAscending ? 1 : -1;
+                return 0;
+            });
         }
-        title.textContent = d.device_name || ('Device #' + deviceId);
-        body.innerHTML = [
-          row('Branch',     '<strong>' + esc(d.chain_type) + '</strong>'),
-          row('IP address', '<code>' + esc(d.ip_address) + '</code>'),
-          row('Location',   esc(d.bcc)),
-          d.status   ? row('Status',   statusBadge(d.status))   : '',
-          d.last_seen ? row('Last seen', esc(d.last_seen)) : '',
-        ].join('');
-      })
-      .catch(function () {
-        body.innerHTML = '<div style="padding:1.25rem; color:var(--red-text);">Failed to load device data.</div>';
-        title.textContent = 'Error';
-      });
-  };
 
-  function row(label, val) {
-    return '<div class="modal-row">'
-         + '<span class="modal-row-label">' + label + '</span>'
-         + '<span class="modal-row-val">'   + val   + '</span>'
-         + '</div>';
-  }
+        const totalItems = filtered.length;
+        const totalPages = Math.ceil(totalItems / itemsPerPage) || 1;
 
-  function statusBadge(s) {
-    var cls = s.toLowerCase().includes('active') ? 'badge-success' : 'badge-neutral';
-    return '<span class="badge ' + cls + '"><span class="badge-dot"></span>' + esc(s) + '</span>';
-  }
+        if (currentPage > totalPages) currentPage = totalPages;
+        if (currentPage < 1) currentPage = 1;
 
-  function esc(str) {
-    return String(str || '—')
-      .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-  }
+        const startIndex = (currentPage - 1) * itemsPerPage;
+        const paginatedData = filtered.slice(startIndex, startIndex + itemsPerPage);
 
-  window.closeModal = function () {
-    document.getElementById('deviceModal').classList.remove('open');
-  };
+        const endDisplay = Math.min(startIndex + itemsPerPage, totalItems);
+        document.getElementById('pageInfo').innerText = `Showing ${totalItems === 0 ? 0 : startIndex + 1} to ${endDisplay} of ${totalItems} entries`;
+        document.getElementById('btnPrev').disabled = currentPage === 1;
+        document.getElementById('btnNext').disabled = currentPage === totalPages || totalItems === 0;
 
-  window.closeModalOnBg = function (e) {
-    if (e.target === document.getElementById('deviceModal')) closeModal();
-  };
+        if (paginatedData.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; padding: 3rem; color: var(--text-muted);"><i data-lucide="search-x" style="margin-bottom:8px; opacity:0.5; width:32px; height:32px;"></i><br>No matching records found.</td></tr>`;
+            lucide.createIcons();
+            return;
+        }
 
-  document.addEventListener('keydown', function (e) {
-    if (e.key === 'Escape') closeModal();
-  });
-})();
+        paginatedData.forEach(log => {
+            // Timestamp split
+            let tsDate = log.timestamp; let tsTime = '';
+            if (log.timestamp !== 'N/A') {
+                const parts = log.timestamp.split(' ');
+                tsDate = parts[0];
+                tsTime = parts.length > 1 ? parts[1] : '';
+            }
+
+            // Avatar logic
+            const initial = log.username.charAt(0).toLowerCase();
+            const avCls = avMap[initial] || 'av-gray';
+
+            // Badge logic
+            const actUpper = log.action.toUpperCase();
+            let badgeCls = 'badge-info';
+            if (actUpper.includes('SUCCESS') || actUpper.includes('ADDED') || actUpper.includes('REGISTERED')) badgeCls = 'badge-success';
+            else if (actUpper.includes('FAILED') || actUpper.includes('DENIED') || actUpper.includes('DELETED')) badgeCls = 'badge-danger';
+            else if (actUpper.includes('EDITED') || actUpper.includes('UPDATE') || actUpper.includes('UPDATED')) badgeCls = 'badge-warning';
+            else if (actUpper.includes('LOGOUT')) badgeCls = 'badge-neutral';
+
+            // Device logic
+            const isDevice = log.type === 'DEVICE' && log.device_id;
+            let deviceHtml = `<span style="color:var(--text-muted); opacity:0.5;">—</span>`;
+            if (log.device_name) {
+                deviceHtml = `
+                    <div class="device-wrap">
+                        <div class="device-info">
+                            <div class="device-name">${log.device_name}</div>
+                            <div class="device-meta">${log.ip || 'Unknown IP'} &bull; ${log.branch || ''}</div>
+                        </div>
+                        ${isDevice ? '<i data-lucide="external-link" class="device-arrow"></i>' : ''}
+                    </div>
+                `;
+            }
+
+            const tr = `
+                <tr class="${isDevice ? 'is-clickable' : ''}" ${isDevice ? `onclick="showDeviceModal('${log.device_id}')"` : ''}>
+                    <td>
+                        <div class="ts-date">${tsDate}</div>
+                        <div class="ts-time">${tsTime}</div>
+                    </td>
+                    <td>
+                        <div class="user-chip">
+                            <div class="avatar ${avCls}">${log.username.substring(0, 2).toUpperCase()}</div>
+                            <span class="user-name">${log.username}</span>
+                        </div>
+                    </td>
+                    <td>
+                        <span class="badge ${badgeCls}"><span class="badge-dot"></span>${log.action}</span>
+                    </td>
+                    <td>
+                        <span class="detail-text" title="${log.details}">${log.details}</span>
+                    </td>
+                    <td>${deviceHtml}</td>
+                </tr>
+            `;
+            tbody.insertAdjacentHTML('beforeend', tr);
+        });
+        lucide.createIcons();
+    }
+
+    function changePage(direction) {
+        currentPage += direction;
+        renderTable();
+    }
+
+    function sortTable(columnKey, iconIndex) {
+        if (currentSortCol === columnKey) sortAscending = !sortAscending;
+        else { currentSortCol = columnKey; sortAscending = true; }
+        
+        currentPage = 1;
+        document.querySelectorAll('.sort-icon').forEach(icon => {
+            icon.setAttribute('data-lucide', 'chevrons-up-down');
+            icon.classList.remove('sort-active');
+        });
+
+        const activeIcon = document.getElementById('icon-' + iconIndex);
+        activeIcon.setAttribute('data-lucide', sortAscending ? 'chevron-up' : 'chevron-down');
+        activeIcon.classList.add('sort-active');
+
+        lucide.createIcons();
+        renderTable();
+    }
+
+    // --- Device Modal Fetch Logic ---
+    function showDeviceModal(deviceId) {
+        if (!deviceId || deviceId === 'None') return;
+
+        const overlay = document.getElementById('deviceModal');
+        const body = document.getElementById('modalBody');
+        const title = document.getElementById('modalTitle');
+
+        title.textContent = 'Loading Device...';
+        body.innerHTML = '<div class="spinner-container"><div class="spinner-ring"></div></div>';
+        overlay.style.display = 'flex';
+
+        fetch('/audit-logs/device/' + encodeURIComponent(deviceId))
+            .then(res => res.json())
+            .then(data => {
+                if (data.error) {
+                    body.innerHTML = `<div style="padding: 24px; color: var(--red-text);"><i data-lucide="alert-circle" style="display:inline; margin-bottom:-4px;"></i> ${data.error}</div>`;
+                    title.textContent = 'Connection Error';
+                    lucide.createIcons();
+                    return;
+                }
+                
+                title.textContent = data.device_name || `Terminal #${deviceId}`;
+                body.innerHTML = `
+                    <div class="modal-row">
+                        <span class="modal-row-label">Branch</span>
+                        <span class="modal-row-val"><strong>${data.chain_type || '—'}</strong></span>
+                    </div>
+                    <div class="modal-row">
+                        <span class="modal-row-label">IP Address</span>
+                        <span class="modal-row-val"><code>${data.ip_address || '—'}</code></span>
+                    </div>
+                    <div class="modal-row">
+                        <span class="modal-row-label">Location Code</span>
+                        <span class="modal-row-val">${data.bcc || '—'}</span>
+                    </div>
+                `;
+            })
+            .catch(err => {
+                body.innerHTML = `<div style="padding: 24px; color: var(--red-text);">Failed to load device network data.</div>`;
+                title.textContent = 'Network Error';
+            });
+    }
+
+    function closeModal() {
+        document.getElementById('deviceModal').style.display = 'none';
+    }
+
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') closeModal();
+    });
 </script>
 {% endblock %}
