@@ -1,14 +1,39 @@
 {% extends "base.html" %}
 
 {% block content %}
+<script src="https://unpkg.com/lucide@latest"></script>
 <script src="{{ url_for('static', filename='js/lucide.min.js') }}"></script>
-
 <style>
-    /* --- Pop-In Animation (Synced with Home) --- */
+    /* --- Audit Logs Shared Variables --- */
+    :root {
+        --bg-page: #f3f4f6;
+        --bg-surface: #ffffff;
+        --bg-muted: #f9fafb;
+        --bg-hover: #f3f4f6;
+        --border: #e5e7eb;
+        --text-primary: #111827;
+        --text-secondary: #6b7280;
+        --text-muted: #9ca3af;
+        --blue-bg: #eff6ff;
+        --blue-text: #1d4ed8;
+        --green-bg: #f0fdf4;
+        --green-text: #15803d;
+        --red-bg: #fef2f2;
+        --red-text: #b91c1c;
+        --yellow-bg: #fffbeb;
+        --yellow-text: #b45309;
+        --eggshell: #f0ead6;
+        --radius-sm: 6px;
+        --radius-md: 8px;
+        --radius-lg: 12px;
+        --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
+    }
+
+    /* --- Pop-In Animation --- */
     @keyframes popIn {
         0% {
             opacity: 0;
-            transform: scale(0.9) translateY(30px);
+            transform: scale(0.9) translateY(20px);
         }
 
         100% {
@@ -21,17 +46,41 @@
         animation: popIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
     }
 
-    /* BUG FIX 1: Added the animation call so these don't stay at opacity 0 */
     .stagger-1 {
-        opacity: 0;
         animation: popIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
         animation-delay: 0.1s;
+        opacity: 0;
     }
 
     .stagger-2 {
-        opacity: 0;
         animation: popIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
         animation-delay: 0.2s;
+        opacity: 0;
+    }
+
+    /* --- Inline Alerts --- */
+    .alert-box {
+        display: none;
+        align-items: center;
+        gap: 8px;
+        padding: 10px 14px;
+        border-radius: var(--radius-md);
+        font-size: 0.8125rem;
+        font-weight: 500;
+        margin-bottom: 1rem;
+        animation: popIn 0.3s ease forwards;
+    }
+
+    .alert-error {
+        background: var(--red-bg);
+        color: var(--red-text);
+        border: 1px solid #fecaca;
+    }
+
+    .alert-success {
+        background: var(--green-bg);
+        color: var(--green-text);
+        border: 1px solid #bbf7d0;
     }
 
     /* --- Manager Layout --- */
@@ -42,6 +91,7 @@
         display: flex;
         flex-direction: column;
         align-items: center;
+        font-family: 'Inter', ui-sans-serif, system-ui, sans-serif;
     }
 
     .header-section {
@@ -49,125 +99,30 @@
         max-width: 1200px;
         display: flex;
         justify-content: space-between;
-        align-items: center;
-        margin-bottom: 2.5rem;
+        align-items: flex-end;
+        margin-bottom: 2rem;
     }
 
-    /* --- Filter & Add Buttons --- */
-    .filter-group {
-        display: flex;
-        gap: 1rem;
-    }
-
-    .filter-btn {
-        background: rgba(255, 255, 255, 0.05);
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        color: #fff;
-        padding: 0.6rem 1.2rem;
-        border-radius: 50px;
-        cursor: pointer;
-        transition: 0.3s;
-    }
-
-    .filter-btn.active {
-        background: rgba(255, 255, 255, 0.2);
-        border-color: #fff;
-    }
-
-    .add-device-btn {
-        background: #fff;
-        color: #000;
-        border: none;
-        padding: 0.8rem 1.5rem;
-        border-radius: 50px;
+    .welcome-title {
+        font-size: 1.5rem;
         font-weight: 600;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
+        color: #fff;
+        margin-bottom: 4px;
     }
 
-    /* --- Mini-Bento Card Grid --- */
-    .device-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-        gap: 1.5rem;
+    .welcome-subtitle {
+        font-size: 0.875rem;
+        color: #a0a0a0;
+    }
+
+    /* --- Toolbar (Search & Buttons) --- */
+    .toolbar {
         width: 100%;
         max-width: 1200px;
-    }
-
-    .mini-bento-card {
-        background: rgba(255, 255, 255, 0.05);
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        border-radius: 30px;
-        padding: 1.5rem;
-        backdrop-filter: blur(10px);
-        transition: transform 0.3s ease;
-    }
-
-    .mini-bento-card:hover {
-        transform: translateY(-10px);
-        border-color: rgba(255, 255, 255, 0.3);
-    }
-
-    .badge {
-        padding: 4px 12px;
-        border-radius: 50px;
-        font-size: 0.75rem;
-        font-weight: 700;
-        text-transform: uppercase;
-    }
-
-    .badge-rustans {
-        background: #eab308;
-        color: #000;
-    }
-
-    /* Gold/Yellow */
-    .badge-rds {
-        background: #3b82f6;
-        color: #fff;
-    }
-
-    /* --- Glassmorphic Modal --- */
-    .modal-overlay {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(0, 0, 0, 0.6);
-        backdrop-filter: blur(15px);
-        display: none;
-        justify-content: center;
-        align-items: center;
-        z-index: 1000;
-    }
-
-    .modal-card {
-        background: rgba(255, 255, 255, 0.1);
-        border: 1px solid rgba(255, 255, 255, 0.2);
-        border-radius: 40px;
-        padding: 3rem;
-        width: 450px;
-        box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
-    }
-
-    .form-input {
-        width: 100%;
-        background: rgba(255, 255, 255, 0.05);
-        border: 1px solid rgba(255, 255, 255, 0.2);
-        padding: 12px 20px;
-        border-radius: 50px;
-        color: #fff;
-        margin-bottom: 1rem;
-    }
-
-    /* --- Right-side Toolbar Container --- */
-    .header-actions {
         display: flex;
+        justify-content: space-between;
         align-items: center;
-        gap: 15px;
+        margin-bottom: 1rem;
     }
 
     .search-wrapper {
@@ -175,196 +130,617 @@
         width: 300px;
     }
 
-    .search-input {
-        width: 100%;
-        background: rgba(255, 255, 255, 0.05);
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        padding: 0 15px 0 45px;
-        /* Added padding back so text doesn't hide behind icon */
-        border-radius: 50px;
-        color: #fff;
-        font-size: 0.9rem;
-        height: 48px;
-        backdrop-filter: blur(10px);
-        outline: none;
-        transition: 0.3s;
-    }
-
     .search-icon {
         position: absolute;
-        left: 18px;
+        left: 10px;
         top: 50%;
         transform: translateY(-50%);
-        color: rgba(255, 255, 255, 0.4);
-        width: 18px;
-        pointer-events: none;
+        color: var(--text-muted);
+        width: 16px;
+        height: 16px;
     }
 
-    .add-device-btn {
-        height: 48px;
-        padding: 0 25px;
-        background: #fff;
-        color: #000;
-        border-radius: 50px;
+    .search-input {
+        width: 100%;
+        padding: 8px 12px 8px 34px;
+        font-size: 0.875rem;
+        border-radius: var(--radius-md);
+        border: 1px solid var(--border);
+        background: var(--bg-surface);
+        color: var(--text-primary);
+        outline: none;
+        transition: border-color .15s, box-shadow .15s;
+    }
+
+    .search-input:focus {
+        border-color: var(--blue-text);
+        box-shadow: 0 0 0 3px rgba(29, 78, 216, 0.1);
+    }
+
+    /* --- Buttons --- */
+    .btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 0.875rem;
+        font-weight: 500;
+        padding: 8px 16px;
+        border-radius: var(--radius-md);
+        cursor: pointer;
+        border: 1px solid var(--border);
+        background: var(--bg-surface);
+        color: var(--text-primary);
+        transition: background .15s;
+    }
+
+    .btn:hover:not(:disabled) {
+        background: var(--bg-muted);
+    }
+
+    .btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+
+    .btn-primary {
+        background: var(--text-primary);
+        color: var(--bg-surface);
+        border-color: transparent;
+    }
+
+    .btn-primary:hover:not(:disabled) {
+        background: #1f2937;
+    }
+
+    .btn-add {
+        background: var(--eggshell);
+        color: #374151;
+        border-color: #d1c8b3;
+        box-shadow: var(--shadow-sm);
         font-weight: 600;
+    }
+
+    .btn-add:hover {
+        background: #e3ddc8;
+    }
+
+    /* --- Table Card --- */
+    .table-container {
+        width: 100%;
+        max-width: 1200px;
+    }
+
+    .table-card {
+        background: var(--bg-surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        box-shadow: var(--shadow-sm);
+        overflow: hidden;
+    }
+
+    .audit-table {
+        width: 100%;
+        border-collapse: collapse;
+        table-layout: fixed;
+    }
+
+    .audit-table thead th {
+        font-size: 0.6875rem;
+        font-weight: 600;
+        letter-spacing: .07em;
+        text-transform: uppercase;
+        color: var(--text-secondary);
+        padding: 12px 16px;
+        text-align: left;
+        background: var(--bg-surface);
+        border-bottom: 1px solid var(--border);
+        cursor: pointer;
+        user-select: none;
+        transition: background 0.2s;
+    }
+
+    .audit-table thead th:hover {
+        background: var(--bg-muted);
+        color: var(--text-primary);
+    }
+
+    .th-content {
         display: flex;
         align-items: center;
+        gap: 4px;
+    }
+
+    .sort-icon {
+        width: 14px;
+        height: 14px;
+        opacity: 0.3;
+    }
+
+    .sort-active {
+        opacity: 1;
+        color: var(--blue-text);
+    }
+
+    /* Zebra Striping */
+    .audit-table tbody tr {
+        border-bottom: 1px solid var(--border);
+        transition: background .1s;
+    }
+
+    .audit-table tbody tr:nth-child(even) {
+        background-color: var(--bg-muted);
+    }
+
+    .audit-table tbody tr:last-child {
+        border-bottom: none;
+    }
+
+    .audit-table tbody tr:hover td {
+        background: #f3f4f6;
+    }
+
+    .audit-table tbody td {
+        padding: 12px 16px;
+        font-size: 0.8125rem;
+        color: var(--text-primary);
+        vertical-align: middle;
+    }
+
+    /* --- Pagination Wrapper --- */
+    .pagination-wrapper {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 12px 16px;
+        border-top: 1px solid var(--border);
+        background: var(--bg-surface);
+    }
+
+    .page-info {
+        font-size: 0.8125rem;
+        color: var(--text-secondary);
+    }
+
+    .pagination-controls {
+        display: flex;
         gap: 8px;
+    }
+
+    /* --- Typography & Badges --- */
+    .device-name {
+        font-weight: 500;
+        font-size: 0.875rem;
+        color: var(--text-primary);
+    }
+
+    .device-ip {
+        font-family: ui-monospace, monospace;
+        color: var(--text-secondary);
+        font-size: 0.8125rem;
+    }
+
+    .badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        font-size: 0.6875rem;
+        font-weight: 600;
+        padding: 4px 10px;
+        border-radius: 20px;
         white-space: nowrap;
-        transition: 0.3s;
     }
 
-    .add-device-btn:hover {
-        transform: scale(1.05);
-        background: #f0f0f0;
+    .badge-dot {
+        width: 5px;
+        height: 5px;
+        border-radius: 50%;
+        flex-shrink: 0;
     }
 
-    @media (max-width: 768px) {
-        .header-section {
-            flex-direction: column;
-            align-items: flex-start;
-            gap: 1.5rem;
-        }
+    .badge-rustans {
+        background: var(--yellow-bg);
+        color: var(--yellow-text);
+    }
 
-        .actions-group {
-            width: 100%;
-            flex-direction: column;
-            align-items: stretch;
-        }
+    .badge-rustans .badge-dot {
+        background: var(--yellow-text);
+    }
 
-        .search-wrapper {
-            width: 100%;
-        }
+    .badge-rds {
+        background: var(--blue-bg);
+        color: var(--blue-text);
+    }
+
+    .badge-rds .badge-dot {
+        background: var(--blue-text);
+    }
+
+    .badge-neutral {
+        background: var(--bg-muted);
+        color: var(--text-secondary);
+        border: 1px solid var(--border);
+    }
+
+    .badge-neutral .badge-dot {
+        background: var(--text-muted);
+    }
+
+    /* --- Action Buttons --- */
+    .action-btn {
+        background: none;
+        border: none;
+        padding: 6px;
+        border-radius: var(--radius-md);
+        cursor: pointer;
+        color: var(--text-secondary);
+        transition: 0.2s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .action-btn:hover {
+        background: #e5e7eb;
+        color: var(--text-primary);
+    }
+
+    .action-btn.danger:hover {
+        background: var(--red-bg);
+        color: var(--red-text);
+    }
+
+    .action-btn i {
+        width: 16px;
+        height: 16px;
+    }
+
+    /* --- Modal --- */
+    .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        backdrop-filter: blur(4px);
+        display: none;
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+    }
+
+    .modal-card {
+        background: var(--bg-surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        width: 450px;
+        box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25);
+        overflow: hidden;
+    }
+
+    .modal-head {
+        padding: 16px 24px;
+        border-bottom: 1px solid var(--border);
+        font-size: 1rem;
+        font-weight: 600;
+        color: var(--text-primary);
+    }
+
+    .modal-body {
+        padding: 24px;
+    }
+
+    .form-group {
+        margin-bottom: 1rem;
+    }
+
+    .form-label {
+        display: block;
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: var(--text-secondary);
+        margin-bottom: 6px;
+        text-transform: uppercase;
+    }
+
+    .form-input {
+        width: 100%;
+        padding: 10px 14px;
+        font-size: 0.875rem;
+        border-radius: var(--radius-md);
+        border: 1px solid var(--border);
+        background: var(--bg-surface);
+        color: var(--text-primary);
+        outline: none;
+        transition: border-color .15s;
+    }
+
+    .form-input:focus {
+        border-color: var(--blue-text);
+    }
+
+    .modal-foot {
+        padding: 16px 24px;
+        background: var(--bg-muted);
+        border-top: 1px solid var(--border);
+        display: flex;
+        justify-content: flex-end;
+        gap: 12px;
     }
 </style>
 
-<div class="header-section pop-in-container">
-    <div class="title-group">
-        <h2 class="welcome-title stagger-1" style="margin: 0;">Device Manager</h2>
-        <p class="welcome-subtitle stagger-2" style="margin: 5px 0 0 0;">Monitoring terminals for ZKTeco Devices</p>
+<div class="manager-wrapper">
+    <div class="header-section">
+        <div>
+            <h2 class="welcome-title stagger-1">Device Manager</h2>
+            <p class="welcome-subtitle stagger-2">Monitor ZKTeco devices across all branches.</p>
+        </div>
     </div>
 
-    <div class="header-actions stagger-2">
+    <div class="toolbar stagger-2">
         <div class="search-wrapper">
             <i data-lucide="search" class="search-icon"></i>
-            <input type="text" id="deviceSearch" class="search-input" placeholder="Search terminals..."
-                onkeyup="filterDevices()">
+            <input type="text" id="searchInput" class="search-input" placeholder="Search devices, locations, IPs...">
         </div>
-
-        <button class="add-device-btn" onclick="openModal()">
+        <button class="btn btn-add" onclick="openModal()">
             <i data-lucide="plus"></i> Add Device
         </button>
     </div>
+
+    <div class="table-container pop-in-container stagger-2">
+        <div id="page-alert" class="alert-box"></div>
+
+        <div class="table-card">
+            <table class="audit-table" id="deviceTable">
+                <thead>
+                    <tr>
+                        <th onclick="sortTable('bcc', 0)">
+                            <div class="th-content">Device Name <i data-lucide="chevrons-up-down" class="sort-icon"
+                                    id="icon-0"></i></div>
+                        </th>
+                        <th style="width: 150px;" onclick="sortTable('chain_type', 1)">
+                            <div class="th-content">Location <i data-lucide="chevrons-up-down" class="sort-icon"
+                                    id="icon-1"></i></div>
+                        </th>
+                        <th style="width: 200px;" onclick="sortTable('ip_address', 2)">
+                            <div class="th-content">IP Address <i data-lucide="chevrons-up-down" class="sort-icon"
+                                    id="icon-2"></i></div>
+                        </th>
+                        <th style="width: 120px; text-align: right; cursor: default;">
+                            <div class="th-content" style="justify-content: flex-end;">Actions</div>
+                        </th>
+                    </tr>
+                </thead>
+                <tbody id="device-tbody">
+                </tbody>
+            </table>
+
+            <div class="pagination-wrapper">
+                <div class="page-info" id="pageInfo">Showing 0 to 0 of 0 entries</div>
+                <div class="pagination-controls">
+                    <button class="btn" id="btnPrev" onclick="changePage(-1)">Previous</button>
+                    <button class="btn" id="btnNext" onclick="changePage(1)">Next</button>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
-<div id="device-container" class="device-grid pop-in-container stagger-2">
-</div>
 <div id="device-modal" class="modal-overlay">
     <div class="modal-card pop-in-container">
-        <h3 style="margin-bottom: 1.5rem;">Device Details</h3>
+        <div class="modal-head">Device Configuration</div>
         <form id="device-form">
-            <input type="hidden" id="device_id" name="device_id">
+            <div class="modal-body">
+                <div id="modal-alert" class="alert-box"></div>
+                <input type="hidden" id="device_id" name="device_id">
 
-            <input type="text" id="bcc" name="bcc" placeholder="Device Name / Store Location (BCC)" class="form-input"
-                required>
+                <div class="form-group">
+                    <label class="form-label">Device Name</label>
+                    <input type="text" id="bcc" name="bcc" placeholder="e.g. MAKATI" class="form-input" required>
+                </div>
 
-            <input type="text" id="ip_address" name="ip_address" placeholder="IP Address (e.g. 192.168.1.201)"
-                class="form-input" required>
+                <div class="form-group">
+                    <label class="form-label">IP Address</label>
+                    <input type="text" id="ip_address" name="ip_address" placeholder="192.168.1.201" class="form-input"
+                        required>
+                </div>
 
-            <input type="text" id="comms_key" name="comms_key" placeholder="Comms Key (Default: 0)" class="form-input"
-                value="0">
+                <div class="form-group">
+                    <label class="form-label">Device Key (Default Password is "0")</label>
+                    <input type="text" id="comms_key" name="comms_key" placeholder="Default: 0" class="form-input"
+                        value="0">
+                </div>
 
-            <input type="text" id="chain_type" name="chain_type" class="form-input" placeholder="Device's Location">
-
-            <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
-                <button type="button" class="minimal-btn" style="background: rgba(255,0,0,0.2); margin-top:0;"
-                    onclick="closeModal()">Cancel</button>
-                <button type="submit" class="minimal-btn" style="background: #fff; color: #000; margin-top:0;">Save
-                    Device</button>
+                <div class="form-group">
+                    <label class="form-label">Location</label>
+                    <input type="text" id="chain_type" name="chain_type" placeholder="Makati HQ" class="form-input"
+                        required>
+                </div>
+            </div>
+            <div class="modal-foot">
+                <button type="button" class="btn" onclick="closeModal()">Cancel</button>
+                <button type="submit" class="btn btn-primary">Save Device</button>
             </div>
         </form>
     </div>
 </div>
 
 <script>
+    let globalDevices = [];
+    let currentSortCol = '';
+    let sortAscending = true;
+
+    // Pagination State
+    let currentPage = 1;
+    const itemsPerPage = 10;
+
     document.addEventListener("DOMContentLoaded", function () {
         lucide.createIcons();
-    });
-
-    // Run this as soon as the page loads
-    document.addEventListener('DOMContentLoaded', () => {
         loadDevices();
         setupFormHandler();
+
+        // Search Listener - Resets to page 1 on search
+        document.getElementById('searchInput').addEventListener('input', function (e) {
+            currentPage = 1;
+            renderTable(e.target.value);
+        });
     });
 
-    // --- 1. Fetch and Display Devices ---
+    // --- Alert Helpers ---
+    function showPageAlert(msg, type = "error") {
+        const box = document.getElementById('page-alert');
+        box.className = 'alert-box alert-' + type;
+        box.innerHTML = `<i data-lucide="${type === 'success' ? 'check-circle' : 'alert-circle'}"></i> <span>${msg}</span>`;
+        box.style.display = 'flex';
+        lucide.createIcons();
+        setTimeout(() => { box.style.display = 'none'; }, 5000);
+    }
+
+    function showModalAlert(msg, type = "error") {
+        const box = document.getElementById('modal-alert');
+        box.className = 'alert-box alert-' + type;
+        box.innerHTML = `<i data-lucide="${type === 'success' ? 'check-circle' : 'alert-circle'}"></i> <span>${msg}</span>`;
+        box.style.display = 'flex';
+        lucide.createIcons();
+    }
+
+    // --- 1. Fetch and Display ---
     function loadDevices() {
         fetch('/api/get-devices')
             .then(response => response.json())
             .then(res => {
                 if (res.status === 'success') {
-                    const container = document.getElementById('device-container');
-                    container.innerHTML = ''; // Clear loading state or old data
-
-                    res.data.forEach(device => {
-                        // Logic Gate for Badges
-                        const badgeClass = device.chain_type === 'RUSTANS' ? 'badge-rustans' : 'badge-rds';
-
-                        // Prevent quotes in strings from breaking the HTML onclick handler
-                        const safeDeviceData = JSON.stringify(device).replace(/'/g, "&#39;").replace(/"/g, "&quot;");
-
-                        const card = `
-                            <div class="mini-bento-card">
-                                <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 1rem;">
-                                    <div>
-                                        <h3 style="margin: 0; font-size: 1.2rem; color: #fff;">${device.bcc}</h3>
-                                        <span class="badge ${badgeClass}" style="margin-top: 0.5rem; display: inline-block;">${device.chain_type}</span>
-                                    </div>
-                                    <div style="display: flex; gap: 0.8rem;">
-                                        <button onclick="openModal(${safeDeviceData})" style="background: none; border: none; color: #a0a0a0; cursor: pointer; transition: color 0.3s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#a0a0a0'">
-                                            <i data-lucide="edit" style="width: 20px; height: 20px;"></i>
-                                        </button>
-                                        <button onclick="deleteDevice(${device.device_id})" style="background: none; border: none; color: #ff4d4d; cursor: pointer; transition: color 0.3s;" onmouseover="this.style.color='#ff9999'" onmouseout="this.style.color='#ff4d4d'">
-                                            <i data-lucide="trash-2" style="width: 20px; height: 20px;"></i>
-                                        </button>
-                                    </div>
-                                </div>
-                                <div style="font-size: 0.95rem; color: #ccc;">
-                                    <p style="margin: 6px 0;"><strong>IP Address:</strong> ${device.ip_address}</p>
-                                    
-                                </div>
-                            </div>
-                        `;
-                        container.insertAdjacentHTML('beforeend', card);
-                    });
-
-                    // Re-initialize Lucide icons for the newly injected dynamic HTML
-                    lucide.createIcons();
+                    globalDevices = res.data;
+                    renderTable(document.getElementById('searchInput').value);
                 } else {
-                    alert("Error loading devices: " + res.message);
+                    showPageAlert("Error loading devices: " + res.message, "error");
                 }
             })
-            .catch(err => console.error("Fetch error:", err));
+            .catch(err => {
+                console.error("Fetch error:", err);
+                showPageAlert("Failed to communicate with the server.", "error");
+            });
     }
 
-    // --- 2. Modal Handling (Add vs Edit) ---
+    // --- 2. Render Logic (Search, Sort, Pagination) ---
+    function renderTable(searchTerm = '') {
+        const tbody = document.getElementById('device-tbody');
+        tbody.innerHTML = '';
+        const term = searchTerm.toLowerCase();
+
+        // 1. Filter
+        let filtered = globalDevices.filter(d =>
+            d.bcc.toLowerCase().includes(term) ||
+            d.chain_type.toLowerCase().includes(term) ||
+            d.ip_address.toLowerCase().includes(term)
+        );
+
+        // 2. Sort
+        if (currentSortCol) {
+            filtered.sort((a, b) => {
+                let valA = a[currentSortCol].toLowerCase();
+                let valB = b[currentSortCol].toLowerCase();
+                if (valA < valB) return sortAscending ? -1 : 1;
+                if (valA > valB) return sortAscending ? 1 : -1;
+                return 0;
+            });
+        }
+
+        // 3. Pagination Logic
+        const totalItems = filtered.length;
+        const totalPages = Math.ceil(totalItems / itemsPerPage) || 1;
+
+        if (currentPage > totalPages) currentPage = totalPages;
+        if (currentPage < 1) currentPage = 1;
+
+        const startIndex = (currentPage - 1) * itemsPerPage;
+        const paginatedData = filtered.slice(startIndex, startIndex + itemsPerPage);
+
+        // Update Pagination UI
+        const endDisplay = Math.min(startIndex + itemsPerPage, totalItems);
+        document.getElementById('pageInfo').innerText = `Showing ${totalItems === 0 ? 0 : startIndex + 1} to ${endDisplay} of ${totalItems} entries`;
+        document.getElementById('btnPrev').disabled = currentPage === 1;
+        document.getElementById('btnNext').disabled = currentPage === totalPages || totalItems === 0;
+
+        if (paginatedData.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="4" style="text-align: center; padding: 3rem; color: var(--text-muted);">No matching devices found.</td></tr>`;
+            return;
+        }
+
+        // 4. Build Rows
+        paginatedData.forEach(device => {
+            let badgeClass = 'badge-neutral';
+            if (device.chain_type === 'RUSTANS') badgeClass = 'badge-rustans';
+            else if (device.chain_type === 'RDS') badgeClass = 'badge-rds';
+
+            const safeDeviceData = JSON.stringify(device).replace(/'/g, "&#39;").replace(/"/g, "&quot;");
+
+            const tr = `
+                <tr>
+                    <td><div class="device-name">${device.bcc}</div></td>
+                    <td><span class="badge ${badgeClass}"><span class="badge-dot"></span>${device.chain_type}</span></td>
+                    <td><span class="device-ip">${device.ip_address}</span></td>
+                    <td>
+                        <div style="display: flex; gap: 4px; justify-content: flex-end;">
+                            <button type="button" class="action-btn" onclick="openModal(${safeDeviceData})" title="Edit">
+                                <i data-lucide="edit-2"></i>
+                            </button>
+                            <button type="button" class="action-btn danger" onclick="deleteDevice(${device.device_id})" title="Delete">
+                                <i data-lucide="trash-2"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            `;
+            tbody.insertAdjacentHTML('beforeend', tr);
+        });
+        lucide.createIcons();
+    }
+
+    // --- 3. Interaction Handlers ---
+    function changePage(direction) {
+        currentPage += direction;
+        renderTable(document.getElementById('searchInput').value);
+    }
+
+    function sortTable(columnKey, iconIndex) {
+        if (currentSortCol === columnKey) {
+            sortAscending = !sortAscending;
+        } else {
+            currentSortCol = columnKey;
+            sortAscending = true;
+        }
+
+        currentPage = 1; // Reset to page 1 on new sort
+
+        document.querySelectorAll('.sort-icon').forEach(icon => {
+            icon.setAttribute('data-lucide', 'chevrons-up-down');
+            icon.classList.remove('sort-active');
+        });
+
+        const activeIcon = document.getElementById('icon-' + iconIndex);
+        activeIcon.setAttribute('data-lucide', sortAscending ? 'chevron-up' : 'chevron-down');
+        activeIcon.classList.add('sort-active');
+
+        lucide.createIcons();
+        renderTable(document.getElementById('searchInput').value);
+    }
+
     function openModal(device = null) {
         const form = document.getElementById('device-form');
+        document.getElementById('modal-alert').style.display = 'none';
 
         if (device) {
-            // EDIT MODE: Populate fields
             document.getElementById('device_id').value = device.device_id;
             document.getElementById('bcc').value = device.bcc;
             document.getElementById('ip_address').value = device.ip_address;
             document.getElementById('comms_key').value = device.comms_key;
             document.getElementById('chain_type').value = device.chain_type;
         } else {
-            // ADD MODE: Clear fields
             form.reset();
             document.getElementById('device_id').value = '';
-            document.getElementById('comms_key').value = '0'; // Default handshake key
+            document.getElementById('comms_key').value = '0';
         }
-
         document.getElementById('device-modal').style.display = 'flex';
     }
 
@@ -373,16 +749,15 @@
         document.getElementById('device-form').reset();
     }
 
-    // --- 3. Form Submission (Save/Update) ---
     function setupFormHandler() {
         const form = document.getElementById('device-form');
         form.addEventListener('submit', function (e) {
-            e.preventDefault(); // Stop default HTML submission
+            e.preventDefault();
 
-            // Optional: Show a loading state on the button here
+            document.getElementById('modal-alert').style.display = 'none';
             const submitBtn = form.querySelector('button[type="submit"]');
             const originalText = submitBtn.innerText;
-            submitBtn.innerText = "Verifying...";
+            submitBtn.innerText = "Saving...";
             submitBtn.disabled = true;
 
             const formData = new FormData(form);
@@ -395,12 +770,16 @@
                 .then(res => {
                     if (res.status === 'success') {
                         closeModal();
-                        loadDevices(); // Refresh the grid to show the new device
+                        showPageAlert("Device saved successfully.", "success");
+                        loadDevices();
                     } else {
-                        alert(res.message); // Will show the Socket Handshake error if offline
+                        showModalAlert(res.message, "error");
                     }
                 })
-                .catch(err => console.error("Save error:", err))
+                .catch(err => {
+                    console.error("Save error:", err);
+                    showModalAlert("A network error occurred. Check your connection.", "error");
+                })
                 .finally(() => {
                     submitBtn.innerText = originalText;
                     submitBtn.disabled = false;
@@ -408,7 +787,6 @@
         });
     }
 
-    // --- 4. Deletion ---
     function deleteDevice(deviceId) {
         if (!confirm("Are you sure you want to delete this terminal?")) return;
 
@@ -422,31 +800,16 @@
             .then(response => response.json())
             .then(res => {
                 if (res.status === 'success') {
-                    loadDevices(); // Refresh the grid
+                    showPageAlert("Device removed successfully.", "success");
+                    loadDevices();
                 } else {
-                    alert("Error deleting device: " + res.message);
+                    showPageAlert("Error deleting device: " + res.message, "error");
                 }
             })
-            .catch(err => console.error("Delete error:", err));
-    }
-
-    // --- 5. Real-time Search Filtering ---
-    function filterDevices() {
-        const query = document.getElementById('deviceSearch').value.toLowerCase();
-        const cards = document.querySelectorAll('.mini-bento-card');
-
-        cards.forEach(card => {
-            // Get all text content from the card to make search more flexible
-            const content = card.textContent.toLowerCase();
-
-            if (content.includes(query)) {
-                card.style.display = ""; // Show
-                card.style.opacity = "1";
-                card.style.transform = "scale(1)";
-            } else {
-                card.style.display = "none"; // Hide
-            }
-        });
+            .catch(err => {
+                console.error("Delete error:", err);
+                showPageAlert("Failed to communicate with the server.", "error");
+            });
     }
 </script>
 {% endblock %}
