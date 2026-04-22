@@ -59,3 +59,6 @@ app.register_blueprint(store_crud_bp)
 
 from routes.audit_log import audit_log_bp
 app.register_blueprint(audit_log_bp)
+
+from routes.get_employees import get_employees_bp
+app.register_blueprint(get_employees_bp)

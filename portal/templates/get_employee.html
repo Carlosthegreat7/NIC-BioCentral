@@ -1,0 +1,604 @@
+{% extends "base.html" %}
+
+{% block content %}
+<script src="https://unpkg.com/lucide@latest"></script>
+<script src="{{ url_for('static', filename='js/lucide.min.js') }}"></script>
+<style>
+    /* --- Shared Variables --- */
+    :root {
+        --bg-page: #f3f4f6;
+        --bg-surface: #ffffff;
+        --bg-muted: #f9fafb;
+        --border: #e5e7eb;
+        --text-primary: #111827;
+        --text-secondary: #6b7280;
+        --text-muted: #9ca3af;
+        --blue-bg: #eff6ff;
+        --blue-text: #1d4ed8;
+        --green-bg: #f0fdf4;
+        --green-text: #15803d;
+        --red-bg: #fef2f2;
+        --red-text: #b91c1c;
+        --yellow-bg: #fffbeb;
+        --yellow-text: #b45309;
+        --eggshell: #f0ead6;
+        --radius-sm: 6px;
+        --radius-md: 8px;
+        --radius-lg: 12px;
+        --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
+    }
+
+    @keyframes popIn {
+        0% {
+            opacity: 0;
+            transform: scale(0.9) translateY(20px);
+        }
+
+        100% {
+            opacity: 1;
+            transform: scale(1) translateY(0);
+        }
+    }
+
+    .pop-in-container {
+        animation: popIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    .stagger-1 {
+        animation-delay: 0.1s;
+        opacity: 0;
+        animation: popIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    .stagger-2 {
+        animation-delay: 0.2s;
+        opacity: 0;
+        animation: popIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    .manager-wrapper {
+        flex: 1;
+        width: 100%;
+        padding: 2rem;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        font-family: 'Inter', ui-sans-serif, system-ui, sans-serif;
+    }
+
+    .header-section {
+        width: 100%;
+        max-width: 1200px;
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-end;
+        margin-bottom: 2rem;
+    }
+
+    .welcome-title {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: #fff;
+        margin-bottom: 4px;
+    }
+
+    .welcome-subtitle {
+        font-size: 0.875rem;
+        color: #a0a0a0;
+    }
+
+    /* --- View Switching --- */
+    .view-section {
+        width: 100%;
+        max-width: 1200px;
+    }
+
+    #view-employees {
+        display: none;
+    }
+
+    /* Hidden by default */
+
+    /* --- Table Layouts --- */
+    .table-container {
+        width: 100%;
+        margin-bottom: 2rem;
+    }
+
+    .table-header-flex {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+    }
+
+    .table-title {
+        font-size: 1.125rem;
+        font-weight: 600;
+        color: #fff;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .table-card {
+        background: var(--bg-surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        box-shadow: var(--shadow-sm);
+        overflow: hidden;
+    }
+
+    .audit-table {
+        width: 100%;
+        border-collapse: collapse;
+        table-layout: fixed;
+    }
+
+    .audit-table thead th {
+        font-size: 0.6875rem;
+        font-weight: 600;
+        letter-spacing: .07em;
+        text-transform: uppercase;
+        color: var(--text-secondary);
+        padding: 12px 16px;
+        text-align: left;
+        background: var(--bg-surface);
+        border-bottom: 1px solid var(--border);
+    }
+
+    .audit-table tbody tr {
+        border-bottom: 1px solid var(--border);
+        transition: background .1s;
+    }
+
+    .audit-table tbody tr:nth-child(even) {
+        background-color: var(--bg-muted);
+    }
+
+    .audit-table tbody tr:last-child {
+        border-bottom: none;
+    }
+
+    .audit-table tbody tr:hover td {
+        background: #f3f4f6;
+    }
+
+    .audit-table tbody td {
+        padding: 12px 16px;
+        font-size: 0.8125rem;
+        color: var(--text-primary);
+        vertical-align: middle;
+    }
+
+    /* --- Badges & Buttons --- */
+    .badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        font-size: 0.6875rem;
+        font-weight: 600;
+        padding: 4px 10px;
+        border-radius: 20px;
+        white-space: nowrap;
+    }
+
+    .badge-dot {
+        width: 5px;
+        height: 5px;
+        border-radius: 50%;
+        flex-shrink: 0;
+    }
+
+    .badge-rustans {
+        background: var(--yellow-bg);
+        color: var(--yellow-text);
+    }
+
+    .badge-rustans .badge-dot {
+        background: var(--yellow-text);
+    }
+
+    .badge-rds {
+        background: var(--blue-bg);
+        color: var(--blue-text);
+    }
+
+    .badge-rds .badge-dot {
+        background: var(--blue-text);
+    }
+
+    .badge-active {
+        background: var(--green-bg);
+        color: var(--green-text);
+    }
+
+    .badge-active .badge-dot {
+        background: var(--green-text);
+    }
+
+    .badge-neutral {
+        background: var(--bg-muted);
+        color: var(--text-secondary);
+        border: 1px solid var(--border);
+    }
+
+    .btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 0.875rem;
+        font-weight: 500;
+        padding: 8px 16px;
+        border-radius: var(--radius-md);
+        cursor: pointer;
+        border: 1px solid var(--border);
+        background: var(--bg-surface);
+        color: var(--text-primary);
+        transition: background .15s;
+    }
+
+    .btn:hover {
+        background: var(--bg-muted);
+    }
+
+    .btn-connect {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        padding: 6px 12px;
+        border-radius: var(--radius-md);
+        cursor: pointer;
+        border: 1px solid var(--border);
+        background: var(--blue-bg);
+        color: var(--blue-text);
+        transition: 0.2s;
+        border-color: #bfdbfe;
+    }
+
+    .btn-connect:hover {
+        background: #dbeafe;
+    }
+
+    .action-btn {
+        background: var(--eggshell);
+        border: 1px solid #d1c8b3;
+        padding: 6px 12px;
+        border-radius: var(--radius-md);
+        cursor: pointer;
+        color: #374151;
+        font-weight: 600;
+        font-size: 0.75rem;
+        transition: 0.2s;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+    }
+
+    .action-btn:hover {
+        background: #e3ddc8;
+    }
+
+    .action-btn i {
+        width: 14px;
+        height: 14px;
+    }
+
+    /* --- Modal --- */
+    .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        backdrop-filter: blur(4px);
+        display: none;
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+    }
+
+    .modal-card {
+        background: var(--bg-surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        width: 600px;
+        max-width: 90%;
+        box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25);
+        overflow: hidden;
+    }
+
+    .modal-head {
+        padding: 16px 24px;
+        border-bottom: 1px solid var(--border);
+        font-size: 1rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .modal-close {
+        background: none;
+        border: none;
+        cursor: pointer;
+        color: var(--text-secondary);
+    }
+
+    .modal-body {
+        padding: 24px;
+        max-height: 400px;
+        overflow-y: auto;
+    }
+
+    .log-entry {
+        display: flex;
+        justify-content: space-between;
+        padding: 10px 0;
+        border-bottom: 1px solid var(--border);
+        font-size: 0.8125rem;
+    }
+
+    .log-entry:last-child {
+        border-bottom: none;
+    }
+
+    .log-type.in {
+        color: var(--green-text);
+        font-weight: 600;
+    }
+
+    .log-type.out {
+        color: var(--red-text);
+        font-weight: 600;
+    }
+</style>
+
+<div class="manager-wrapper">
+    <div class="header-section">
+        <div>
+            <h2 class="welcome-title stagger-1">Terminal Synchronization</h2>
+            <p class="welcome-subtitle stagger-2" id="header-subtitle">Select a device to view enrolled staff and live
+                attendance logs.</p>
+        </div>
+    </div>
+
+    <div class="view-section stagger-2" id="view-devices">
+        <div class="table-container">
+            <h3 class="table-title"><i data-lucide="server"></i> Available Devices</h3>
+            <div class="table-card">
+                <table class="audit-table" id="deviceTable">
+                    <thead>
+                        <tr>
+                            <th>Device Name</th>
+                            <th style="width: 150px;">Chain</th>
+                            <th style="width: 200px;">IP Address</th>
+                            <th style="width: 120px; text-align: right;">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="device-tbody">
+                        <tr>
+                            <td colspan="4" style="text-align: center; padding: 2rem;"><i data-lucide="loader-2"
+                                    class="lucide-spin"></i> Loading devices...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="view-section" id="view-employees">
+        <div class="table-container">
+            <div class="table-header-flex">
+                <h3 class="table-title"><i data-lucide="users"></i> Device Roster: <span id="selected-device-name"
+                        style="color:#bfdbfe; margin-left: 8px;"></span></h3>
+                <button class="btn" onclick="backToDevices()">
+                    <i data-lucide="arrow-left"></i> Disconnect
+                </button>
+            </div>
+
+            <div class="table-card">
+                <table class="audit-table" id="employeeTable">
+                    <thead>
+                        <tr>
+                            <th style="width: 100px;">Emp ID</th>
+                            <th>Employee Name</th>
+                            <th style="width: 150px;">Status</th>
+                            <th style="width: 150px; text-align: right;">Attendance Logs</th>
+                        </tr>
+                    </thead>
+                    <tbody id="employee-tbody">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="logs-modal" class="modal-overlay">
+    <div class="modal-card">
+        <div class="modal-head">
+            <span id="modal-emp-name">Attendance Logs</span>
+            <button class="modal-close" onclick="closeModal()">
+                <i data-lucide="x"></i>
+            </button>
+        </div>
+        <div class="modal-body" id="modal-logs-container">
+        </div>
+    </div>
+</div>
+
+<script>
+    let currentDeviceId = null;
+
+    document.addEventListener("DOMContentLoaded", function () {
+        lucide.createIcons();
+        loadDevices();
+    });
+
+    // --- 1. Load Devices ---
+    function loadDevices() {
+        fetch('/api/fetch-devices')
+            .then(response => response.json())
+            .then(res => {
+                const tbody = document.getElementById('device-tbody');
+                tbody.innerHTML = '';
+
+                if (res.status === 'success') {
+                    if (res.data.length === 0) {
+                        tbody.innerHTML = `<tr><td colspan="4" style="text-align: center; padding: 2rem; color: var(--text-muted);">No devices found in database.</td></tr>`;
+                        return;
+                    }
+
+                    res.data.forEach(device => {
+                        let badgeClass = 'badge-neutral';
+                        if (device.chain_type === 'RUSTANS') badgeClass = 'badge-rustans';
+                        else if (device.chain_type === 'RDS') badgeClass = 'badge-rds';
+
+                        const tr = document.createElement('tr');
+                        tr.innerHTML = `
+                            <td><strong>${device.bcc}</strong></td>
+                            <td><span class="badge ${badgeClass}"><span class="badge-dot"></span>${device.chain_type}</span></td>
+                            <td style="font-family: monospace;">${device.ip_address}</td>
+                            <td style="text-align: right;">
+                                <button class="btn-connect" onclick="connectToDevice('${device.device_id}', '${device.bcc}')">
+                                    <i data-lucide="wifi"></i> <span>Connect</span>
+                                </button>
+                            </td>
+                        `;
+                        tbody.appendChild(tr);
+                    });
+                    lucide.createIcons();
+                } else {
+                    tbody.innerHTML = `<tr><td colspan="4" style="text-align: center; padding: 2rem; color: red;">Error: ${res.message}</td></tr>`;
+                }
+            })
+            .catch(err => console.error("Fetch error:", err));
+    }
+
+    // --- 2. Switch Views (Master/Detail) ---
+    function connectToDevice(deviceId, bcc) {
+        currentDeviceId = deviceId;
+
+        // Hide Device View, Show Employee View
+        document.getElementById('view-devices').style.display = 'none';
+
+        const empView = document.getElementById('view-employees');
+        empView.style.display = 'block';
+        empView.classList.add('pop-in-container'); // Trigger animation
+
+        document.getElementById('selected-device-name').innerText = bcc;
+        document.getElementById('header-subtitle').innerText = "Live connection active. Managing terminal data.";
+
+        loadEmployees(deviceId);
+    }
+
+    function backToDevices() {
+        currentDeviceId = null;
+
+        // Hide Employee View, Show Device View
+        document.getElementById('view-employees').style.display = 'none';
+        document.getElementById('view-employees').classList.remove('pop-in-container');
+
+        const devView = document.getElementById('view-devices');
+        devView.style.display = 'block';
+        devView.classList.add('pop-in-container');
+
+        document.getElementById('header-subtitle').innerText = "Select a device to view enrolled staff and live attendance logs.";
+    }
+
+    // --- 3. Load Employees ---
+    function loadEmployees(deviceId) {
+        const tbody = document.getElementById('employee-tbody');
+        tbody.innerHTML = `<tr><td colspan="4" style="text-align: center; padding: 2rem;"><i data-lucide="loader-2" class="lucide-spin"></i> Establishing hardware connection and syncing...</td></tr>`;
+        lucide.createIcons();
+
+        const formData = new FormData();
+        formData.append('device_id', deviceId);
+
+        fetch('/api/fetch-employees', {
+            method: 'POST',
+            body: formData
+        })
+            .then(response => response.json())
+            .then(res => {
+                tbody.innerHTML = '';
+                if (res.status === 'success') {
+                    if (res.data.length === 0) {
+                        tbody.innerHTML = `<tr><td colspan="4" style="text-align: center; padding: 2rem; color: var(--text-muted);">No employees enrolled on this terminal.</td></tr>`;
+                        return;
+                    }
+
+                    res.data.forEach(emp => {
+                        const safeName = emp.name.replace(/'/g, "\\'");
+                        const tr = `
+                        <tr>
+                            <td style="font-family: monospace; color: var(--text-secondary);">${emp.id}</td>
+                            <td><strong>${emp.name}</strong></td>
+                            <td><span class="badge badge-active"><span class="badge-dot"></span>${emp.status}</span></td>
+                            <td style="text-align: right;">
+                                <button class="action-btn" onclick="openLogsModal('${safeName}', '${emp.id}')">
+                                    <i data-lucide="clock"></i> View Logs
+                                </button>
+                            </td>
+                        </tr>
+                    `;
+                        tbody.insertAdjacentHTML('beforeend', tr);
+                    });
+                    lucide.createIcons();
+                } else {
+                    tbody.innerHTML = `<tr><td colspan="4" style="text-align: center; padding: 2rem; color: var(--red-text);"><strong>Connection Failed:</strong> ${res.message}</td></tr>`;
+                }
+            });
+    }
+
+    // --- 4. Load Live Logs ---
+    function openLogsModal(name, id) {
+        document.getElementById('modal-emp-name').innerText = `Logs: ${name} (${id})`;
+        const container = document.getElementById('modal-logs-container');
+        container.innerHTML = `<div style="text-align: center; padding: 2rem;"><i data-lucide="loader-2" class="lucide-spin"></i> Downloading buffer from terminal...</div>`;
+        document.getElementById('logs-modal').style.display = 'flex';
+        lucide.createIcons();
+
+        const formData = new FormData();
+        formData.append('device_id', currentDeviceId); // Critical: Tells backend which device to hit
+        formData.append('emp_id', id);
+
+        fetch('/api/fetch-logs', {
+            method: 'POST',
+            body: formData
+        })
+            .then(response => response.json())
+            .then(res => {
+                container.innerHTML = '';
+                if (res.status === 'success') {
+                    if (res.data.length === 0) {
+                        container.innerHTML = `<div style="text-align: center; padding: 2rem; color: var(--text-muted);">No attendance records found for this employee on this device.</div>`;
+                        return;
+                    }
+
+                    res.data.forEach(log => {
+                        container.innerHTML += `
+                        <div class="log-entry">
+                            <span><i data-lucide="calendar" style="width:14px; margin-right:4px;"></i> ${log.date}</span>
+                            <span style="font-family: monospace; color: var(--text-secondary);">${log.time}</span>
+                            <span class="log-type ${log.type === 'TIME IN' ? 'in' : log.type === 'TIME OUT' ? 'out' : ''}">${log.type}</span>
+                        </div>
+                    `;
+                    });
+                    lucide.createIcons();
+                } else {
+                    container.innerHTML = `<div style="text-align: center; padding: 2rem; color: var(--red-text);">Failed to load logs: ${res.message}</div>`;
+                }
+            });
+    }
+
+    function closeModal() {
+        document.getElementById('logs-modal').style.display = 'none';
+    }
+</script>
+{% endblock %}
