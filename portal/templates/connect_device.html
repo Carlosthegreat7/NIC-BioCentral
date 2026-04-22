@@ -1,8 +1,8 @@
 {% extends "base.html" %}
 
 {% block content %}
-<script src="https://unpkg.com/lucide@latest"></script>
 <script src="{{ url_for('static', filename='js/lucide.min.js') }}"></script>
+
 <style>
     /* --- Pop-In Animation (Synced with Home) --- */
     @keyframes popIn {
@@ -21,14 +21,17 @@
         animation: popIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
     }
 
+    /* BUG FIX 1: Added the animation call so these don't stay at opacity 0 */
     .stagger-1 {
-        animation-delay: 0.1s;
         opacity: 0;
+        animation: popIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        animation-delay: 0.1s;
     }
 
     .stagger-2 {
-        animation-delay: 0.2s;
         opacity: 0;
+        animation: popIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        animation-delay: 0.2s;
     }
 
     /* --- Manager Layout --- */
@@ -46,8 +49,8 @@
         max-width: 1200px;
         display: flex;
         justify-content: space-between;
-        align-items: flex-end;
-        margin-bottom: 2rem;
+        align-items: center;
+        margin-bottom: 2.5rem;
     }
 
     /* --- Filter & Add Buttons --- */
@@ -159,34 +162,103 @@
         color: #fff;
         margin-bottom: 1rem;
     }
+
+    /* --- Right-side Toolbar Container --- */
+    .header-actions {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
+
+    .search-wrapper {
+        position: relative;
+        width: 300px;
+    }
+
+    .search-input {
+        width: 100%;
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        padding: 0 15px 0 45px;
+        /* Added padding back so text doesn't hide behind icon */
+        border-radius: 50px;
+        color: #fff;
+        font-size: 0.9rem;
+        height: 48px;
+        backdrop-filter: blur(10px);
+        outline: none;
+        transition: 0.3s;
+    }
+
+    .search-icon {
+        position: absolute;
+        left: 18px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: rgba(255, 255, 255, 0.4);
+        width: 18px;
+        pointer-events: none;
+    }
+
+    .add-device-btn {
+        height: 48px;
+        padding: 0 25px;
+        background: #fff;
+        color: #000;
+        border-radius: 50px;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        white-space: nowrap;
+        transition: 0.3s;
+    }
+
+    .add-device-btn:hover {
+        transform: scale(1.05);
+        background: #f0f0f0;
+    }
+
+    @media (max-width: 768px) {
+        .header-section {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 1.5rem;
+        }
+
+        .actions-group {
+            width: 100%;
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .search-wrapper {
+            width: 100%;
+        }
+    }
 </style>
 
-<div class="manager-wrapper">
-    <div class="header-section pop-in-container">
-        <div>
-            <h2 class="welcome-title stagger-1">Device Manager</h2>
-            <p class="welcome-subtitle stagger-2">Monitoring terminals for RUSTANS & RDS</p>
+<div class="header-section pop-in-container">
+    <div class="title-group">
+        <h2 class="welcome-title stagger-1" style="margin: 0;">Device Manager</h2>
+        <p class="welcome-subtitle stagger-2" style="margin: 5px 0 0 0;">Monitoring terminals for ZKTeco Devices</p>
+    </div>
+
+    <div class="header-actions stagger-2">
+        <div class="search-wrapper">
+            <i data-lucide="search" class="search-icon"></i>
+            <input type="text" id="deviceSearch" class="search-input" placeholder="Search terminals..."
+                onkeyup="filterDevices()">
         </div>
+
         <button class="add-device-btn" onclick="openModal()">
             <i data-lucide="plus"></i> Add Device
         </button>
     </div>
-
-    <!-- <div class="header-section pop-in-container stagger-2" style="justify-content: flex-start; gap: 1rem;">
-        <button class="filter-btn active" onclick="filterDevices('ALL')">All</button>
-        <button class="filter-btn" onclick="filterDevices('RUSTANS')">Rustans</button>
-        <button class="filter-btn" onclick="filterDevices('RDS')">RDS</button>
-        <button class="filter-btn" onclick="filterDevices('SM')">SM</button>
-        <button class="filter-btn" onclick="filterDevices('RDS')">RDS</button>
-        <button class="filter-btn" onclick="filterDevices('RDS')">RDS</button>
-        <button class="filter-btn" onclick="filterDevices('RDS')">RDS</button>
-        filtering function, work in progress
-    </div> -->
-
-    <div id="device-container" class="device-grid pop-in-container stagger-2">
-    </div>
 </div>
 
+<div id="device-container" class="device-grid pop-in-container stagger-2">
+</div>
 <div id="device-modal" class="modal-overlay">
     <div class="modal-card pop-in-container">
         <h3 style="margin-bottom: 1.5rem;">Device Details</h3>
@@ -241,12 +313,6 @@
                         // Prevent quotes in strings from breaking the HTML onclick handler
                         const safeDeviceData = JSON.stringify(device).replace(/'/g, "&#39;").replace(/"/g, "&quot;");
 
-
-                        // LAST SEEN DRAFT
-                        // <div style="font-size: 0.95rem; color: #ccc;">
-                        //             <p style="margin: 6px 0;"><strong>IP:</strong> ${device.ip_address}</p>
-                        //             <p style="margin: 6px 0;"><strong>Last Seen:</strong> ${device.last_seen}</p>
-                        //         </div>
                         const card = `
                             <div class="mini-bento-card">
                                 <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 1rem;">
@@ -362,6 +428,25 @@
                 }
             })
             .catch(err => console.error("Delete error:", err));
+    }
+
+    // --- 5. Real-time Search Filtering ---
+    function filterDevices() {
+        const query = document.getElementById('deviceSearch').value.toLowerCase();
+        const cards = document.querySelectorAll('.mini-bento-card');
+
+        cards.forEach(card => {
+            // Get all text content from the card to make search more flexible
+            const content = card.textContent.toLowerCase();
+
+            if (content.includes(query)) {
+                card.style.display = ""; // Show
+                card.style.opacity = "1";
+                card.style.transform = "scale(1)";
+            } else {
+                card.style.display = "none"; // Hide
+            }
+        });
     }
 </script>
 {% endblock %}
