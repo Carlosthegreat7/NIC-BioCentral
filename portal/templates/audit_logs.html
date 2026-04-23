@@ -1065,9 +1065,9 @@
                     <button class="export-item" onclick="exportData('csv')">
                         <i data-lucide="file-text"></i> Export as CSV
                     </button>
-                    <button class="export-item" onclick="exportData('json')">
+                    <!-- <button class="export-item" onclick="exportData('json')">
                         <i data-lucide="braces"></i> Export as JSON
-                    </button>
+                    </button> -->
                     <button class="export-item" onclick="exportData('print')">
                         <i data-lucide="printer"></i> Print / Save PDF
                     </button>
@@ -1396,12 +1396,21 @@
             const initial = log.username.charAt(0).toLowerCase();
             const avCls = avMap[initial] || 'av-gray';
 
-            const actUpper = log.action.toUpperCase();
-            let badgeCls = 'badge-info';
-            if (actUpper.includes('SUCCESS') || actUpper.includes('ADDED') || actUpper.includes('REGISTERED')) badgeCls = 'badge-success';
-            else if (actUpper.includes('FAILED') || actUpper.includes('DENIED') || actUpper.includes('DELETED')) badgeCls = 'badge-danger';
-            else if (actUpper.includes('EDITED') || actUpper.includes('UPDATE') || actUpper.includes('UPDATED')) badgeCls = 'badge-warning';
-            else if (actUpper.includes('LOGOUT')) badgeCls = 'badge-neutral';
+            const actUpper = log.action.toUpperCase().trim(); // Trim added for exact matching
+            let badgeCls = 'badge-info'; // Default remains blue
+
+            // GREEN - Prioritize REGISTERED and SUCCESS
+            if (actUpper === 'REGISTER' || actUpper.includes('SUCCESS') || actUpper.includes('ADDED')) {
+                badgeCls = 'badge-success'; 
+            } 
+            // RED - DELETE / DELETED
+            else if (actUpper.includes('DELETE') || actUpper.includes('FAILED') || actUpper.includes('DENIED')) {
+                badgeCls = 'badge-danger'; 
+            } 
+            // YELLOW - UPDATE / UPDATED
+            else if (actUpper.includes('UPDATE') || actUpper.includes('EDITED')) {
+                badgeCls = 'badge-warning'; 
+            } 
 
             const isDevice = log.type === 'DEVICE' && log.device_id;
             let deviceHtml = `<span style="color:var(--text-muted); opacity:0.5;">—</span>`;
@@ -1424,7 +1433,6 @@
                     </td>
                     <td>
                         <div class="user-chip">
-                            <div class="avatar ${avCls}">${log.username.substring(0, 2).toUpperCase()}</div>
                             <span class="user-name">${log.username}</span>
                         </div>
                     </td>
