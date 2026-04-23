@@ -36,122 +36,207 @@
             overflow-x: hidden;
         }
 
-        /* Sticky Glassmorphism Header */
+        /* Sticky Header */
         .bento-header {
             position: sticky;
             top: 0;
             z-index: 1050;
-            background: rgba(30, 30, 47, 0.85);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-            padding: 0.75rem 2.5rem;
+            background: rgba(18, 18, 30, 0.75);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+            padding: 0 2rem;
+            height: 72px;
             display: flex;
             justify-content: space-between;
             align-items: center;
             width: 100%;
+            box-shadow: 0 1px 0 rgba(255,255,255,0.04), 0 4px 24px rgba(0,0,0,0.3);
         }
 
+        /* Animated top border removed */
+
+        /* Brand */
         .header-brand {
-            font-size: 1.25rem;
-            font-weight: 600;
-            color: #e0e0e0;
-            letter-spacing: 0.5px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
             transition: opacity 0.2s;
         }
+        .header-brand:hover { opacity: 0.85; text-decoration: none; }
 
-        .header-brand:hover {
-            opacity: 0.8;
+        .brand-logo-wrap {
+            width: 40px; height: 40px;
+            background: #ffffff;
+            border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+            flex-shrink: 0;
+        }
+        .brand-logo-wrap img { height: 22px; width: auto; }
+
+        .brand-text {
+            display: flex; flex-direction: column; line-height: 1.1;
+        }
+        .brand-name {
+            font-size: 1.0625rem;
+            font-weight: 700;
+            color: #f1f1f1;
+            letter-spacing: -0.01em;
+        }
+        .brand-sub {
+            font-size: 0.6875rem;
+            font-weight: 500;
+            color: rgba(255,255,255,0.35);
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+        }
+
+        /* Nav area */
+        .header-nav { display: flex; align-items: center; gap: 8px; }
+
+        .nav-link-item {
+            display: flex; align-items: center; gap: 7px;
+            color: rgba(255,255,255,0.55);
+            font-size: 0.8125rem;
+            font-weight: 500;
+            padding: 6px 12px;
+            border-radius: 8px;
             text-decoration: none;
+            transition: all 0.2s;
+            border: 1px solid transparent;
+        }
+        .nav-link-item i { font-size: 0.75rem; }
+        .nav-link-item:hover {
             color: #ffffff;
+            background: rgba(255,255,255,0.07);
+            border-color: rgba(255,255,255,0.08);
+            text-decoration: none;
+        }
+        .nav-link-item.active {
+            color: #a5b4fc;
+            background: rgba(99,102,241,0.12);
+            border-color: rgba(99,102,241,0.25);
         }
 
-        /* Custom Dropdown Styles */
-        .custom-dropdown {
-            position: relative;
-            display: inline-block;
+        .nav-divider {
+            width: 1px; height: 20px;
+            background: rgba(255,255,255,0.08);
+            margin: 0 4px;
         }
+
+        /* Burger menu button */
+        .custom-dropdown { position: relative; display: inline-block; }
 
         .custom-pill-btn {
-            background: rgba(255, 255, 255, 0.05);
-            color: #ffffff;
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            border-radius: 50px;
-            padding: 0.5rem 1.5rem;
-            font-weight: 500;
-            font-size: 0.9rem;
-            transition: all 0.3s ease;
+            background: rgba(255,255,255,0.05);
+            color: rgba(255,255,255,0.75);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 10px;
+            width: 40px;
+            height: 40px;
+            padding: 0;
+            transition: all 0.2s ease;
             cursor: pointer;
             display: flex;
             align-items: center;
-            gap: 8px;
+            justify-content: center;
             user-select: none;
+            flex-direction: column;
+            gap: 5px;
         }
-
         .custom-pill-btn:hover {
-            background: rgba(255, 255, 255, 0.1);
-            border-color: rgba(255, 255, 255, 0.25);
+            background: rgba(255,255,255,0.09);
+            border-color: rgba(255,255,255,0.18);
+            color: #fff;
         }
-
         .custom-pill-btn.active {
-            background: rgba(255, 255, 255, 0.15);
-            border-color: rgba(255, 255, 255, 0.35);
-            box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+            background: rgba(99,102,241,0.15);
+            border-color: rgba(99,102,241,0.35);
         }
 
+        /* Burger lines */
+        .burger-line {
+            display: block;
+            width: 18px;
+            height: 2px;
+            background: currentColor;
+            border-radius: 2px;
+            transition: all 0.25s ease;
+            transform-origin: center;
+        }
+        .custom-pill-btn.active .burger-line:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+        .custom-pill-btn.active .burger-line:nth-child(2) { opacity: 0; transform: scaleX(0); }
+        .custom-pill-btn.active .burger-line:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+        /* Dropdown menu */
         .custom-dropdown-menu {
             position: absolute;
-            top: 130%;
+            top: calc(100% + 10px);
             right: 0;
-            min-width: 220px;
-            background: rgba(35, 35, 55, 0.98);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 12px;
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
-            padding: 0.6rem 0;
+            min-width: 210px;
+            background: rgba(22, 22, 38, 0.97);
+            border: 1px solid rgba(255,255,255,0.09);
+            border-radius: 14px;
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.5), 0 0 0 1px rgba(99,102,241,0.1);
+            padding: 0.5rem;
             z-index: 1060;
             opacity: 0;
             visibility: hidden;
-            transform: translateY(-10px) scale(0.95);
+            transform: translateY(-8px) scale(0.96);
             transform-origin: top right;
-            transition: all 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.1);
+            transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.1);
         }
-
         .custom-dropdown-menu.show {
             opacity: 1;
             visibility: visible;
             transform: translateY(0) scale(1);
         }
 
+        /* Dropdown header label */
+        .dropdown-label {
+            font-size: 0.6375rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: rgba(255,255,255,0.25);
+            padding: 6px 12px 4px;
+        }
+
         .custom-dropdown-item {
             display: flex;
             align-items: center;
-            color: #d1d1d1;
-            padding: 12px 20px;
+            color: rgba(255,255,255,0.65);
+            padding: 9px 12px;
             text-decoration: none;
-            font-size: 0.9rem;
-            transition: all 0.2s ease;
+            font-size: 0.8375rem;
+            font-weight: 500;
+            border-radius: 9px;
+            transition: all 0.15s ease;
+            gap: 10px;
         }
-
-        .custom-dropdown-item i {
-            width: 20px;
-            margin-right: 12px;
-            text-align: center;
+        .custom-dropdown-item .item-icon {
+            width: 28px; height: 28px;
+            border-radius: 7px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.75rem;
+            flex-shrink: 0;
         }
-
         .custom-dropdown-item:hover {
-            background: rgba(255, 255, 255, 0.08);
+            background: rgba(255,255,255,0.06);
             color: #ffffff;
             text-decoration: none;
-            padding-left: 25px;
         }
+        .custom-dropdown-item.danger { color: rgba(252, 129, 129, 0.8); }
+        .custom-dropdown-item.danger:hover { background: rgba(239,68,68,0.1); color: #fc8181; }
 
         .custom-dropdown-divider {
             height: 1px;
-            background: rgba(255, 255, 255, 0.08);
-            margin: 0.5rem 0;
+            background: rgba(255,255,255,0.06);
+            margin: 0.4rem 0;
         }
 
         /* Alert Glass Effect */
@@ -191,32 +276,48 @@
 
 <body>
     {% if session['sdr_loggedin'] %}
-    <header class="bento-header shadow-sm">
-        <a href="{{ url_for('index') }}" class="header-brand d-flex align-items-center">
-            <div
-                style="background-color: #ffffff; padding: 6px; border-radius: 8px; margin-right: 14px; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 4px rgba(0,0,0,0.2);">
-                <img src="{{ url_for('static', filename='newtrendslogo.png') }}" alt="Logo"
-                    style="height: 18px; width: auto;">
+    <header class="bento-header">
+        <a href="{{ url_for('index') }}" class="header-brand">
+            <div class="brand-logo-wrap">
+                <img src="{{ url_for('static', filename='newtrendslogo.png') }}" alt="Logo">
             </div>
-            NIC BioCentral
+            <div class="brand-text">
+                <span class="brand-name">NIC BioCentral</span>
+                <span class="brand-sub">Management System</span>
+            </div>
         </a>
-        <div class="custom-dropdown">
-            <div class="custom-pill-btn" id="optionsToggleBtn">
-                <i class="fas fa-bars small"></i> Options
+
+        <nav class="header-nav">
+            <div class="custom-dropdown">
+                <div class="custom-pill-btn" id="optionsToggleBtn" title="Menu">
+                    <span class="burger-line"></span>
+                    <span class="burger-line"></span>
+                    <span class="burger-line"></span>
+                </div>
+                <div class="custom-dropdown-menu" id="optionsDropdownMenu">
+                    <div class="dropdown-label">Navigation</div>
+                    <a class="custom-dropdown-item" href="/device-manager">
+                        <div class="item-icon" style="background: rgba(139,180,247,0.12); color: #8bb4f7;">
+                            <i class="fas fa-server"></i>
+                        </div>
+                        Device Manager
+                    </a>
+                    <a class="custom-dropdown-item" href="/audit-logs">
+                        <div class="item-icon" style="background: rgba(160,160,160,0.1); color: #a0a0a0;">
+                            <i class="fas fa-file-invoice"></i>
+                        </div>
+                        Audit Logs
+                    </a>
+                    <div class="custom-dropdown-divider"></div>
+                    <a class="custom-dropdown-item danger" href="{{ url_for('logout') }}">
+                        <div class="item-icon" style="background: rgba(239,68,68,0.1); color: #fc8181;">
+                            <i class="fas fa-sign-out-alt"></i>
+                        </div>
+                        Logout
+                    </a>
+                </div>
             </div>
-            <div class="custom-dropdown-menu" id="optionsDropdownMenu">
-                <a class="custom-dropdown-item" href="/device-manager">
-                    <i class="fas fa-server" style="color: #8bb4f7;"></i> Device Manager
-                </a>
-                <a class="custom-dropdown-item" href="/audit-logs">
-                    <i class="fas fa-file-invoice" style="color: #a0a0a0;"></i> Audit Logs
-                </a>
-                <div class="custom-dropdown-divider"></div>
-                <a class="custom-dropdown-item" href="{{ url_for('logout') }}" style="color: #ff6b6b;">
-                    <i class="fas fa-sign-out-alt"></i> Logout
-                </a>
-            </div>
-        </div>
+        </nav>
     </header>
     {% endif %}
 

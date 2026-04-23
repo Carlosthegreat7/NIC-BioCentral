@@ -135,10 +135,9 @@ def delete_device():
        
         cursor.execute("DELETE FROM dbo.device_registry WHERE device_id = ?", (d_id,))
        
-        # Corrected: Added action_at and GETDATE() to prevent the NULL constraint crash
         cursor.execute("""
-            INSERT INTO dbo.biocentral_audit_logs (module, target, action, action_details, action_by, action_at)
-            VALUES ('DEVICE', ?, 'DELETE', ?, ?, GETDATE())
+            INSERT INTO dbo.biocentral_audit_logs (module, target, action, action_details, action_by)
+            VALUES ('DEVICE', ?, 'DELETE', ?, ?)
         """, (str(d_id), f"Deleted terminal {bcc}", current_user))
        
         conn.commit()
