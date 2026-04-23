@@ -270,19 +270,18 @@
             }
         });
 
-        // Scroll to Top Logic
-        const backToTopBtn = document.getElementById("backToTop");
-        window.addEventListener('scroll', function() {
-            if (window.pageYOffset > 400) {
+        // Scroll to Top logic
+        var backToTopBtn = document.getElementById("backToTop");
+        window.onscroll = function () {
+            if (document.body.scrollTop > 300 || document.documentElement.scrollTop > 300) {
                 backToTopBtn.style.display = "block";
             } else {
                 backToTopBtn.style.display = "none";
             }
-        });
-
-        backToTopBtn.addEventListener('click', function() {
+        };
+        backToTopBtn.onclick = function () {
             window.scrollTo({ top: 0, behavior: 'smooth' });
-        });
+        };
 
         // Developed By Animation (Easter Egg)
         $(document).ready(function () {
