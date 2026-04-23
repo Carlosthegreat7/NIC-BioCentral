@@ -51,7 +51,7 @@
             justify-content: space-between;
             align-items: center;
             width: 100%;
-            box-shadow: 0 1px 0 rgba(255,255,255,0.04), 0 4px 24px rgba(0,0,0,0.3);
+            box-shadow: 0 1px 0 rgba(255, 255, 255, 0.04), 0 4px 24px rgba(0, 0, 0, 0.3);
         }
 
         /* Animated top border removed */
@@ -64,41 +64,62 @@
             text-decoration: none;
             transition: opacity 0.2s;
         }
-        .header-brand:hover { opacity: 0.85; text-decoration: none; }
+
+        .header-brand:hover {
+            opacity: 0.85;
+            text-decoration: none;
+        }
 
         .brand-logo-wrap {
-            width: 40px; height: 40px;
+            width: 40px;
+            height: 40px;
             background: #ffffff;
             border-radius: 10px;
-            display: flex; align-items: center; justify-content: center;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
             flex-shrink: 0;
         }
-        .brand-logo-wrap img { height: 22px; width: auto; }
+
+        .brand-logo-wrap img {
+            height: 22px;
+            width: auto;
+        }
 
         .brand-text {
-            display: flex; flex-direction: column; line-height: 1.1;
+            display: flex;
+            flex-direction: column;
+            line-height: 1.1;
         }
+
         .brand-name {
             font-size: 1.0625rem;
             font-weight: 700;
             color: #f1f1f1;
             letter-spacing: -0.01em;
         }
+
         .brand-sub {
             font-size: 0.6875rem;
             font-weight: 500;
-            color: rgba(255,255,255,0.35);
+            color: rgba(255, 255, 255, 0.35);
             text-transform: uppercase;
             letter-spacing: 0.12em;
         }
 
         /* Nav area */
-        .header-nav { display: flex; align-items: center; gap: 8px; }
+        .header-nav {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
 
         .nav-link-item {
-            display: flex; align-items: center; gap: 7px;
-            color: rgba(255,255,255,0.55);
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            color: rgba(255, 255, 255, 0.55);
             font-size: 0.8125rem;
             font-weight: 500;
             padding: 6px 12px;
@@ -107,32 +128,41 @@
             transition: all 0.2s;
             border: 1px solid transparent;
         }
-        .nav-link-item i { font-size: 0.75rem; }
+
+        .nav-link-item i {
+            font-size: 0.75rem;
+        }
+
         .nav-link-item:hover {
             color: #ffffff;
-            background: rgba(255,255,255,0.07);
-            border-color: rgba(255,255,255,0.08);
+            background: rgba(255, 255, 255, 0.07);
+            border-color: rgba(255, 255, 255, 0.08);
             text-decoration: none;
         }
+
         .nav-link-item.active {
             color: #a5b4fc;
-            background: rgba(99,102,241,0.12);
-            border-color: rgba(99,102,241,0.25);
+            background: rgba(99, 102, 241, 0.12);
+            border-color: rgba(99, 102, 241, 0.25);
         }
 
         .nav-divider {
-            width: 1px; height: 20px;
-            background: rgba(255,255,255,0.08);
+            width: 1px;
+            height: 20px;
+            background: rgba(255, 255, 255, 0.08);
             margin: 0 4px;
         }
 
         /* Burger menu button */
-        .custom-dropdown { position: relative; display: inline-block; }
+        .custom-dropdown {
+            position: relative;
+            display: inline-block;
+        }
 
         .custom-pill-btn {
-            background: rgba(255,255,255,0.05);
-            color: rgba(255,255,255,0.75);
-            border: 1px solid rgba(255,255,255,0.1);
+            background: rgba(255, 255, 255, 0.05);
+            color: rgba(255, 255, 255, 0.75);
+            border: 1px solid rgba(255, 255, 255, 0.1);
             border-radius: 10px;
             width: 40px;
             height: 40px;
@@ -146,14 +176,16 @@
             flex-direction: column;
             gap: 5px;
         }
+
         .custom-pill-btn:hover {
-            background: rgba(255,255,255,0.09);
-            border-color: rgba(255,255,255,0.18);
+            background: rgba(255, 255, 255, 0.09);
+            border-color: rgba(255, 255, 255, 0.18);
             color: #fff;
         }
+
         .custom-pill-btn.active {
-            background: rgba(99,102,241,0.15);
-            border-color: rgba(99,102,241,0.35);
+            background: rgba(99, 102, 241, 0.15);
+            border-color: rgba(99, 102, 241, 0.35);
         }
 
         /* Burger lines */
@@ -166,9 +198,19 @@
             transition: all 0.25s ease;
             transform-origin: center;
         }
-        .custom-pill-btn.active .burger-line:nth-child(1) { transform: translateY(7px) rotate(45deg); }
-        .custom-pill-btn.active .burger-line:nth-child(2) { opacity: 0; transform: scaleX(0); }
-        .custom-pill-btn.active .burger-line:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+        .custom-pill-btn.active .burger-line:nth-child(1) {
+            transform: translateY(7px) rotate(45deg);
+        }
+
+        .custom-pill-btn.active .burger-line:nth-child(2) {
+            opacity: 0;
+            transform: scaleX(0);
+        }
+
+        .custom-pill-btn.active .burger-line:nth-child(3) {
+            transform: translateY(-7px) rotate(-45deg);
+        }
 
         /* Dropdown menu */
         .custom-dropdown-menu {
@@ -177,11 +219,11 @@
             right: 0;
             min-width: 210px;
             background: rgba(22, 22, 38, 0.97);
-            border: 1px solid rgba(255,255,255,0.09);
+            border: 1px solid rgba(255, 255, 255, 0.09);
             border-radius: 14px;
             backdrop-filter: blur(24px);
             -webkit-backdrop-filter: blur(24px);
-            box-shadow: 0 20px 40px rgba(0,0,0,0.5), 0 0 0 1px rgba(99,102,241,0.1);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(99, 102, 241, 0.1);
             padding: 0.5rem;
             z-index: 1060;
             opacity: 0;
@@ -190,6 +232,7 @@
             transform-origin: top right;
             transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.1);
         }
+
         .custom-dropdown-menu.show {
             opacity: 1;
             visibility: visible;
@@ -202,14 +245,14 @@
             font-weight: 600;
             text-transform: uppercase;
             letter-spacing: 0.1em;
-            color: rgba(255,255,255,0.25);
+            color: rgba(255, 255, 255, 0.25);
             padding: 6px 12px 4px;
         }
 
         .custom-dropdown-item {
             display: flex;
             align-items: center;
-            color: rgba(255,255,255,0.65);
+            color: rgba(255, 255, 255, 0.65);
             padding: 9px 12px;
             text-decoration: none;
             font-size: 0.8375rem;
@@ -218,24 +261,36 @@
             transition: all 0.15s ease;
             gap: 10px;
         }
+
         .custom-dropdown-item .item-icon {
-            width: 28px; height: 28px;
+            width: 28px;
+            height: 28px;
             border-radius: 7px;
-            display: flex; align-items: center; justify-content: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             font-size: 0.75rem;
             flex-shrink: 0;
         }
+
         .custom-dropdown-item:hover {
-            background: rgba(255,255,255,0.06);
+            background: rgba(255, 255, 255, 0.06);
             color: #ffffff;
             text-decoration: none;
         }
-        .custom-dropdown-item.danger { color: rgba(252, 129, 129, 0.8); }
-        .custom-dropdown-item.danger:hover { background: rgba(239,68,68,0.1); color: #fc8181; }
+
+        .custom-dropdown-item.danger {
+            color: rgba(252, 129, 129, 0.8);
+        }
+
+        .custom-dropdown-item.danger:hover {
+            background: rgba(239, 68, 68, 0.1);
+            color: #fc8181;
+        }
 
         .custom-dropdown-divider {
             height: 1px;
-            background: rgba(255,255,255,0.06);
+            background: rgba(255, 255, 255, 0.06);
             margin: 0.4rem 0;
         }
 
@@ -283,7 +338,7 @@
             </div>
             <div class="brand-text">
                 <span class="brand-name">NIC BioCentral</span>
-                <span class="brand-sub">Management System</span>
+                <span class="brand-sub">Biometrics System</span>
             </div>
         </a>
 
