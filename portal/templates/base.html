@@ -194,10 +194,6 @@
     </div>
     {% endfor %}
 
-    <button id="backToTop" title="Go to top"
-        style="display: none; position: fixed; bottom: 20px; right: 20px; z-index: 99; background: rgba(255,255,255,0.1); color: white; border: 1px solid rgba(255,255,255,0.2); padding: 15px; border-radius: 50%;"><i
-            class="fas fa-chevron-up"></i></button>
-
     {% block content %}{% endblock %}
 
     <footer class="page-footer font-small py-4 mt-auto">
@@ -231,19 +227,6 @@
                 });
             }
         });
-
-        // Scroll to Top logic
-        var backToTopBtn = document.getElementById("backToTop");
-        window.onscroll = function () {
-            if (document.body.scrollTop > 300 || document.documentElement.scrollTop > 300) {
-                backToTopBtn.style.display = "block";
-            } else {
-                backToTopBtn.style.display = "none";
-            }
-        };
-        backToTopBtn.onclick = function () {
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        };
 
         $(document).ready(function () {
             // Carlos The Great Easter Egg
