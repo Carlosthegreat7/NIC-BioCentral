@@ -161,7 +161,7 @@
             border: 1px solid rgba(255, 255, 255, 0.15);
             border-radius: 12px;
             color: #ffffff;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
         }
 
         /* Floating Back to Top */
@@ -193,8 +193,10 @@
     {% if session['sdr_loggedin'] %}
     <header class="bento-header shadow-sm">
         <a href="{{ url_for('index') }}" class="header-brand d-flex align-items-center">
-            <div style="background-color: #ffffff; padding: 6px; border-radius: 8px; margin-right: 14px; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 4px rgba(0,0,0,0.2);">
-                <img src="{{ url_for('static', filename='newtrendslogo.png') }}" alt="Logo" style="height: 18px; width: auto;">
+            <div
+                style="background-color: #ffffff; padding: 6px; border-radius: 8px; margin-right: 14px; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 4px rgba(0,0,0,0.2);">
+                <img src="{{ url_for('static', filename='newtrendslogo.png') }}" alt="Logo"
+                    style="height: 18px; width: auto;">
             </div>
             NIC BioCentral
         </a>
@@ -223,7 +225,8 @@
         <div class="container mt-4">
             <div class="alert alert-dismissible fade show border-0 alert-glass" role="alert">
                 <i class="fas fa-info-circle mr-2"></i> {{ mess }}
-                <button type="button" class="close" data-dismiss="alert" aria-label="Close" style="color: #fff; opacity: 0.8;">
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close"
+                    style="color: #fff; opacity: 0.8;">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
@@ -236,11 +239,11 @@
     <button id="backToTop" class="btn-back-to-top" title="Go to top">
         <i class="fas fa-arrow-up"></i>
     </button>
-    {% block content %}{% endblock %}
+
 
     <footer class="page-footer mt-auto py-4">
         <div class="footer-copyright text-center small" style="color: #777; letter-spacing: 0.3px;">
-            © 2026 MIS Department | 
+            © 2026 MIS Department |
             <span id="companySignature" style="cursor: pointer; transition: color 0.2s;">
                 Newtrends International Corporation
             </span>
@@ -300,8 +303,8 @@
                         $this.text(currentText.slice(0, -1));
                     } else {
                         clearInterval(deleteInterval);
-                        $this.css({'color': '#4da3ff', 'font-weight': 'bold'});
-                        
+                        $this.css({ 'color': '#4da3ff', 'font-weight': 'bold' });
+
                         let i = 0;
                         let typeInterval = setInterval(function () {
                             $this.text(devText.substring(0, i + 1));
@@ -309,7 +312,7 @@
                             if (i === devText.length) {
                                 clearInterval(typeInterval);
                                 setTimeout(function () {
-                                    $this.text(originalText).css({'color': '', 'font-weight': ''});
+                                    $this.text(originalText).css({ 'color': '', 'font-weight': '' });
                                     isAnimating = false;
                                 }, 3000);
                             }
