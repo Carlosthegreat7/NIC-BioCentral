@@ -114,23 +114,34 @@
     }
     .header-icon-wrap i { width: 26px; height: 26px; color: #fff; }
 
-    /* Text block */
-    .page-header-left {
-        display: flex; flex-direction: column; gap: 3px;
+    /* Updated Layout for Centering Icon and Text */
+    .header-left-group {
+        display: flex;
+        align-items: center; 
+        gap: 1rem;
         flex: 1;
         z-index: 1;
+    }
+
+    /* Text block */
+    .page-header-left {
+        display: flex; flex-direction: column;
+        justify-content: center;
     }
     .welcome-title {
         font-size: 1.4rem;
         font-weight: 700;
         color: var(--text-primary);
         letter-spacing: -0.025em;
-        line-height: 1.2;
+        line-height: 1;
+        margin: 0;
         animation: slideInLeft 0.4s cubic-bezier(0.16,1,0.3,1) 0.05s both;
     }
     .welcome-subtitle {
         font-size: 0.8125rem;
         color: var(--text-secondary);
+        margin: 2px 0 0 0;
+        line-height: 1.2;
         animation: slideInLeft 0.4s cubic-bezier(0.16,1,0.3,1) 0.1s both;
     }
 
@@ -275,12 +286,14 @@
 
 <div class="manager-wrapper">
     <div class="page-header-bar">
-        <div class="header-icon-wrap">
-            <i data-lucide="clock"></i>
-        </div>
-        <div class="page-header-left">
-            <h2 class="welcome-title">Synchronize Device Time</h2>
-            <p class="welcome-subtitle">Align remote terminal clocks with the central server time.</p>
+        <div class="header-left-group">
+            <div class="header-icon-wrap">
+                <i data-lucide="clock"></i>
+            </div>
+            <div class="page-header-left">
+                <h2 class="welcome-title">Synchronize Device Time</h2>
+                <p class="welcome-subtitle">Align remote terminal clocks with the central server time.</p>
+            </div>
         </div>
         <div class="header-divider"></div>
         <div class="page-header-stats">

@@ -2,320 +2,309 @@
 
 {% block content %}
 <style>
-  /* Updated BioCentral Theme */
+  /* --- Master Theme Variables --- */
   :root {
-    --bento-card-bg: rgba(255, 255, 255, 0.05);
-    --input-bg: rgba(255, 255, 255, 0.1);
-    --btn-bg: rgba(255, 255, 255, 0.15);
-    --btn-hover: rgba(255, 255, 255, 0.25);
+    --bg-surface: rgba(30, 30, 47, 0.7);
+    --border-light: rgba(255, 255, 255, 0.1);
     --text-main: #ffffff;
+    --text-muted: #a0a0a0;
   }
 
-  /* --- Pure CSS Master Wrapper --- */
+  /* --- Layout Wrappers --- */
+  /* Ensure the parent wrapper allows for full height centering */
   .dashboard-wrapper {
     flex: 1;
     display: flex;
     align-items: center;
     justify-content: center;
     width: 100%;
+    min-height: calc(100vh - 120px); /* Accounts for header/footer height */
     padding: 2rem;
     box-sizing: border-box;
     overflow: hidden;
   }
 
-  /* --- Inner Dashboard Flex Column --- */
   .dashboard-content {
     display: flex;
     flex-direction: column;
     width: 100%;
-    max-width: 1400px;
-    gap: 1.5rem;
+    max-width: 1300px;
+    gap: 2rem;
   }
 
-  /* --- Welcome Message Typography --- */
+  /* --- Typography --- */
   .welcome-header {
     width: 100%;
     text-align: left;
-    padding-left: 1rem;
+    padding-left: 0.5rem;
+    animation: fadeInDown 0.6s ease-out forwards;
   }
 
   .welcome-title {
     font-size: 2.2rem;
-    font-weight: 600;
-    color: #ffffff;
+    font-weight: 700;
+    color: var(--text-main);
     margin: 0 0 0.5rem 0;
     letter-spacing: 0.5px;
   }
 
   .welcome-subtitle {
     font-size: 1.1rem;
-    color: #a0a0a0;
+    color: var(--text-muted);
     margin: 0;
     font-weight: 400;
   }
 
-  /* --- Login Screen Styles --- */
-  .biocentral-login-wrapper {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    width: 100%;
-    gap: 2.5rem;
+  /* --- Animation Classes --- */
+  @keyframes popIn {
+    0% { opacity: 0; transform: scale(0.9) translateY(30px); }
+    100% { opacity: 1; transform: scale(1) translateY(0); }
+  }
+  @keyframes fadeInDown {
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
   }
 
-  .bento-card {
-    background: var(--bento-card-bg);
+  .pop-in-container { animation: popIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+  .stagger-1 { animation-delay: 0.1s; opacity: 0; }
+  .stagger-2 { animation-delay: 0.2s; opacity: 0; }
+  .stagger-3 { animation-delay: 0.3s; opacity: 0; }
+  .stagger-4 { animation-delay: 0.4s; opacity: 0; }
+
+  /* =========================================
+     LOGIN SCREEN STYLES
+  ========================================= */
+  /* Center the login wrapper both horizontally and vertically */
+  .biocentral-login-wrapper {
+      display: flex;
+      justify-content: center; /* Centers horizontally */
+      align-items: center;     /* Centers vertically */
+      width: 100%;
+      min-height: 70vh;       /* Provides enough vertical space to see the centering */
+      gap: 2.5rem;
+      flex-wrap: wrap;
+      margin: auto;            /* Final centering push */
+  }
+
+  .login-card {
+    background: var(--bg-surface);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid var(--border-light);
     border-radius: 24px;
-    width: 360px;
-    height: 380px;
+    width: 100%;
+    max-width: 400px;
+    height: 420px;
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    padding: 2.5rem;
+    padding: 3rem 2.5rem;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
     opacity: 0;
-    transform: translateY(50px);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-  }
-
-  /* --- Pop-In Animation --- */
-  @keyframes popIn {
-    0% {
-      opacity: 0;
-      transform: scale(0.9) translateY(30px);
-    }
-
-    100% {
-      opacity: 1;
-      transform: scale(1) translateY(0);
-    }
-  }
-
-  .pop-in-container {
     animation: popIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   }
 
-  .stagger-1 {
-    animation-delay: 0.1s;
-    opacity: 0;
-  }
-
-  .stagger-2 {
-    animation-delay: 0.2s;
-    opacity: 0;
-  }
-
-  .stagger-3 {
-    animation-delay: 0.3s;
-    opacity: 0;
-  }
-
-  .stagger-4 {
-    animation-delay: 0.4s;
-    opacity: 0;
-  }
-
-  .pop-up-left {
-    animation: popIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-    animation-delay: 0.1s;
-  }
-
-  .pop-up-right {
-    animation: popIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-    animation-delay: 0.25s;
-  }
-
-  @keyframes popUpAnim {
-    0% {
-      opacity: 0;
-      transform: translateY(50px);
-    }
-
-    100% {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
+  .login-card.delay-left { animation-delay: 0.1s; }
+  .login-card.delay-right { animation-delay: 0.25s; }
 
   .minimal-form {
     width: 100%;
     display: flex;
     flex-direction: column;
-    align-items: center;
     gap: 1.25rem;
   }
 
-  /* Inputs & Bulletproof Autofill Overrides */
+  .custom-input-group {
+    position: relative;
+    width: 100%;
+  }
+
+  .custom-input-group i {
+    position: absolute;
+    left: 18px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #888;
+    transition: color 0.3s;
+    font-size: 1.1rem;
+  }
+
   .minimal-input {
-    width: 85%;
-    padding: 14px 24px;
+    width: 100%;
+    padding: 14px 20px 14px 50px;
     border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: 50px;
-    background: var(--input-bg);
+    border-radius: 12px;
+    background: rgba(0, 0, 0, 0.2);
     color: #ffffff !important;
     font-size: 1rem;
-    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif !important;
-    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    transition: all 0.3s ease;
     outline: none;
-    caret-color: #ffffff;
   }
 
-  .minimal-input::placeholder {
-    color: #a0a0a0;
-    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-  }
+  .minimal-input::placeholder { color: #888; }
 
   .minimal-input:focus {
-    transform: scale(1.04);
-    border-color: rgba(255, 255, 255, 0.5);
-    background: rgba(255, 255, 255, 0.15);
+    background: rgba(0, 0, 0, 0.4);
+    border-color: #4da3ff;
+    box-shadow: 0 0 0 4px rgba(77, 163, 255, 0.1);
   }
 
-  .minimal-input:-webkit-autofill,
-  .minimal-input:-webkit-autofill:hover,
-  .minimal-input:-webkit-autofill:focus,
-  .minimal-input:-webkit-autofill:active {
-    -webkit-box-shadow: 0 0 0px 1000px #222230 inset !important;
+  .minimal-input:focus + i, .minimal-input:not(:placeholder-shown) + i {
+    color: #4da3ff;
+  }
+
+  .minimal-input:-webkit-autofill {
+    -webkit-box-shadow: 0 0 0px 1000px #1e1e2f inset !important;
     -webkit-text-fill-color: #ffffff !important;
-    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif !important;
     transition: background-color 5000s ease-in-out 0s;
   }
 
-  .minimal-btn {
-    width: 60%;
-    padding: 14px 24px;
-    margin-top: 1.5rem;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: 50px;
-    background: var(--btn-bg);
-    color: #ffffff;
-    font-size: 1rem;
-    font-weight: 500;
-    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif !important;
-    cursor: pointer;
-    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-  }
-
-  .minimal-btn:hover {
-    background: var(--btn-hover);
-    transform: translateY(-4px);
-  }
-
-  /* --- FLUID Wireframe Dashboard Grid --- */
-  .wireframe-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 2rem;
+  .btn-login {
     width: 100%;
-    height: 60vh;
-    min-height: 400px;
+    margin-top: 1rem;
+    padding: 14px 24px;
+    background: linear-gradient(135deg, #4f46e5, #3b82f6);
+    color: #ffffff;
+    border: none;
+    border-radius: 12px;
+    font-size: 1.05rem;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
+    transition: all 0.3s ease;
   }
 
-  .bio-card {
-    background: rgba(255, 255, 255, 0.05);
+  .btn-login:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(59, 130, 246, 0.5);
+  }
+
+  /* =========================================
+     DASHBOARD CARDS (Bento Grid)
+  ========================================= */
+  .dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+    width: 100%;
+  }
+
+  .dash-card {
+    background: rgba(30, 30, 47, 0.6);
     border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 40px;
-    padding: 2.5rem 1.5rem;
+    border-radius: 20px;
+    padding: 2rem;
+    text-decoration: none;
+    color: white;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
     display: flex;
     flex-direction: column;
-    align-items: center;
-    text-align: center;
-    cursor: pointer;
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-    height: 100%;
-
-    transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275),
-      box-shadow 0.4s ease,
-      border-color 0.4s ease,
-      background 0.4s ease;
-  }
-
-  .bio-card:hover {
-    transform: translateY(-16px);
-    box-shadow: 0 25px 40px rgba(0, 0, 0, 0.4),
-      0 0 0 1px rgba(255, 255, 255, 0.2) inset;
-    background: rgba(255, 255, 255, 0.08);
-    border-color: rgba(255, 255, 255, 0.25);
-  }
-
-  .bio-card-label {
-    font-size: 1.15rem;
-    font-weight: 500;
-    color: #ffffff;
-    line-height: 1.4;
-    margin-bottom: auto;
-  }
-
-  .wireframe-x {
-    flex-grow: 1;
-    width: 100%;
-    margin-top: 2rem;
-    border-radius: 12px;
-    background:
-      linear-gradient(to top left, transparent calc(50% - 1px), rgba(255, 255, 255, 0.1) calc(50%), transparent calc(50% + 1px)),
-      linear-gradient(to top right, transparent calc(50% - 1px), rgba(255, 255, 255, 0.1) calc(50%), transparent calc(50% + 1px));
-    background-color: rgba(0, 0, 0, 0.2);
-  }
-
-  .card-image-container {
-    flex-grow: 1;
-    width: 100%;
-    margin-top: 1.5rem;
-    border-radius: 32px;
-    background: linear-gradient(135deg, rgba(97, 97, 158, 0.8), rgb(204, 204, 216));
-    display: flex;
-    justify-content: center;
-    align-items: center;
+    position: relative;
     overflow: hidden;
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.3);
+    min-height: 240px;
   }
 
-  .card-image {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-
-    /* 'multiply' is the magic trick here. 
-       It treats the white background of your image as transparent, 
-       allowing the dark container gradient to show through 
-       while keeping the black arrows and gold/grey logo colors visible.
-    */
-    mix-blend-mode: multiply;
-    transition: all 0.4s ease;
+  .dash-card:hover {
+    transform: translateY(-8px);
+    background: rgba(45, 45, 65, 0.8);
+    border-color: rgba(255, 255, 255, 0.25);
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+    text-decoration: none;
+    color: white;
   }
 
-  .bio-card:hover .card-image {
-    transform: scale(1.08);
-    opacity: 1;
+  /* Decorative glowing orb in the corner */
+  .dash-card::before {
+    content: '';
+    position: absolute;
+    top: -40px;
+    right: -40px;
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    filter: blur(40px);
+    opacity: 0.25;
+    transition: opacity 0.3s;
   }
 
-  @media (max-width: 1200px) {
-    .wireframe-grid {
-      grid-template-columns: repeat(2, 1fr);
-      height: auto;
-    }
+  .dash-card:hover::before { opacity: 0.6; }
 
-    .bio-card {
-      height: 400px;
-    }
+  /* Card Theme Colors */
+  .card-blue::before { background: #3b82f6; }
+  .card-green::before { background: #10b981; }
+  .card-purple::before { background: #8b5cf6; }
+  .card-orange::before { background: #f59e0b; }
+
+  .dash-icon-wrap {
+    width: 55px;
+    height: 55px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.6rem;
+    margin-bottom: 1.25rem;
   }
 
-  @media (max-width: 600px) {
-    .wireframe-grid {
-      grid-template-columns: 1fr;
-    }
+  .card-blue .dash-icon-wrap { background: rgba(59, 130, 246, 0.2); color: #60a5fa; }
+  .card-green .dash-icon-wrap { background: rgba(16, 185, 129, 0.2); color: #34d399; }
+  .card-purple .dash-icon-wrap { background: rgba(139, 92, 246, 0.2); color: #a78bfa; }
+  .card-orange .dash-icon-wrap { background: rgba(245, 158, 11, 0.2); color: #fbbf24; }
+
+  .dash-card h3 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin: 0 0 0.5rem 0;
   }
+
+  .dash-card p {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    margin: 0;
+    line-height: 1.5;
+    flex-grow: 1;
+  }
+
+  .dash-card-arrow {
+    align-self: flex-end;
+    margin-top: 1rem;
+    color: #666;
+    font-size: 1.2rem;
+    transition: all 0.3s;
+  }
+
+  .dash-card:hover .dash-card-arrow {
+    color: #fff;
+    transform: translateX(5px);
+  }
+
+  /* Full Loading Overlay */
+  #loading-overlay {
+    display: none; 
+    position: fixed; 
+    top: 0; left: 0; 
+    width: 100%; height: 100%; 
+    background: rgba(20, 20, 30, 0.95); 
+    backdrop-filter: blur(10px);
+    z-index: 9999; 
+    justify-content: center; 
+    align-items: center; 
+    flex-direction: column;
+  }
+  .spinner-premium {
+    width: 50px; height: 50px;
+    border: 4px solid rgba(255,255,255,0.1);
+    border-top-color: #4da3ff;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
 </style>
 
-<div id="loading-overlay"
-  style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(30,30,47,0.9); z-index: 9999; justify-content: center; align-items: center; flex-direction: column;">
-  <div class="spinner-premium mb-3" style="border-color: #fff; border-top-color: transparent;"></div>
+<div id="loading-overlay">
+  <div class="spinner-premium mb-3"></div>
   <h5 class="font-weight-bold" style="letter-spacing: 2px; color: var(--text-main);">AUTHENTICATING</h5>
 </div>
 
@@ -324,69 +313,98 @@
   {% if not session['sdr_loggedin'] %}
 
   <div class="biocentral-login-wrapper">
-    <div class="bento-card pop-up-left">
+    
+    <div class="login-card delay-left">
+      <div style="text-align: center; margin-bottom: 2rem;">
+        <h2 style="font-weight: 700; font-size: 1.8rem; margin:0;">Sign In</h2>
+        <p style="color: var(--text-muted); font-size: 0.9rem; margin-top: 4px;">Enter your credentials to continue</p>
+      </div>
+
       <form id="login-form" method="POST" class="minimal-form">
-        <input type="text" name="username" class="minimal-input" placeholder="Username" spellcheck="false"
-          autocomplete="nope" required>
-        <input type="password" name="password" class="minimal-input" placeholder="Password" spellcheck="false"
-          autocomplete="new-password" required>
-        <button type="submit" class="minimal-btn">Login</button>
+        <div class="custom-input-group">
+          <input type="text" name="username" class="minimal-input" placeholder="Username" spellcheck="false" autocomplete="nope" required autofocus>
+          <i class="fas fa-user"></i>
+        </div>
+        
+        <div class="custom-input-group">
+          <input type="password" name="password" class="minimal-input" placeholder="Password" spellcheck="false" autocomplete="new-password" required>
+          <i class="fas fa-lock"></i>
+        </div>
+        
+        <button type="submit" class="btn-login">
+          Login <i class="fas fa-arrow-right ml-2"></i>
+        </button>
       </form>
     </div>
 
-    <div class="bento-card pop-up-right">
-      <div
-        style="background-color: #ffffff; width: 240px; height: 240px; border-radius: 28px; display: flex; justify-content: center; align-items: center; padding: 1rem; box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4); margin-bottom: 1.5rem;">
-        <img src="{{ url_for('static', filename='BioLogoNIC.png') }}" alt="NIC BioCentral Logo"
-          style="width: 100%; height: auto; object-fit: contain;">
+    <div class="login-card delay-right" style="background: transparent; border: none; box-shadow: none;">
+      <div style="background-color: #ffffff; width: 220px; height: 220px; border-radius: 32px; display: flex; justify-content: center; align-items: center; padding: 1.5rem; box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4); margin-bottom: 1.5rem;">
+        <img src="{{ url_for('static', filename='BioLogoNIC.png') }}" alt="NIC BioCentral Logo" style="width: 100%; height: auto; object-fit: contain;">
       </div>
-      <div style="font-size: 1.4rem; font-weight: 600; color: #ffffff; letter-spacing: 0.5px;">
+      <div style="font-size: 1.5rem; font-weight: 700; color: #ffffff; letter-spacing: 0.5px;">
         NIC BioCentral
       </div>
     </div>
+
   </div>
 
   {% else %}
 
   <div class="dashboard-content">
 
-    <div class="welcome-header pop-in-container">
+    <div class="welcome-header">
       <h1 class="welcome-title">Welcome back, {{ session.get('username', 'User').split('.')[0] | title }}!</h1>
-      <p class="welcome-subtitle">Select a button to manage device connections and employee data.</p>
+      <p class="welcome-subtitle">Select a module below to manage device connections and employee data.</p>
     </div>
 
-    <div class="wireframe-grid">
-      <div class="bio-card pop-in-container stagger-1" onclick="window.location.href='/get-employee'">
-        <div class="bio-card-label">Connect to a Store Device</div>
-        <div class="wireframe-x"></div>
-      </div>
-
-      <div class="bio-card pop-in-container stagger-2" onclick="window.location.href='/register_employee'">
-        <div class="bio-card-label">Register new employee</div>
-        <div class="wireframe-x"></div>
-      </div>
-
-      <div class="bio-card pop-in-container stagger-3" onclick="window.location.href='/move_registration'">
-        <div class="bio-card-label">Copy Employee Data</div>
-        <div class="wireframe-x"></div>
-      </div>
-
-      <div class="bio-card pop-in-container stagger-4" onclick="window.location.href='/reset_time'">
-        <div class="bio-card-label">Sync Device's Time</div>
-        <div class="card-image-container">
-          <img src="{{ url_for('static', filename='sync_logo.png') }}" alt="Sync Logo" class="card-image">
+    <div class="dashboard-grid">
+      
+      <a href="/get-employee" class="dash-card card-blue pop-in-container stagger-1">
+        <div class="dash-icon-wrap">
+          <i class="fas fa-network-wired"></i>
         </div>
-      </div>
+        <h3>Connect Device</h3>
+        <p>Establish a connection to a specific store device to view or pull current biometric data.</p>
+        <i class="fas fa-arrow-right dash-card-arrow"></i>
+      </a>
+
+      <a href="/register_employee" class="dash-card card-green pop-in-container stagger-2">
+        <div class="dash-icon-wrap">
+          <i class="fas fa-user-plus"></i>
+        </div>
+        <h3>Register Employee</h3>
+        <p>Enroll new employees into the system and assign their biometric credentials.</p>
+        <i class="fas fa-arrow-right dash-card-arrow"></i>
+      </a>
+
+      <a href="/move_registration" class="dash-card card-purple pop-in-container stagger-3">
+        <div class="dash-icon-wrap">
+          <i class="fas fa-exchange-alt"></i>
+        </div>
+        <h3>Copy Data</h3>
+        <p>Transfer existing employee registration data and fingerprints between devices.</p>
+        <i class="fas fa-arrow-right dash-card-arrow"></i>
+      </a>
+
+      <a href="/reset_time" class="dash-card card-orange pop-in-container stagger-4">
+        <div class="dash-icon-wrap">
+          <i class="fas fa-clock"></i>
+        </div>
+        <h3>Sync Device Time</h3>
+        <p>Align remote terminal clocks with the central server to ensure accurate attendance logs.</p>
+        <i class="fas fa-arrow-right dash-card-arrow"></i>
+      </a>
+
     </div>
 
   </div>
 
-  <i data-lucide="check-circle" style="color: green;"></i>
-
   {% endif %}
 
 </div>
+
 <script>
+  // Show loading overlay when form is submitted
   const loginForm = document.getElementById('login-form');
   if (loginForm) {
     loginForm.addEventListener('submit', () => {
