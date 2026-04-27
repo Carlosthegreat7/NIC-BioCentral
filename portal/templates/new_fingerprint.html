@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-dark text-white">
+                    <i class="fa-solid fa-fingerprint me-2"></i> Remote Fingerprint Enrollment
+                </div>
+                <div class="card-body bg-light">
+                    <form id="enrollmentForm">
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Target Store Device</label>
+                            <select id="targetIp" class="form-select">
+                                <option value="192.168.100.201">Store 1 Terminal (192.168.100.201)</option>
+                                <option value="192.168.100.202">Store 2 Terminal (192.168.100.202)</option>
+                            </select>
+                        </div>
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">Search Employee</label>
+                            <input type="text" id="searchQuery" class="form-control form-control-lg"
+                                placeholder="Enter Employee # (e.g., IM002) or Name..." required>
+                            <small class="text-muted">The system will look up their profile in HRIS and automatically
+                                assign their Access Number to the scanner.</small>
+                        </div>
+                        <button type="submit" class="btn btn-success w-100 py-2 fs-5" id="btnEnroll">
+                            <i class="fa-solid fa-satellite-dish me-2"></i> Trigger Device Scanner
+                        </button>
+                    </form>
+
+                    <div id="enrollFeedback" class="mt-4 text-center"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.getElementById('enrollmentForm').addEventListener('submit', function (e) {
+        e.preventDefault();
+
+        const btn = document.getElementById('btnEnroll');
+        const feedback = document.getElementById('enrollFeedback');
+        const searchQuery = document.getElementById('searchQuery').value;
+        const ip = document.getElementById('targetIp').value;
+
+        const payload = {
+            ip: ip,
+            search_query: searchQuery
+        };
+
+        btn.disabled = true;
+        feedback.innerHTML = '<span class="text-primary fw-bold fs-5"><i class="fa-solid fa-spinner fa-spin"></i> Searching HRIS and connecting to hardware...</span>';
+
+        fetch('/api/enroll_fingerprint', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    // Beautiful Success Alert showing the Assigned Access No
+                    feedback.innerHTML = `
+                <div class="alert alert-success border-2 shadow-sm text-start" role="alert">
+                    <h4 class="alert-heading mb-3"><i class="fa-solid fa-circle-check"></i> Enrollment Mode Active!</h4>
+                    <p class="mb-1"><strong>Employee:</strong> ${data.emp_name}</p>
+                    <p class="mb-2 fs-5"><strong>Device Access #: <span class="badge bg-success fs-5">${data.access_no}</span></strong></p>
+                    <hr>
+                    <p class="mb-0 text-muted"><i class="fa-solid fa-info-circle"></i> ${data.message}</p>
+                </div>
+            `;
+                } else {
+                    feedback.innerHTML = `<span class="text-danger fw-bold fs-5"><i class="fa-solid fa-circle-xmark"></i> ${data.message}</span>`;
+                }
+            })
+            .catch(error => {
+                feedback.innerHTML = `<span class="text-danger fw-bold fs-5"><i class="fa-solid fa-triangle-exclamation"></i> System Error: ${error}</span>`;
+            })
+            .finally(() => {
+                btn.disabled = false;
+            });
+    });
+</script>
+{% endblock %}
