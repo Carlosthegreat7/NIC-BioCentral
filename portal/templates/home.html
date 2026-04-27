@@ -8,33 +8,60 @@
     --border-light: rgba(255, 255, 255, 0.1);
     --text-main: #ffffff;
     --text-muted: #a0a0a0;
+    --accent: #4da3ff;
+    --accent-glow: rgba(77, 163, 255, 0.4);
+    --success: #10b981;
+    --bg-main: #0a0a12;
+  }
+
+  body {
+    background-color: var(--bg-main) !important;
+  }
+
+  /* --- Force Footer to Blend into Login Background --- */
+  footer, .footer, #footer, footer * {
+    background: transparent !important;
+    background-color: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
   }
 
   /* --- Layout Wrappers --- */
   .dashboard-wrapper {
     flex: 1;
     display: flex;
-    align-items: center;
-    justify-content: center;
+    justify-content: center;   /* Centers horizontally */
     width: 100%;
-    min-height: calc(100vh - 120px);
+    min-height: 100vh;         /* Forces the footer below */
     padding: 2rem;
     box-sizing: border-box;
-    overflow: hidden;
+    position: relative;
+  }
+
+  /* Separating the vertical alignment for Login vs Dashboard */
+  .wrapper-login {
+    align-items: center;       /* Centers the login pane vertically */
+  }
+
+  .wrapper-dash {
+    align-items: flex-start;   /* Anchors dashboard to the top to fix the huge gap */
+    padding-top: 4rem;         /* Adds a nice standard top margin */
   }
 
   .dashboard-content {
     display: flex;
     flex-direction: column;
+    /* align-items removed to keep the dashboard left-aligned */
     width: 100%;
     max-width: 1300px;
     gap: 2rem;
+    z-index: 2;
   }
 
   /* --- Typography --- */
   .welcome-header {
     width: 100%;
-    text-align: left;
+    text-align: left;        /* Aligned left just like your original design */
     padding-left: 0.5rem;
     animation: fadeInDown 0.6s ease-out forwards;
   }
@@ -56,92 +83,144 @@
 
   /* --- Animation Classes --- */
   @keyframes popIn {
-    0% {
-      opacity: 0;
-      transform: scale(0.9) translateY(30px);
-    }
-
-    100% {
-      opacity: 1;
-      transform: scale(1) translateY(0);
-    }
+    0% { opacity: 0; transform: scale(0.9) translateY(30px); }
+    100% { opacity: 1; transform: scale(1) translateY(0); }
   }
 
   @keyframes fadeInDown {
-    from {
-      opacity: 0;
-      transform: translateY(-20px);
-    }
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
 
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
+  @keyframes orb-drift-1 {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    33% { transform: translate(30px, -20px) scale(1.05); }
+    66% { transform: translate(-20px, 15px) scale(0.95); }
+  }
+
+  @keyframes orb-drift-2 {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    33% { transform: translate(-25px, 20px) scale(0.95); }
+    66% { transform: translate(20px, -15px) scale(1.05); }
   }
 
   .pop-in-container {
     animation: popIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   }
 
-  .stagger-1 {
-    animation-delay: 0.1s;
-    opacity: 0;
-  }
-
-  .stagger-2 {
-    animation-delay: 0.2s;
-    opacity: 0;
-  }
-
-  .stagger-3 {
-    animation-delay: 0.3s;
-    opacity: 0;
-  }
-
-  .stagger-4 {
-    animation-delay: 0.4s;
-    opacity: 0;
-  }
+  .stagger-1 { animation-delay: 0.1s; opacity: 0; }
+  .stagger-2 { animation-delay: 0.2s; opacity: 0; }
+  .stagger-3 { animation-delay: 0.3s; opacity: 0; }
+  .stagger-4 { animation-delay: 0.4s; opacity: 0; }
 
   /* =========================================
-     LOGIN SCREEN STYLES
+     LOGIN SCREEN 
   ========================================= */
+  .login-scene-bg {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    overflow: hidden;
+  }
+
+  .login-scene-bg::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: radial-gradient(circle, rgba(255,255,255,0.05) 1px, transparent 1px);
+    background-size: 36px 36px;
+    mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black 40%, transparent 100%);
+    -webkit-mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black 40%, transparent 100%);
+  }
+
+  .orb {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(80px);
+    opacity: 0.18;
+  }
+
+  .orb-1 {
+    width: 500px; height: 500px;
+    background: radial-gradient(circle, #3b82f6, transparent 70%);
+    top: -100px; left: -100px;
+    animation: orb-drift-1 18s ease-in-out infinite;
+  }
+
+  .orb-2 {
+    width: 400px; height: 400px;
+    background: radial-gradient(circle, #6366f1, transparent 70%);
+    bottom: -80px; right: -80px;
+    animation: orb-drift-2 14s ease-in-out infinite;
+  }
+
   .biocentral-login-wrapper {
     display: flex;
     justify-content: center;
     align-items: center;
     width: 100%;
-    min-height: calc(100vh - 120px);
-    gap: 4rem;
-    flex-wrap: wrap;
-    margin: auto;
+    position: relative;
+    z-index: 1;
   }
 
-  .login-card {
+  .slick-split-card {
+    display: flex;
+    width: 100%;
+    max-width: 950px;
     background: var(--bg-surface);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
+    backdrop-filter: blur(28px);
+    -webkit-backdrop-filter: blur(28px);
     border: 1px solid var(--border-light);
     border-radius: 24px;
-    width: 100%;
-    max-width: 400px;
-    height: 420px;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    padding: 3rem 2.5rem;
-    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+    overflow: hidden;
+    box-shadow: none; 
     opacity: 0;
     animation: popIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   }
 
-  .login-card.delay-left {
-    animation-delay: 0.1s;
+  /* ---- LEFT: Form Side ---- */
+  .split-form-side {
+    flex: 1;
+    padding: 3rem 3.5rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    position: relative;
   }
 
-  .login-card.delay-right {
-    animation-delay: 0.25s;
+  .form-eyebrow {
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .form-eyebrow::before {
+    content: '';
+    display: block;
+    width: 20px;
+    height: 2px;
+    background: var(--accent);
+  }
+
+  .form-heading {
+    font-size: 2.1rem;
+    font-weight: 800;
+    margin: 0 0 0.4rem;
+    letter-spacing: -1px;
+    color: var(--text-main);
+  }
+
+  .form-subheading {
+    color: var(--text-muted);
+    font-size: 0.95rem;
+    margin: 0 0 2rem;
   }
 
   .minimal-form {
@@ -151,77 +230,228 @@
     gap: 1.25rem;
   }
 
-  .custom-input-group {
-    position: relative;
-    width: 100%;
+  .field-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
   }
 
-  .custom-input-group i {
+  .field-label {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    font-weight: 600;
+    margin-left: 4px;
+    transition: color 0.3s ease;
+  }
+
+  .input-container {
+    position: relative;
+    border-radius: 10px;
+    overflow: hidden;
+    background: rgba(0, 0, 0, 0.25);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    transition: all 0.3s ease;
+  }
+
+  .field-icon {
     position: absolute;
-    left: 18px;
+    left: 16px;
     top: 50%;
     transform: translateY(-50%);
-    color: #888;
-    transition: color 0.3s;
-    font-size: 1.1rem;
+    color: #666;
+    font-size: 0.95rem;
+    transition: color 0.4s ease;
+    pointer-events: none;
+    z-index: 2;
   }
 
   .minimal-input {
     width: 100%;
-    padding: 14px 20px 14px 50px;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: 12px;
-    background: rgba(0, 0, 0, 0.2);
-    color: #ffffff !important;
-    font-size: 1rem;
-    transition: all 0.3s ease;
+    padding: 14px 16px 14px 44px;
+    background: transparent;
+    border: none;
+    color: var(--text-main);
+    font-size: 0.95rem;
     outline: none;
+    box-sizing: border-box;
+    position: relative;
+    z-index: 1;
   }
 
   .minimal-input::placeholder {
-    color: #888;
+    color: #555;
+    transition: opacity 0.3s ease;
   }
 
-  .minimal-input:focus {
-    background: rgba(0, 0, 0, 0.4);
-    border-color: #4da3ff;
-    box-shadow: 0 0 0 4px rgba(77, 163, 255, 0.1);
+  .underline-fx {
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    height: 2px;
+    width: 0%;
+    background: var(--accent);
+    transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 -2px 10px var(--accent-glow);
+    z-index: 2;
   }
 
-  .minimal-input:focus+i,
-  .minimal-input:not(:placeholder-shown)+i {
-    color: #4da3ff;
+  .minimal-input:focus ~ .underline-fx {
+    width: 100%;
+  }
+
+  .minimal-input:focus ~ .field-icon {
+    color: var(--accent);
+  }
+
+  .minimal-input:focus::placeholder {
+    opacity: 0.3;
+  }
+
+  .input-container:focus-within {
+    background: rgba(77, 163, 255, 0.03);
+    border-color: rgba(77, 163, 255, 0.2);
+    box-shadow: inset 0 0 15px rgba(77, 163, 255, 0.05);
+  }
+
+  .input-container:focus-within ~ .field-label, 
+  .field-wrap:focus-within .field-label {
+    color: var(--accent);
   }
 
   .minimal-input:-webkit-autofill {
-    -webkit-box-shadow: 0 0 0px 1000px #1e1e2f inset !important;
+    -webkit-box-shadow: 0 0 0px 1000px rgba(20,20,32,1) inset !important;
     -webkit-text-fill-color: #ffffff !important;
-    transition: background-color 5000s ease-in-out 0s;
+  }
+
+  .pwd-toggle {
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: #666;
+    cursor: pointer;
+    padding: 8px;
+    transition: color 0.3s ease;
+    font-size: 0.95rem;
+    z-index: 3;
+  }
+  .pwd-toggle:hover { color: var(--accent); }
+
+  .btn-login-wrap {
+    margin-top: 0.8rem;
   }
 
   .btn-login {
     width: 100%;
-    margin-top: 1rem;
     padding: 14px 24px;
-    background: linear-gradient(135deg, #4f46e5, #3b82f6);
+    background: linear-gradient(135deg, #4da3ff 0%, #3b82f6 100%);
     color: #ffffff;
     border: none;
-    border-radius: 12px;
-    font-size: 1.05rem;
-    font-weight: 600;
-    letter-spacing: 0.5px;
+    border-radius: 10px;
+    font-size: 0.95rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
     cursor: pointer;
-    box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
-    transition: all 0.3s ease;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    box-shadow: none; 
   }
 
   .btn-login:hover {
     transform: translateY(-2px);
-    box-shadow: 0 8px 25px rgba(59, 130, 246, 0.5);
+    background: linear-gradient(135deg, #60b4ff 0%, #4d94ff 100%);
+  }
+
+  /* ---- RIGHT: Brand Side (Masked Logo) ---- */
+  .split-brand-side {
+    flex: 1.1;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 3rem;
+    background: rgba(10, 10, 18, 0.4);
+    border-left: 1px solid var(--border-light);
+  }
+
+  .logo-wrapper {
+    position: relative;
+    display: block;
+    width: 100%;
+    max-width: 340px; 
+    margin: 0 auto 1.5rem auto;
+  }
+
+  .brand-logo-img {
+    width: 100%;
+    height: auto;
+    display: block; 
+    filter: invert(1) drop-shadow(0 0 20px rgba(77,163,255,0.4));
+  }
+
+  .fingerprint-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%; 
+    height: 100%;
+    z-index: 2;
+    pointer-events: none;
+
+    background-image: url("{{ url_for('static', filename='fingerprint.png') }}");
+    background-size: cover;
+    background-position: center;
+    
+    -webkit-mask-image: url("{{ url_for('static', filename='newtrends_long-removebg-preview.png') }}");
+    -webkit-mask-size: 100% 100%; 
+    -webkit-mask-repeat: no-repeat;
+    
+    mask-image: url("{{ url_for('static', filename='newtrends_long-removebg-preview.png') }}");
+    mask-size: 100% 100%;
+    mask-repeat: no-repeat;
+
+    clip-path: inset(0 75% 0 0);
+
+    filter: invert(1);
+    opacity: 0.6;
+    mix-blend-mode: screen;
+  }
+
+  .brand-wordmark {
+    text-align: center;
+  }
+
+  .brand-tagline {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    font-weight: 600;
+  }
+
+  @media (max-width: 850px) {
+    .slick-split-card { flex-direction: column-reverse; max-width: 450px; }
+    .split-brand-side {
+      padding: 2.5rem 2rem;
+      border-left: none;
+      border-bottom: 1px solid var(--border-light);
+      min-height: auto;
+    }
+    .split-form-side { padding: 2.5rem 2rem; }
   }
 
   /* =========================================
-     DASHBOARD CARDS (Bento Grid)
+     DASHBOARD CARDS (ORIGINAL BENTO GRID)
   ========================================= */
   .dashboard-grid {
     display: grid;
@@ -243,6 +473,7 @@
     position: relative;
     overflow: hidden;
     min-height: 240px;
+    text-align: left;
   }
 
   .dash-card:hover {
@@ -254,7 +485,6 @@
     color: white;
   }
 
-  /* Decorative glowing orb in the corner */
   .dash-card::before {
     content: '';
     position: absolute;
@@ -272,22 +502,10 @@
     opacity: 0.6;
   }
 
-  /* Card Theme Colors */
-  .card-blue::before {
-    background: #3b82f6;
-  }
-
-  .card-green::before {
-    background: #10b981;
-  }
-
-  .card-purple::before {
-    background: #8b5cf6;
-  }
-
-  .card-orange::before {
-    background: #f59e0b;
-  }
+  .card-blue::before { background: #3b82f6; }
+  .card-green::before { background: #10b981; }
+  .card-purple::before { background: #8b5cf6; }
+  .card-orange::before { background: #f59e0b; }
 
   .dash-icon-wrap {
     width: 55px;
@@ -300,25 +518,10 @@
     margin-bottom: 1.25rem;
   }
 
-  .card-blue .dash-icon-wrap {
-    background: rgba(59, 130, 246, 0.2);
-    color: #60a5fa;
-  }
-
-  .card-green .dash-icon-wrap {
-    background: rgba(16, 185, 129, 0.2);
-    color: #34d399;
-  }
-
-  .card-purple .dash-icon-wrap {
-    background: rgba(139, 92, 246, 0.2);
-    color: #a78bfa;
-  }
-
-  .card-orange .dash-icon-wrap {
-    background: rgba(245, 158, 11, 0.2);
-    color: #fbbf24;
-  }
+  .card-blue .dash-icon-wrap { background: rgba(59, 130, 246, 0.2); color: #60a5fa; }
+  .card-green .dash-icon-wrap { background: rgba(16, 185, 129, 0.2); color: #34d399; }
+  .card-purple .dash-icon-wrap { background: rgba(139, 92, 246, 0.2); color: #a78bfa; }
+  .card-orange .dash-icon-wrap { background: rgba(245, 158, 11, 0.2); color: #fbbf24; }
 
   .dash-card h3 {
     font-size: 1.25rem;
@@ -373,9 +576,7 @@
   }
 
   @keyframes spin {
-    to {
-      transform: rotate(360deg);
-    }
+    to { transform: rotate(360deg); }
   }
 </style>
 
@@ -384,52 +585,73 @@
   <h5 class="font-weight-bold" style="letter-spacing: 2px; color: var(--text-main);">AUTHENTICATING</h5>
 </div>
 
-<div class="dashboard-wrapper">
+{% if not session['sdr_loggedin'] %}
 
-  {% if not session['sdr_loggedin'] %}
-
-  <div class="biocentral-login-wrapper">
-
-    <div class="login-card delay-left">
-      <div style="text-align: center; margin-bottom: 2rem;">
-        <h2 style="font-weight: 700; font-size: 1.8rem; margin:0;">Sign In</h2>
-        <p style="color: var(--text-muted); font-size: 0.9rem; margin-top: 4px;">Enter your credentials to continue</p>
-      </div>
-
-      <form id="login-form" method="POST" class="minimal-form">
-        <div class="custom-input-group">
-          <input type="text" name="username" class="minimal-input" placeholder="Username" spellcheck="false"
-            autocomplete="nope" required autofocus>
-          <i class="fas fa-user"></i>
-        </div>
-
-        <div class="custom-input-group">
-          <input type="password" name="password" class="minimal-input" placeholder="Password" spellcheck="false"
-            autocomplete="new-password" required>
-          <i class="fas fa-lock"></i>
-        </div>
-
-        <button type="submit" class="btn-login">
-          Login <i class="fas fa-arrow-right ml-2"></i>
-        </button>
-      </form>
-    </div>
-
-    <div class="login-card delay-right" style="background: transparent; border: none; box-shadow: none;">
-      <div
-        style="background-color: #ffffff; width: 220px; height: 220px; border-radius: 32px; display: flex; justify-content: center; align-items: center; padding: 1.5rem; box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4); margin-bottom: 1.5rem;">
-        <img src="{{ url_for('static', filename='BioLogoNIC.png') }}" alt="NIC BioCentral Logo"
-          style="width: 100%; height: auto; object-fit: contain;">
-      </div>
-      <div style="font-size: 1.5rem; font-weight: 700; color: #ffffff; letter-spacing: 0.5px;">
-        NIC BioCentral
-      </div>
-    </div>
-
+<div class="dashboard-wrapper wrapper-login">
+  <div class="login-scene-bg">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
   </div>
 
-  {% else %}
+  <div class="biocentral-login-wrapper">
+    <div class="slick-split-card">
 
+      <div class="split-form-side">
+        <p class="form-eyebrow">MIS | BioCentral</p>
+        <h2 class="form-heading">Sign In</h2>
+        <p class="form-subheading">Access the Biometrics management portal.</p>
+
+        <form id="login-form" method="POST" class="minimal-form" autocomplete="off">
+          
+          <div class="field-wrap">
+            <label class="field-label" for="inp-username">Username</label>
+            <div class="input-container">
+              <input type="text" name="username" id="inp-username" class="minimal-input" placeholder="Enter your Username" spellcheck="false" autocomplete="nope" required autofocus>
+              <i class="fas fa-user field-icon"></i>
+              <span class="underline-fx"></span>
+            </div>
+          </div>
+
+          <div class="field-wrap">
+            <label class="field-label" for="inp-password">Password</label>
+            <div class="input-container">
+              <input type="password" name="password" id="inp-password" class="minimal-input" placeholder="Enter your password" spellcheck="false" autocomplete="new-password" required>
+              <i class="fas fa-lock field-icon"></i>
+              <button type="button" class="pwd-toggle" id="pwd-toggle" tabindex="-1" aria-label="Toggle password visibility">
+                <i class="fas fa-eye-slash" id="pwd-icon"></i>
+              </button>
+              <span class="underline-fx"></span>
+            </div>
+          </div>
+
+          <div class="btn-login-wrap">
+            <button type="submit" class="btn-login">
+              Sign In
+              <i class="fas fa-arrow-right"></i>
+            </button>
+          </div>
+
+        </form>
+      </div>
+
+      <div class="split-brand-side">
+        <div class="logo-wrapper">
+          <img src="{{ url_for('static', filename='print-removebg-preview.png') }}" alt="Newtrends International Corporation Logo" class="brand-logo-img">
+          <div class="fingerprint-overlay"></div>
+        </div>
+
+        <div class="brand-wordmark">
+          <div class="brand-tagline">Biometrics Management</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+{% else %}
+
+<div class="dashboard-wrapper wrapper-dash">
   <div class="dashboard-content">
 
     <div class="welcome-header">
@@ -478,17 +700,26 @@
     </div>
 
   </div>
-
-  {% endif %}
-
 </div>
 
+{% endif %}
+
 <script>
-  // Show loading overlay when form is submitted
   const loginForm = document.getElementById('login-form');
   if (loginForm) {
     loginForm.addEventListener('submit', () => {
       document.getElementById('loading-overlay').style.display = 'flex';
+    });
+  }
+
+  const pwdToggle = document.getElementById('pwd-toggle');
+  const pwdInput  = document.getElementById('inp-password');
+  const pwdIcon   = document.getElementById('pwd-icon');
+  if (pwdToggle) {
+    pwdToggle.addEventListener('click', () => {
+      const isHidden = pwdInput.type === 'password';
+      pwdInput.type  = isHidden ? 'text' : 'password';
+      pwdIcon.className = isHidden ? 'fas fa-eye' : 'fas fa-eye-slash';
     });
   }
 </script>
