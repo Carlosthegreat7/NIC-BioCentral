@@ -800,6 +800,20 @@
   </div>
 </div>
 
+<div id="errorModal" class="modal-backdrop">
+  <div class="modal-window" style="max-width: 420px; text-align: center; padding: 3rem 2rem;">
+    <div style="font-size: 4rem; color: var(--error); margin-bottom: 1rem; animation: popIn 0.5s ease forwards;">
+      <i class="fas fa-times-circle"></i>
+    </div>
+    <h3 style="color: var(--text-primary); font-size: 1.6rem; margin-top: 0; margin-bottom: 0.5rem; font-weight: 700;">
+      Transfer Failed</h3>
+    <p id="errorMessage"
+      style="color: var(--text-secondary); font-size: 0.95rem; margin-bottom: 2rem; line-height: 1.5;"></p>
+    <button class="btn-cancel" style="width: 100%; justify-content: center; padding: 12px; background: var(--bg-muted);"
+      onclick="document.getElementById('errorModal').classList.remove('open')">Try Again</button>
+  </div>
+</div>
+
 <script>
   let selectedOrigin = null;
   let selectedOriginName = null;
@@ -996,11 +1010,17 @@
           document.getElementById('successMessage').textContent = data.message;
           document.getElementById('successModal').classList.add('open');
         } else {
-          alert("Error: " + data.message);
+          // Replaced standard alert with custom error modal
+          toggleModal(false);
+          document.getElementById('errorMessage').textContent = data.message || "An unknown error occurred during transfer.";
+          document.getElementById('errorModal').classList.add('open');
         }
       })
       .catch(err => {
-        alert("A network error occurred. Please try again.");
+        // Replaced standard alert with custom error modal
+        toggleModal(false);
+        document.getElementById('errorMessage').textContent = "A network error occurred. Please check your connection and try again.";
+        document.getElementById('errorModal').classList.add('open');
         console.error(err);
       })
       .finally(() => {
