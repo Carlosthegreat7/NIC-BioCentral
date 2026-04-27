@@ -635,6 +635,7 @@
         lucide.createIcons();
         loadDevices();
         setupFormHandler();
+        startLiveSync(); // Initiates the background poller
 
         // Search Listener - Resets to page 1 on search
         document.getElementById('searchInput').addEventListener('input', function (e) {
@@ -642,6 +643,29 @@
             renderTable(e.target.value);
         });
     });
+
+    // --- Expert Background Poller (Live Sync) ---
+    function startLiveSync() {
+        setInterval(() => {
+            fetch('/api/get-devices')
+                .then(response => response.json())
+                .then(res => {
+                    if (res.status === 'success') {
+                        // Mathematically hash/compare the strings to avoid DOM flickering
+                        const newDataString = JSON.stringify(res.data);
+                        const oldDataString = JSON.stringify(globalDevices);
+
+                        if (newDataString !== oldDataString) {
+                            globalDevices = res.data; // Update internal memory
+                            // Re-render, completely preserving user's search and pagination state
+                            renderTable(document.getElementById('searchInput').value);
+                        }
+                    }
+                })
+                // Fails silently in the background if network drops momentarily 
+                .catch(() => { });
+        }, 3000); // Polls every 3 seconds
+    }
 
     // --- Alert Helpers ---
     function showPageAlert(msg, type = "error") {
