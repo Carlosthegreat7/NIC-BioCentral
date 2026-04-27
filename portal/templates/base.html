@@ -5,7 +5,7 @@
     <meta charset="utf-8">
     <title>Bio-Central</title>
 
-    <link rel="icon" href="{{ url_for('static', filename='Newtrends.png') }}" type="image/x-icon">
+    <link rel="icon" href="{{ url_for('static', filename='newtrendslogo.png') }}" type="image/x-icon">
 
     <link rel="stylesheet" href="{{ url_for('static', filename='bootstrap/css/bootstrap.min.css') }}">
     <script src="{{ url_for('static', filename='bootstrap/js/jquery-3.3.1.min.js') }}"></script>
@@ -26,7 +26,7 @@
         }
 
         body {
-            background: linear-gradient(135deg, #1e1e2f 0%, #15151e 100%);
+            background: linear-gradient(135deg, #0a0a12 0%, #15151e 100%);
             color: #ffffff;
             font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
             min-height: 100vh;
@@ -36,171 +36,165 @@
             overflow-x: hidden;
         }
 
-        /* Sticky Header */
+        /* =========================================
+           PREMIUM CYBERPUNK NAVBAR
+        ========================================= */
         .bento-header {
-            position: sticky;
+            position: fixed; /* Changed to Fixed for guaranteed stickiness */
             top: 0;
+            left: 0;
+            width: 100%;
             z-index: 1050;
-            background: rgba(18, 18, 30, 0.75);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+            background: rgba(10, 10, 18, 0.75);
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            border-bottom: 1px solid rgba(77, 163, 255, 0.15);
             padding: 0 2rem;
-            height: 72px;
+            height: 76px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            width: 100%;
-            box-shadow: 0 1px 0 rgba(255, 255, 255, 0.04), 0 4px 24px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
         }
 
-        /* Animated top border removed */
+        /* Animated Glowing Edge */
+        .bento-header::after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 0;
+            width: 100%;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(77, 163, 255, 0.8), transparent);
+            animation: scanlineX 4s ease-in-out infinite;
+            opacity: 0.5;
+        }
 
-        /* Brand */
+        @keyframes scanlineX {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+        }
+
+        /* Brand Area - Perfectly Centered Layout */
         .header-brand {
             display: flex;
-            align-items: center;
+            align-items: center; /* Mathematically centers all items vertically */
             gap: 12px;
             text-decoration: none;
-            transition: opacity 0.2s;
+            transition: all 0.3s ease;
+            border-radius: 12px;
+            padding: 4px;
         }
 
         .header-brand:hover {
-            opacity: 0.85;
             text-decoration: none;
         }
 
-        .brand-logo-wrap {
-            width: 40px;
-            height: 40px;
-            background: #ffffff;
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-            flex-shrink: 0;
+        .nav-brand-img {
+            height: 32px; 
+            width: auto;
+            display: block; /* Removes bottom invisible margin */
+            filter: brightness(0) invert(1); /* Pure white */
+            opacity: 1;
+            transition: all 0.3s;
         }
 
-        .brand-logo-wrap img {
-            height: 22px;
-            width: auto;
+        .header-brand:hover .nav-brand-img {
+            filter: brightness(0) invert(1) drop-shadow(0 0 10px rgba(255,255,255,0.4));
+            transform: translateY(-1px);
+        }
+
+        /* Subtle divider between logo and text */
+        .nav-divider {
+            width: 1px;
+            height: 28px;
+            background: rgba(255, 255, 255, 0.2);
+            margin: 0 4px;
         }
 
         .brand-text {
             display: flex;
             flex-direction: column;
-            line-height: 1.1;
+            justify-content: center; /* Internal vertical centering */
+            line-height: 1.1; /* Tightened line height */
+            transition: transform 0.3s;
+        }
+
+        .header-brand:hover .brand-text {
+            transform: translateX(4px);
         }
 
         .brand-name {
-            font-size: 1.0625rem;
-            font-weight: 700;
-            color: #f1f1f1;
-            letter-spacing: -0.01em;
+            font-size: 1.1rem;
+            font-weight: 800;
+            color: #ffffff;
+            letter-spacing: 0.5px;
+            text-shadow: 0 0 10px rgba(77, 163, 255, 0.2);
+            margin-bottom: 2px; /* Balances the top and bottom text */
         }
 
         .brand-sub {
-            font-size: 0.6875rem;
-            font-weight: 500;
-            color: rgba(255, 255, 255, 0.35);
+            font-size: 0.65rem;
+            font-weight: 600;
+            color: #4da3ff;
             text-transform: uppercase;
-            letter-spacing: 0.12em;
+            letter-spacing: 0.15em;
+            opacity: 0.8;
         }
 
-        /* Nav area */
+        /* Nav area & Burger menu button */
         .header-nav {
             display: flex;
             align-items: center;
-            gap: 8px;
         }
 
-        .nav-link-item {
-            display: flex;
-            align-items: center;
-            gap: 7px;
-            color: rgba(255, 255, 255, 0.55);
-            font-size: 0.8125rem;
-            font-weight: 500;
-            padding: 6px 12px;
-            border-radius: 8px;
-            text-decoration: none;
-            transition: all 0.2s;
-            border: 1px solid transparent;
-        }
-
-        .nav-link-item i {
-            font-size: 0.75rem;
-        }
-
-        .nav-link-item:hover {
-            color: #ffffff;
-            background: rgba(255, 255, 255, 0.07);
-            border-color: rgba(255, 255, 255, 0.08);
-            text-decoration: none;
-        }
-
-        .nav-link-item.active {
-            color: #a5b4fc;
-            background: rgba(99, 102, 241, 0.12);
-            border-color: rgba(99, 102, 241, 0.25);
-        }
-
-        .nav-divider {
-            width: 1px;
-            height: 20px;
-            background: rgba(255, 255, 255, 0.08);
-            margin: 0 4px;
-        }
-
-        /* Burger menu button */
         .custom-dropdown {
             position: relative;
             display: inline-block;
         }
 
         .custom-pill-btn {
-            background: rgba(255, 255, 255, 0.05);
-            color: rgba(255, 255, 255, 0.75);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 10px;
-            width: 40px;
-            height: 40px;
+            background: rgba(255, 255, 255, 0.03);
+            color: #ffffff;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 12px;
+            width: 44px;
+            height: 44px;
             padding: 0;
-            transition: all 0.2s ease;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
-            user-select: none;
             flex-direction: column;
-            gap: 5px;
+            gap: 6px;
         }
 
         .custom-pill-btn:hover {
-            background: rgba(255, 255, 255, 0.09);
-            border-color: rgba(255, 255, 255, 0.18);
-            color: #fff;
+            background: rgba(77, 163, 255, 0.1);
+            border-color: rgba(77, 163, 255, 0.3);
+            box-shadow: 0 0 15px rgba(77, 163, 255, 0.2);
         }
 
         .custom-pill-btn.active {
-            background: rgba(99, 102, 241, 0.15);
-            border-color: rgba(99, 102, 241, 0.35);
+            background: rgba(77, 163, 255, 0.15);
+            border-color: #4da3ff;
+            box-shadow: 0 0 20px rgba(77, 163, 255, 0.3);
         }
 
         /* Burger lines */
         .burger-line {
             display: block;
-            width: 18px;
+            width: 20px;
             height: 2px;
             background: currentColor;
             border-radius: 2px;
-            transition: all 0.25s ease;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             transform-origin: center;
         }
 
         .custom-pill-btn.active .burger-line:nth-child(1) {
-            transform: translateY(7px) rotate(45deg);
+            transform: translateY(8px) rotate(45deg);
         }
 
         .custom-pill-btn.active .burger-line:nth-child(2) {
@@ -209,28 +203,28 @@
         }
 
         .custom-pill-btn.active .burger-line:nth-child(3) {
-            transform: translateY(-7px) rotate(-45deg);
+            transform: translateY(-8px) rotate(-45deg);
         }
 
         /* Dropdown menu */
         .custom-dropdown-menu {
             position: absolute;
-            top: calc(100% + 10px);
+            top: calc(100% + 15px);
             right: 0;
-            min-width: 210px;
-            background: rgba(22, 22, 38, 0.97);
-            border: 1px solid rgba(255, 255, 255, 0.09);
-            border-radius: 14px;
+            min-width: 240px;
+            background: rgba(15, 15, 22, 0.95);
+            border: 1px solid rgba(77, 163, 255, 0.2);
+            border-radius: 16px;
             backdrop-filter: blur(24px);
             -webkit-backdrop-filter: blur(24px);
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(99, 102, 241, 0.1);
-            padding: 0.5rem;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(77, 163, 255, 0.1) inset;
+            padding: 0.75rem;
             z-index: 1060;
             opacity: 0;
             visibility: hidden;
-            transform: translateY(-8px) scale(0.96);
+            transform: translateY(-15px) scale(0.95);
             transform-origin: top right;
-            transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.1);
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.1);
         }
 
         .custom-dropdown-menu.show {
@@ -241,67 +235,82 @@
 
         /* Dropdown header label */
         .dropdown-label {
-            font-size: 0.6375rem;
-            font-weight: 600;
+            font-size: 0.7rem;
+            font-weight: 700;
             text-transform: uppercase;
-            letter-spacing: 0.1em;
-            color: rgba(255, 255, 255, 0.25);
-            padding: 6px 12px 4px;
+            letter-spacing: 0.15em;
+            color: rgba(255, 255, 255, 0.4);
+            padding: 8px 12px 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .dropdown-label::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: rgba(255, 255, 255, 0.1);
         }
 
         .custom-dropdown-item {
             display: flex;
             align-items: center;
-            color: rgba(255, 255, 255, 0.65);
-            padding: 9px 12px;
+            color: rgba(255, 255, 255, 0.75);
+            padding: 10px 12px;
             text-decoration: none;
-            font-size: 0.8375rem;
+            font-size: 0.9rem;
             font-weight: 500;
-            border-radius: 9px;
-            transition: all 0.15s ease;
-            gap: 10px;
+            border-radius: 10px;
+            transition: all 0.2s ease;
+            gap: 12px;
+            position: relative;
+            overflow: hidden;
         }
 
         .custom-dropdown-item .item-icon {
-            width: 28px;
-            height: 28px;
-            border-radius: 7px;
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 0.75rem;
+            font-size: 0.85rem;
             flex-shrink: 0;
+            transition: all 0.2s ease;
         }
 
         .custom-dropdown-item:hover {
-            background: rgba(255, 255, 255, 0.06);
+            background: rgba(77, 163, 255, 0.1);
             color: #ffffff;
             text-decoration: none;
+            transform: translateX(4px);
+        }
+
+        .custom-dropdown-item:hover .item-icon {
+            transform: scale(1.1);
         }
 
         .custom-dropdown-item.danger {
-            color: rgba(252, 129, 129, 0.8);
+            color: #fc8181;
+            margin-top: 0.25rem;
         }
 
         .custom-dropdown-item.danger:hover {
-            background: rgba(239, 68, 68, 0.1);
-            color: #fc8181;
-        }
-
-        .custom-dropdown-divider {
-            height: 1px;
-            background: rgba(255, 255, 255, 0.06);
-            margin: 0.4rem 0;
+            background: rgba(239, 68, 68, 0.15);
+            color: #ff9999;
+            box-shadow: 0 0 15px rgba(239, 68, 68, 0.2);
         }
 
         /* Alert Glass Effect */
         .alert-glass {
-            background: rgba(255, 255, 255, 0.08);
-            backdrop-filter: blur(8px);
-            border: 1px solid rgba(255, 255, 255, 0.15);
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(77, 163, 255, 0.2);
+            border-left: 4px solid #4da3ff;
             border-radius: 12px;
             color: #ffffff;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
         }
 
         /* Floating Back to Top */
@@ -320,10 +329,12 @@
             border-radius: 50%;
             cursor: pointer;
             transition: all 0.3s ease;
+            box-shadow: 0 0 15px rgba(77, 163, 255, 0.2);
         }
 
         .btn-back-to-top:hover {
-            background: rgba(77, 163, 255, 0.4);
+            background: rgba(77, 163, 255, 0.5);
+            box-shadow: 0 0 20px rgba(77, 163, 255, 0.4);
             transform: translateY(-5px);
         }
     </style>
@@ -332,12 +343,13 @@
 <body>
     {% if session['sdr_loggedin'] %}
     <header class="bento-header">
-        <a href="{{ url_for('index') }}" class="header-brand">
-            <div class="brand-logo-wrap">
-                <img src="{{ url_for('static', filename='newtrendslogo.png') }}" alt="Logo">
-            </div>
+        <a href="{{ url_for('home') }}" class="header-brand">
+            
+            <img src="{{ url_for('static', filename='newtrends_long-removebg-preview.png') }}" alt="NIC Logo" class="nav-brand-img">
+            
+            <div class="nav-divider"></div>
+
             <div class="brand-text">
-                <span class="brand-name">NIC BioCentral</span>
                 <span class="brand-sub">Biometrics System</span>
             </div>
         </a>
@@ -350,39 +362,44 @@
                     <span class="burger-line"></span>
                 </div>
                 <div class="custom-dropdown-menu" id="optionsDropdownMenu">
-                    <div class="dropdown-label">Navigation</div>
+                    <div class="dropdown-label">Workspace</div>
+                    
                     <a class="custom-dropdown-item" href="/device-manager">
-                        <div class="item-icon" style="background: rgba(139,180,247,0.12); color: #8bb4f7;">
+                        <div class="item-icon" style="background: rgba(77,163,255,0.15); color: #4da3ff;">
                             <i class="fas fa-server"></i>
                         </div>
                         Device Manager
                     </a>
+                    
                     <a class="custom-dropdown-item" href="/audit-logs">
-                        <div class="item-icon" style="background: rgba(160,160,160,0.1); color: #a0a0a0;">
+                        <div class="item-icon" style="background: rgba(160,160,160,0.15); color: #c0c0c0;">
                             <i class="fas fa-file-invoice"></i>
                         </div>
                         Audit Logs
                     </a>
-                    <div class="custom-dropdown-divider"></div>
+                    
+                    <div class="dropdown-label" style="margin-top: 8px;">System</div>
+                    
                     <a class="custom-dropdown-item danger" href="{{ url_for('logout') }}">
-                        <div class="item-icon" style="background: rgba(239,68,68,0.1); color: #fc8181;">
-                            <i class="fas fa-sign-out-alt"></i>
+                        <div class="item-icon" style="background: rgba(239,68,68,0.15); color: #fc8181;">
+                            <i class="fas fa-power-off"></i>
                         </div>
-                        Logout
+                        Terminate Session
                     </a>
                 </div>
             </div>
         </nav>
     </header>
+    <div style="height: 76px; width: 100%; flex-shrink: 0;"></div>
     {% endif %}
 
     <main class="flex-shrink-0">
         {% for mess in get_flashed_messages() %}
         <div class="container mt-4">
-            <div class="alert alert-dismissible fade show border-0 alert-glass" role="alert">
-                <i class="fas fa-info-circle mr-2"></i> {{ mess }}
+            <div class="alert alert-dismissible fade show alert-glass" role="alert">
+                <i class="fas fa-info-circle mr-2" style="color: #4da3ff;"></i> {{ mess }}
                 <button type="button" class="close" data-dismiss="alert" aria-label="Close"
-                    style="color: #fff; opacity: 0.8;">
+                    style="color: #fff; opacity: 0.8; text-shadow: none;">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
@@ -396,9 +413,8 @@
         <i class="fas fa-arrow-up"></i>
     </button>
 
-
     <footer class="page-footer mt-auto py-4">
-        <div class="footer-copyright text-center small" style="color: #777; letter-spacing: 0.3px;">
+        <div class="footer-copyright text-center small" style="color: rgba(255,255,255,0.3); letter-spacing: 0.5px;">
             © 2026 MIS Department |
             <span id="companySignature" style="cursor: pointer; transition: color 0.2s;">
                 Newtrends International Corporation
@@ -459,7 +475,7 @@
                         $this.text(currentText.slice(0, -1));
                     } else {
                         clearInterval(deleteInterval);
-                        $this.css({ 'color': '#4da3ff', 'font-weight': 'bold' });
+                        $this.css({ 'color': '#4da3ff', 'font-weight': 'bold', 'text-shadow': '0 0 10px rgba(77,163,255,0.5)' });
 
                         let i = 0;
                         let typeInterval = setInterval(function () {
@@ -468,7 +484,7 @@
                             if (i === devText.length) {
                                 clearInterval(typeInterval);
                                 setTimeout(function () {
-                                    $this.text(originalText).css({ 'color': '', 'font-weight': '' });
+                                    $this.text(originalText).css({ 'color': '', 'font-weight': '', 'text-shadow': '' });
                                     isAnimating = false;
                                 }, 3000);
                             }

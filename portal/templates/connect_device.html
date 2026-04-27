@@ -475,13 +475,16 @@
     /* --- Hold to Delete Button --- */
     .btn-danger {
         background: var(--red-bg);
-        color: var(--red-text);
+        color: var(--red-text) !important;
+        /* Force dark red text */
         border: 1px solid #fecaca;
         position: relative;
         overflow: hidden;
         user-select: none;
         -webkit-user-select: none;
         transition: transform 0.1s ease;
+        font-weight: 600;
+        /* Extra weight helps legibility */
     }
 
     .btn-danger:hover {
@@ -493,9 +496,16 @@
         left: 0;
         top: 0;
         height: 100%;
-        background: rgba(220, 38, 38, 0.2);
+        /* Increased opacity from 0.2 to 0.4 for better visibility */
+        background: rgba(220, 38, 38, 0.4);
         width: 0%;
         pointer-events: none;
+        z-index: 0;
+    }
+
+    .btn-danger span {
+        position: relative;
+        z-index: 10;
     }
 </style>
 
@@ -616,7 +626,7 @@
             <button type="button" class="btn" onclick="closeDeleteModal()">Cancel</button>
             <button type="button" id="hold-delete-btn" class="btn btn-danger">
                 <div class="hold-progress" id="hold-progress-bar"></div>
-                <span style="position: relative; z-index: 1;">Hold 3s to Delete</span>
+                <span>Hold 3s to Delete</span>
             </button>
         </div>
     </div>
@@ -635,6 +645,7 @@
         lucide.createIcons();
         loadDevices();
         setupFormHandler();
+        startLiveSync(); // Initiates the background poller
 
         // Search Listener - Resets to page 1 on search
         document.getElementById('searchInput').addEventListener('input', function (e) {
@@ -642,6 +653,29 @@
             renderTable(e.target.value);
         });
     });
+
+    // --- Expert Background Poller (Live Sync) ---
+    function startLiveSync() {
+        setInterval(() => {
+            fetch('/api/get-devices')
+                .then(response => response.json())
+                .then(res => {
+                    if (res.status === 'success') {
+                        // Mathematically hash/compare the strings to avoid DOM flickering
+                        const newDataString = JSON.stringify(res.data);
+                        const oldDataString = JSON.stringify(globalDevices);
+
+                        if (newDataString !== oldDataString) {
+                            globalDevices = res.data; // Update internal memory
+                            // Re-render, completely preserving user's search and pagination state
+                            renderTable(document.getElementById('searchInput').value);
+                        }
+                    }
+                })
+                // Fails silently in the background if network drops momentarily 
+                .catch(() => { });
+        }, 3000); // Polls every 3 seconds
+    }
 
     // --- Alert Helpers ---
     function showPageAlert(msg, type = "error") {

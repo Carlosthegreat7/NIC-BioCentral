@@ -65,3 +65,9 @@ app.register_blueprint(sync_time_bp)
 
 from routes.get_employees import get_employees_bp
 app.register_blueprint(get_employees_bp)
+
+from routes.user_enrollment import enroll_bp
+app.register_blueprint(enroll_bp)
+
+from routes.move_registration import move_registration_bp 
+app.register_blueprint(move_registration_bp)
