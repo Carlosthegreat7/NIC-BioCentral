@@ -98,10 +98,15 @@ def enroll_fingerprint():
         
         device_users = conn.get_users()
         target_uid = None
+        existing_pin = ''
+        existing_privilege = const.USER_DEFAULT
         
+        # 1. PRESERVE EXISTING DATA (Stops PIN overwrites)
         for u in device_users:
             if str(u.user_id) == str(access_no):
                 target_uid = u.uid
+                existing_pin = u.password  
+                existing_privilege = u.privilege 
                 break
                 
         if target_uid is None:
@@ -113,23 +118,23 @@ def enroll_fingerprint():
         if target_uid > 65535:
              raise Exception("Scanner's internal index is full (> 65535).")
 
-        # --- EXPERT FIX: ALPHANUMERIC MERGE WORKAROUND ---
-        # 1. Temporarily stage the user with a numeric ID to bypass pyzk limitations
-        temp_numeric_id = str(target_uid)
-        conn.set_user(uid=target_uid, name=employee_name, privilege=const.USER_DEFAULT, password=pin, group_id='', user_id=temp_numeric_id)
-        
-        try:
-            # 2. Trigger hardware. The device links the fingerprint to the staged numeric ID.
-            # ⚠️ Blocking call: Waits for success, timeout, or duplicate rejection.
-            conn.enroll_user(uid=target_uid, temp_id=int(temp_id), user_id=temp_numeric_id)
-        finally:
-            # 3. IMMEDIATELY revert the ID back to the alphanumeric Access No.
-            # This safely unifies the PIN, Name, and new Fingerprint under "RW0009"
-            conn.set_user(uid=target_uid, name=employee_name, privilege=const.USER_DEFAULT, password=pin, group_id='', user_id=str(access_no))
-        # -------------------------------------------------
+        # Use new PIN if typed, otherwise recycle the existing one
+        final_pin = pin if pin else existing_pin
 
-        # --- Hardware Verification ---
-        # Prove the device actually stored the template in memory.
+        # 2. BIND USER DATA EXACTLY ONCE
+        conn.set_user(uid=target_uid, name=employee_name, privilege=existing_privilege, password=final_pin, group_id='', user_id=str(access_no))
+        
+        # 3. TRIGGER HARDWARE SAFELY
+        # ⚠️ Blocking call: Waits for success, timeout, or duplicate rejection.
+        if str(access_no).isdigit():
+            # Standard numeric path (e.g., 11110295). Safe to pass user_id string.
+            conn.enroll_user(uid=target_uid, temp_id=int(temp_id), user_id=str(access_no))
+        else:
+            # Alphanumeric path (e.g., RW0009). PyZK will crash if we pass letters.
+            # Omitting user_id forces PyZK to use the internal numeric 'uid' under the hood.
+            conn.enroll_user(uid=target_uid, temp_id=int(temp_id))
+        
+        # 4. HARDWARE VERIFICATION
         templates = conn.get_templates()
         is_saved = False
         
@@ -159,7 +164,7 @@ def enroll_fingerprint():
         if conn:
             conn.enable_device() 
             conn.disconnect()
-
+            
 @enroll_bp.route('/api/live_search_employee', methods=['GET'])
 def live_search_employee():
     """Returns top 10 employee matches as the user types."""
