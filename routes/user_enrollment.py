@@ -81,7 +81,7 @@ def enroll_fingerprint():
     port = int(data.get('port', 4370))
     search_query = data.get('search_query') 
     temp_id = data.get('temp_id')
-    pin = data.get('pin', '') 
+    pin = data.get('pin', '')
     
     if not ip or not search_query or temp_id is None:
         return jsonify({"status": "error", "message": "Store IP, Search Query, and Finger Selection are required."}), 400
@@ -113,17 +113,28 @@ def enroll_fingerprint():
         if target_uid > 65535:
              raise Exception("Scanner's internal index is full (> 65535).")
 
-
-        conn.set_user(uid=target_uid, name=employee_name, privilege=const.USER_DEFAULT, password=pin, group_id='', user_id=str(access_no))
+        # --- EXPERT FIX: ALPHANUMERIC MERGE WORKAROUND ---
+        # 1. Temporarily stage the user with a numeric ID to bypass pyzk limitations
+        temp_numeric_id = str(target_uid)
+        conn.set_user(uid=target_uid, name=employee_name, privilege=const.USER_DEFAULT, password=pin, group_id='', user_id=temp_numeric_id)
         
+        try:
+            # 2. Trigger hardware. The device links the fingerprint to the staged numeric ID.
+            # ⚠️ Blocking call: Waits for success, timeout, or duplicate rejection.
+            conn.enroll_user(uid=target_uid, temp_id=int(temp_id), user_id=temp_numeric_id)
+        finally:
+            # 3. IMMEDIATELY revert the ID back to the alphanumeric Access No.
+            # This safely unifies the PIN, Name, and new Fingerprint under "RW0009"
+            conn.set_user(uid=target_uid, name=employee_name, privilege=const.USER_DEFAULT, password=pin, group_id='', user_id=str(access_no))
+        # -------------------------------------------------
 
-        conn.enroll_user(uid=target_uid, temp_id=int(temp_id), user_id=str(target_uid))
-        
-
+        # --- Hardware Verification ---
+        # Prove the device actually stored the template in memory.
         templates = conn.get_templates()
         is_saved = False
         
         for t in templates:
+            # Match the exact internal UID and the specific finger index (fid)
             if str(t.uid) == str(target_uid) and str(t.fid) == str(temp_id):
                 is_saved = True
                 break
