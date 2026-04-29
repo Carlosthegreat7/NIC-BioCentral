@@ -83,6 +83,7 @@ def enroll_fingerprint():
     port = int(data.get('port', 4370))
     search_query = data.get('search_query') 
     temp_id = data.get('temp_id')
+    pin = data.get('pin', '') # <-- 1. Extract the pin payload (defaults to empty string)
     
     if not ip or not search_query or temp_id is None:
         return jsonify({"status": "error", "message": "Store IP, Search Query, and Finger Selection are required."}), 400
@@ -114,7 +115,8 @@ def enroll_fingerprint():
         if target_uid > 65535:
              raise Exception("Scanner's internal index is full (> 65535).")
 
-        conn.set_user(uid=target_uid, name=employee_name, privilege=const.USER_DEFAULT, password='', group_id='', user_id=str(access_no))
+        # <-- 2. Pass 'pin' to the password parameter
+        conn.set_user(uid=target_uid, name=employee_name, privilege=const.USER_DEFAULT, password=pin, group_id='', user_id=str(access_no))
         
         # ⚠️ Blocking call: Waits for success, timeout, or duplicate rejection.
         conn.enroll_user(uid=target_uid, temp_id=int(temp_id), user_id=str(access_no))
