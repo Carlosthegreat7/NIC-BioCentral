@@ -276,9 +276,23 @@
         
         <div style="display: flex; gap: 12px; justify-content: center;">
             <button type="button" class="btn" onclick="closePurgeModal()">Cancel</button>
-            <button type="button" class="btn btn-danger" onclick="executePurge()">
+            <button type="button" class="btn btn-danger" id="purge-confirm-btn" onclick="executePurge()">
                 Confirm Purge
             </button>
+        </div>
+    </div>
+</div>
+
+<div id="alert-modal" class="modal-overlay">
+    <div class="modal-card pop-in-container" style="width: 350px; text-align: center; padding: 2rem;">
+        <div id="alert-icon-container" style="margin-bottom: 1rem; display: flex; justify-content: center;">
+            </div>
+        <h3 id="alert-title" style="margin-bottom: 0.5rem; font-size: 1.25rem; font-weight: 600; color: var(--text-primary);">Notice</h3>
+        <p id="alert-message" style="color: var(--text-secondary); font-size: 0.875rem; margin-bottom: 1.5rem;">
+            Message goes here.
+        </p>
+        <div style="display: flex; justify-content: center;">
+            <button type="button" class="btn btn-connect" onclick="closeAlertModal()">OK</button>
         </div>
     </div>
 </div>
@@ -296,6 +310,31 @@
         lucide.createIcons();
         loadDevices();
     });
+
+    // --- Custom Alert Modal Functions ---
+    function showAlertModal(title, message, type = 'info') {
+        const titleEl = document.getElementById('alert-title');
+        const messageEl = document.getElementById('alert-message');
+        const iconContainer = document.getElementById('alert-icon-container');
+
+        titleEl.innerText = title;
+        messageEl.innerText = message;
+
+        if (type === 'error') {
+            iconContainer.innerHTML = '<i data-lucide="x-circle" style="width: 48px; height: 48px; color: var(--red-text);"></i>';
+        } else if (type === 'success') {
+            iconContainer.innerHTML = '<i data-lucide="check-circle" style="width: 48px; height: 48px; color: var(--green-text);"></i>';
+        } else {
+            iconContainer.innerHTML = '<i data-lucide="info" style="width: 48px; height: 48px; color: var(--blue-text);"></i>';
+        }
+
+        lucide.createIcons();
+        document.getElementById('alert-modal').style.display = 'flex';
+    }
+
+    function closeAlertModal() {
+        document.getElementById('alert-modal').style.display = 'none';
+    }
 
     // --- Load Devices ---
     function loadDevices() {
@@ -680,13 +719,12 @@
         document.getElementById('logs-modal').style.display = 'none';
     }
 
-    // --- NEW: Device Backup & Purge Logic ---
+    // --- Device Backup & Purge Logic with Custom Modals ---
     function backupDeviceLogs() {
         if(!currentDeviceId) {
-            alert("No device selected for backup.");
+            showAlertModal("Error", "No device selected for backup.", "error");
             return;
         }
-        // This directs the user to the backup API endpoint which will automatically trigger the CSV download
         window.location.href = `/api/backup-logs?device_id=${currentDeviceId}`;
     }
 
@@ -702,9 +740,10 @@
 
     function executePurge() {
         const pin = document.getElementById('purge-pin').value;
+        const confirmBtn = document.getElementById('purge-confirm-btn');
         
         if (pin !== "123123") {
-            alert("Incorrect Administrator PIN.");
+            showAlertModal("Authentication Failed", "Incorrect Administrator PIN.", "error");
             return;
         }
 
@@ -712,8 +751,9 @@
         formData.append('device_id', currentDeviceId);
         formData.append('password', pin);
 
-        // Visual feedback that it's processing
-        document.getElementById('purge-modal').querySelector('.btn-danger').innerText = "Purging...";
+        // Visual feedback
+        confirmBtn.innerText = "Purging...";
+        confirmBtn.disabled = true;
 
         fetch('/api/purge-logs', {
             method: 'POST',
@@ -722,20 +762,20 @@
         .then(res => res.json())
         .then(res => {
             if(res.status === 'success') {
-                alert("Terminal logs successfully purged.");
+                showAlertModal("Success", "Terminal logs successfully purged.", "success");
                 closePurgeModal();
-                // Optionally reload employees or reset view
                 loadEmployees(currentDeviceId); 
             } else {
-                alert("Purge Failed: " + res.message);
+                showAlertModal("Purge Failed", res.message, "error");
             }
         })
         .catch(err => {
-            alert("Network error occurred during purge command.");
+            showAlertModal("Network Error", "An error occurred during the purge command.", "error");
             console.error(err);
         })
         .finally(() => {
-            document.getElementById('purge-modal').querySelector('.btn-danger').innerText = "Confirm Purge";
+            confirmBtn.innerText = "Confirm Purge";
+            confirmBtn.disabled = false;
         });
     }
 </script>
