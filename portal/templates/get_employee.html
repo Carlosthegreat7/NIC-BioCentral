@@ -264,22 +264,41 @@
 </div>
 
 <div id="purge-modal" class="modal-overlay">
-    <div class="modal-card pop-in-container" style="width: 400px; text-align: center; padding: 2rem;">
-        <div style="color: var(--red-text); margin-bottom: 1rem; display: flex; justify-content: center;">
-            <i data-lucide="alert-triangle" style="width: 48px; height: 48px;"></i>
-        </div>
-        <h3 style="margin-bottom: 0.5rem; font-size: 1.25rem; font-weight: 600; color: var(--text-primary);">Purge Terminal Logs?</h3>
-        <p style="color: var(--text-secondary); font-size: 0.875rem; margin-bottom: 1.5rem;">
-            This will permanently wipe attendance data from the physical device hardware to free up space. Please enter the Administrator PIN to confirm.
-        </p>
-        <input type="password" id="purge-pin" class="search-input" placeholder="Enter Admin PIN" style="width: 100%; margin-bottom: 1.5rem; text-align: center;">
+    <div class="modal-card pop-in-container" style="width: 420px; padding: 0; overflow: hidden;">
         
-        <div style="display: flex; gap: 12px; justify-content: center;">
-            <button type="button" class="btn" onclick="closePurgeModal()">Cancel</button>
-            <button type="button" class="btn btn-danger" id="purge-confirm-btn" onclick="executePurge()">
-                Confirm Purge
-            </button>
+        <div style="height: 4px; background: var(--red-text); width: 100%;"></div>
+        
+        <div style="padding: 2rem;">
+            <div style="display: flex; justify-content: center; margin-bottom: 1.25rem;">
+                <div style="background: var(--red-bg); border: 1px solid #fecaca; width: 64px; height: 64px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: var(--red-text); box-shadow: 0 4px 10px rgba(220, 38, 38, 0.1);">
+                    <i data-lucide="hard-drive" style="width: 32px; height: 32px;"></i>
+                </div>
+            </div>
+
+            <h3 style="text-align: center; margin-bottom: 0.5rem; font-size: 1.25rem; font-weight: 700; color: var(--text-primary);">Purge Terminal Storage</h3>
+            
+            <div style="background: #fff5f5; border-left: 4px solid var(--red-text); padding: 12px 16px; border-radius: 4px; margin: 1rem 0 1.5rem 0; text-align: left;">
+                <p style="color: #991b1b; font-size: 0.8125rem; margin: 0; line-height: 1.5;">
+                    <strong>Warning:</strong> This will permanently wipe all attendance data from the physical device hardware. This action cannot be undone.
+                </p>
+            </div>
+
+            <div style="text-align: left; margin-bottom: 2rem;">
+                <label for="purge-pin" style="display: block; font-size: 0.75rem; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px;">Administrator PIN</label>
+                <div style="position: relative;">
+                    <i data-lucide="lock" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #9ca3af; width: 16px; height: 16px;"></i>
+                    <input type="password" id="purge-pin" class="search-input" placeholder="Enter PIN to confirm" style="width: 100%; padding: 10px 12px 10px 36px; text-align: left; font-size: 1rem; box-sizing: border-box;" autocomplete="off">
+                </div>
+            </div>
+            
+            <div style="display: flex; gap: 12px;">
+                <button type="button" class="btn" style="flex: 1; justify-content: center; padding: 10px;" onclick="closePurgeModal()">Cancel</button>
+                <button type="button" class="btn btn-danger" id="purge-confirm-btn" style="flex: 1; justify-content: center; padding: 10px;" onclick="executePurge()">
+                    <i data-lucide="alert-triangle" style="width: 16px; height: 16px; margin-right: 4px;"></i> Purge Now
+                </button>
+            </div>
         </div>
+        
     </div>
 </div>
 
