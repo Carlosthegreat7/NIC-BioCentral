@@ -11,14 +11,14 @@
         --text-main: #0f172a;
         --text-secondary: #475569;
         --text-muted: #94a3b8;
-        
+
         --accent: #3b82f6;
         --accent-hover: #2563eb;
         --accent-light: #eff6ff;
-        
+
         --success: #10b981;
         --success-light: #f0fdf4;
-        
+
         --warning: #f59e0b;
         --warning-light: #fffbeb;
 
@@ -28,17 +28,33 @@
 
     /* Premium Entrance Animations */
     @keyframes fadeInUp {
-        from { opacity: 0; transform: translateY(20px); }
-        to { opacity: 1; transform: translateY(0); }
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
     }
 
     .animate-entrance {
         opacity: 0;
         animation: fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
     }
-    .delay-1 { animation-delay: 0.1s; }
-    .delay-2 { animation-delay: 0.2s; }
-    .delay-3 { animation-delay: 0.3s; }
+
+    .delay-1 {
+        animation-delay: 0.1s;
+    }
+
+    .delay-2 {
+        animation-delay: 0.2s;
+    }
+
+    .delay-3 {
+        animation-delay: 0.3s;
+    }
 
     /* Bento Card Layout */
     .dashboard-wrapper {
@@ -138,8 +154,14 @@
         background: var(--bg-surface);
     }
 
-    .device-list-container::-webkit-scrollbar { width: 6px; }
-    .device-list-container::-webkit-scrollbar-thumb { background-color: #cbd5e1; border-radius: 10px; }
+    .device-list-container::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    .device-list-container::-webkit-scrollbar-thumb {
+        background-color: #cbd5e1;
+        border-radius: 10px;
+    }
 
     .device-list-item {
         cursor: pointer;
@@ -152,8 +174,10 @@
         align-items: center;
     }
 
-    .device-list-item:hover { background-color: var(--bg-muted); }
-    
+    .device-list-item:hover {
+        background-color: var(--bg-muted);
+    }
+
     .device-list-item.selected {
         background-color: var(--accent-light);
         border-left-color: var(--accent);
@@ -164,16 +188,29 @@
         animation: popIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
     }
 
-    .device-name { font-weight: 700; color: var(--text-main); margin: 0 0 4px 0; }
-    .device-ip { font-family: monospace; color: var(--text-muted); font-size: 0.85rem; }
+    .device-name {
+        font-weight: 700;
+        color: var(--text-main);
+        margin: 0 0 4px 0;
+    }
+
+    .device-ip {
+        font-family: monospace;
+        color: var(--text-muted);
+        font-size: 0.85rem;
+    }
 
     /* Live Search Autocomplete */
-    .search-wrapper { position: relative; z-index: 1050; }
+    .search-wrapper {
+        position: relative;
+        z-index: 1050;
+    }
 
     .autocomplete-dropdown {
         position: absolute;
         top: calc(100% + 8px);
-        left: 0; right: 0;
+        left: 0;
+        right: 0;
         background: var(--bg-surface);
         border-radius: 12px;
         box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
@@ -190,8 +227,14 @@
         border-bottom: 1px solid var(--border);
         transition: background 0.2s;
     }
-    .autocomplete-item:hover { background: var(--bg-muted); }
-    .autocomplete-item:last-child { border-bottom: none; }
+
+    .autocomplete-item:hover {
+        background: var(--bg-muted);
+    }
+
+    .autocomplete-item:last-child {
+        border-bottom: none;
+    }
 
     /* ── High-End Scanner Visuals ── */
     .scanner-pad-wrapper {
@@ -202,7 +245,7 @@
         margin-top: 1rem;
         position: relative;
         overflow: hidden;
-        box-shadow: inset 0 4px 10px rgba(0,0,0,0.02);
+        box-shadow: inset 0 4px 10px rgba(0, 0, 0, 0.02);
     }
 
     /* Subtle grid background for the scanner */
@@ -210,7 +253,7 @@
         content: '';
         position: absolute;
         inset: 0;
-        background-image: 
+        background-image:
             linear-gradient(rgba(148, 163, 184, 0.05) 1px, transparent 1px),
             linear-gradient(90deg, rgba(148, 163, 184, 0.05) 1px, transparent 1px);
         background-size: 20px 20px;
@@ -236,12 +279,12 @@
         background: #e2e8f0;
         border-radius: 20px;
         /* 1. INCREASED BORDER THICKNESS AND DARKER COLOR */
-        border: 3px solid #64748b; 
+        border: 3px solid #64748b;
         cursor: pointer;
         transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
         position: relative;
         /* 2. STRONGER SHADOW TO MAKE IT POP OFF THE PAD */
-        box-shadow: inset 0 -4px 8px rgba(0,0,0,0.05), 0 6px 12px rgba(0,0,0,0.15); 
+        box-shadow: inset 0 -4px 8px rgba(0, 0, 0, 0.05), 0 6px 12px rgba(0, 0, 0, 0.15);
         overflow: hidden;
     }
 
@@ -270,14 +313,36 @@
         transition: opacity 0.3s, bottom 0.3s;
     }
 
-    .pinky { height: 80px; }
-    .ring { height: 110px; }
-    .middle { height: 125px; }
-    .index { height: 115px; }
-    .thumb { height: 75px; margin-top: 40px; }
+    .pinky {
+        height: 80px;
+    }
 
-    .left-hand .thumb { transform: rotate(25deg); margin-left: 15px; }
-    .right-hand .thumb { transform: rotate(-25deg); margin-right: 15px; }
+    .ring {
+        height: 110px;
+    }
+
+    .middle {
+        height: 125px;
+    }
+
+    .index {
+        height: 115px;
+    }
+
+    .thumb {
+        height: 75px;
+        margin-top: 40px;
+    }
+
+    .left-hand .thumb {
+        transform: rotate(25deg);
+        margin-left: 15px;
+    }
+
+    .right-hand .thumb {
+        transform: rotate(-25deg);
+        margin-right: 15px;
+    }
 
     .finger:hover {
         background: #f1f5f9;
@@ -286,8 +351,16 @@
         box-shadow: inset 0 -4px 8px rgba(59, 130, 246, 0.1), 0 8px 15px rgba(59, 130, 246, 0.15);
     }
 
-    .finger:hover::before { opacity: 1; background: repeating-radial-gradient(circle at 50% 30%, transparent 0, transparent 2px, rgba(59, 130, 246, 0.2) 3px, rgba(59, 130, 246, 0.2) 4px); }
-    .finger:hover::after { opacity: 1; bottom: -28px; color: var(--accent); }
+    .finger:hover::before {
+        opacity: 1;
+        background: repeating-radial-gradient(circle at 50% 30%, transparent 0, transparent 2px, rgba(59, 130, 246, 0.2) 3px, rgba(59, 130, 246, 0.2) 4px);
+    }
+
+    .finger:hover::after {
+        opacity: 1;
+        bottom: -28px;
+        color: var(--accent);
+    }
 
     /* Enrolling State - Laser Scan Animation */
     .finger.enrolling {
@@ -296,13 +369,18 @@
         transform: translateY(-8px);
         box-shadow: inset 0 -4px 8px rgba(245, 158, 11, 0.2), 0 10px 20px rgba(245, 158, 11, 0.2);
     }
-    
-    .finger.enrolling::before { opacity: 0.8; background: repeating-radial-gradient(circle at 50% 30%, transparent 0, transparent 2px, rgba(245, 158, 11, 0.25) 3px, rgba(245, 158, 11, 0.25) 4px); }
+
+    .finger.enrolling::before {
+        opacity: 0.8;
+        background: repeating-radial-gradient(circle at 50% 30%, transparent 0, transparent 2px, rgba(245, 158, 11, 0.25) 3px, rgba(245, 158, 11, 0.25) 4px);
+    }
 
     .finger-laser {
         display: none;
         position: absolute;
-        top: 0; left: 0; right: 0;
+        top: 0;
+        left: 0;
+        right: 0;
         height: 3px;
         background: var(--warning);
         box-shadow: 0 0 8px var(--warning), 0 0 15px var(--warning);
@@ -315,10 +393,23 @@
     }
 
     @keyframes scanline {
-        0% { top: 0%; opacity: 0; }
-        10% { opacity: 1; }
-        90% { opacity: 1; }
-        100% { top: 95%; opacity: 0; }
+        0% {
+            top: 0%;
+            opacity: 0;
+        }
+
+        10% {
+            opacity: 1;
+        }
+
+        90% {
+            opacity: 1;
+        }
+
+        100% {
+            top: 95%;
+            opacity: 0;
+        }
     }
 
     /* Success State */
@@ -328,11 +419,22 @@
         transform: translateY(-8px);
         box-shadow: inset 0 -4px 8px rgba(16, 185, 129, 0.2), 0 10px 20px rgba(16, 185, 129, 0.2);
     }
-    .finger.success::before { opacity: 1; background: repeating-radial-gradient(circle at 50% 30%, transparent 0, transparent 2px, rgba(16, 185, 129, 0.3) 3px, rgba(16, 185, 129, 0.3) 4px); }
+
+    .finger.success::before {
+        opacity: 1;
+        background: repeating-radial-gradient(circle at 50% 30%, transparent 0, transparent 2px, rgba(16, 185, 129, 0.3) 3px, rgba(16, 185, 129, 0.3) 4px);
+    }
 
     @keyframes popIn {
-        from { transform: scale(0.5); opacity: 0; }
-        to { transform: scale(1); opacity: 1; }
+        from {
+            transform: scale(0.5);
+            opacity: 0;
+        }
+
+        to {
+            transform: scale(1);
+            opacity: 1;
+        }
     }
 
     /* Feedback Banner */
@@ -364,7 +466,7 @@
 
 <div class="dashboard-wrapper">
     <div class="bento-card animate-entrance">
-        
+
         <div class="header-title">
             <div class="header-icon"><i class="fa-solid fa-fingerprint"></i></div>
             Remote Fingerprint Enrollment
@@ -377,15 +479,19 @@
 
                 <div class="input-group mb-3 shadow-sm" style="border-radius: 12px; overflow: hidden;">
                     <span class="input-group-text border-end-0"><i class="fa-solid fa-filter"></i></span>
-                    <input type="text" id="searchDevice" class="form-control border-start-0" placeholder="Filter devices by name or IP...">
+                    <input type="text" id="searchDevice" class="form-control border-start-0"
+                        placeholder="Filter devices by name or IP...">
                 </div>
 
                 <div class="device-list-container shadow-sm">
                     {% for device in devices %}
-                    <div class="device-list-item" data-ip="{{ device.ip }}" onclick="selectDevice(this, '{{ device.ip }}')">
+                    <div class="device-list-item" data-ip="{{ device.ip }}"
+                        onclick="selectDevice(this, '{{ device.ip }}')">
                         <div>
-                            <div class="device-name"><i class="fa-solid fa-server text-muted me-2"></i>{{ device.name }}</div>
-                            <div class="device-ip"><i class="fa-solid fa-network-wired text-muted me-2" style="font-size: 0.7rem;"></i>{{ device.ip }}</div>
+                            <div class="device-name"><i class="fa-solid fa-server text-muted me-2"></i>{{ device.name }}
+                            </div>
+                            <div class="device-ip"><i class="fa-solid fa-network-wired text-muted me-2"
+                                    style="font-size: 0.7rem;"></i>{{ device.ip }}</div>
                         </div>
                         <i class="fa-solid fa-circle-check text-primary fs-5 d-none select-check"></i>
                     </div>
@@ -399,38 +505,73 @@
             <div class="col-md-6">
                 <div class="step-label"><span class="step-badge">2</span> Search Employee</div>
                 <div class="search-wrapper">
-                    <input type="text" id="searchQuery" class="form-control shadow-sm" style="height: 50px; font-size: 1.1rem;" placeholder="Type name or code..." autocomplete="off" required>
+                    <input type="text" id="searchQuery" class="form-control shadow-sm"
+                        style="height: 50px; font-size: 1.1rem;" placeholder="Type name or code..." autocomplete="off"
+                        required>
                     <input type="hidden" id="lockedAccessNo">
                     <div id="searchResults" class="autocomplete-dropdown"></div>
                 </div>
 
                 <div class="mt-4 p-3 rounded" style="background: var(--bg-muted); border: 1px dashed var(--border);">
                     <p class="text-secondary mb-0" style="font-size: 0.85rem;">
-                        <i class="fa-solid fa-circle-info text-primary me-1"></i> 
-                        Select a device and locate an employee first. Then, click on any finger below to trigger the remote enrollment process on the physical terminal.
+                        <i class="fa-solid fa-circle-info text-primary me-1"></i>
+                        Select a device and locate an employee first. Then, click on any finger below to trigger the
+                        remote enrollment process on the physical terminal.
                     </p>
                 </div>
+
+                <div class="mt-3">
+                    <div class="step-label mb-2"><i class="fa-solid fa-key me-1"></i> Optional PIN</div>
+                    <div class="input-group shadow-sm" style="border-radius: 12px; overflow: hidden;">
+                        <span class="input-group-text border-end-0"><i class="fa-solid fa-hashtag"></i></span>
+                        <input type="password" id="userPin" class="form-control border-start-0"
+                            placeholder="Enter numeric PIN (optional)..." pattern="\d*" inputmode="numeric"
+                            oninput="this.value = this.value.replace(/[^0-9]/g, '')" maxlength="8">
+                    </div>
+                </div>
+
             </div>
         </div>
 
         <div class="animate-entrance delay-2" style="position: relative; z-index: 1;">
-            <div class="step-label mt-5 justify-content-center"><span class="step-badge">3</span> Scanner Interface</div>
-            
+            <div class="step-label mt-5 justify-content-center"><span class="step-badge">3</span> Scanner Interface
+            </div>
+
             <div class="scanner-pad-wrapper">
                 <div class="hands-container" id="handsContainer">
                     <div class="hand left-hand">
-                        <div class="finger pinky" data-id="0" data-index="0" title="Left Pinky"><div class="finger-laser"></div></div>
-                        <div class="finger ring" data-id="1" data-index="1" title="Left Ring"><div class="finger-laser"></div></div>
-                        <div class="finger middle" data-id="2" data-index="2" title="Left Middle"><div class="finger-laser"></div></div>
-                        <div class="finger index" data-id="3" data-index="3" title="Left Index"><div class="finger-laser"></div></div>
-                        <div class="finger thumb" data-id="4" data-index="4" title="Left Thumb"><div class="finger-laser"></div></div>
+                        <div class="finger pinky" data-id="0" data-index="0" title="Left Pinky">
+                            <div class="finger-laser"></div>
+                        </div>
+                        <div class="finger ring" data-id="1" data-index="1" title="Left Ring">
+                            <div class="finger-laser"></div>
+                        </div>
+                        <div class="finger middle" data-id="2" data-index="2" title="Left Middle">
+                            <div class="finger-laser"></div>
+                        </div>
+                        <div class="finger index" data-id="3" data-index="3" title="Left Index">
+                            <div class="finger-laser"></div>
+                        </div>
+                        <div class="finger thumb" data-id="4" data-index="4" title="Left Thumb">
+                            <div class="finger-laser"></div>
+                        </div>
                     </div>
                     <div class="hand right-hand">
-                        <div class="finger thumb" data-id="5" data-index="5" title="Right Thumb"><div class="finger-laser"></div></div>
-                        <div class="finger index" data-id="6" data-index="6" title="Right Index"><div class="finger-laser"></div></div>
-                        <div class="finger middle" data-id="7" data-index="7" title="Right Middle"><div class="finger-laser"></div></div>
-                        <div class="finger ring" data-id="8" data-index="8" title="Right Ring"><div class="finger-laser"></div></div>
-                        <div class="finger pinky" data-id="9" data-index="9" title="Right Pinky"><div class="finger-laser"></div></div>
+                        <div class="finger thumb" data-id="5" data-index="5" title="Right Thumb">
+                            <div class="finger-laser"></div>
+                        </div>
+                        <div class="finger index" data-id="6" data-index="6" title="Right Index">
+                            <div class="finger-laser"></div>
+                        </div>
+                        <div class="finger middle" data-id="7" data-index="7" title="Right Middle">
+                            <div class="finger-laser"></div>
+                        </div>
+                        <div class="finger ring" data-id="8" data-index="8" title="Right Ring">
+                            <div class="finger-laser"></div>
+                        </div>
+                        <div class="finger pinky" data-id="9" data-index="9" title="Right Pinky">
+                            <div class="finger-laser"></div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -448,12 +589,15 @@
                 <h3 class="fw-bold text-dark mb-4">Enrollment Complete</h3>
 
                 <div class="p-4 rounded-3 my-3 text-start border shadow-sm" style="background: var(--bg-muted);">
-                    <p class="mb-2 fs-5"><span class="text-secondary fw-bold">Employee:</span> <span id="modalEmpName" class="text-primary fw-bold float-end"></span></p>
-                    <p class="mb-0 fs-5"><span class="text-secondary fw-bold">Access ID:</span> <span id="modalAccessNo" class="badge bg-success float-end fs-6"></span></p>
+                    <p class="mb-2 fs-5"><span class="text-secondary fw-bold">Employee:</span> <span id="modalEmpName"
+                            class="text-primary fw-bold float-end"></span></p>
+                    <p class="mb-0 fs-5"><span class="text-secondary fw-bold">Access ID:</span> <span id="modalAccessNo"
+                            class="badge bg-success float-end fs-6"></span></p>
                 </div>
 
                 <p class="text-secondary mt-4 mb-4">The biometric data has been securely synced to the terminal.</p>
-                <button type="button" class="btn btn-primary px-5 py-3 rounded-pill shadow-sm fw-bold w-100" onclick="closeModalAndReset()">Thank You! 😊</button>
+                <button type="button" class="btn btn-primary px-5 py-3 rounded-pill shadow-sm fw-bold w-100"
+                    onclick="closeModalAndReset()">Thank You! 😊</button>
             </div>
         </div>
     </div>
@@ -556,6 +700,7 @@
         finger.addEventListener('click', function () {
             const ip = document.getElementById('targetIp').value;
             const searchQuery = document.getElementById('lockedAccessNo').value || document.getElementById('searchQuery').value;
+            const userPin = document.getElementById('userPin').value; // Grab the PIN
             const feedback = document.getElementById('enrollFeedback');
 
             if (!ip || !searchQuery) {
@@ -576,11 +721,13 @@
             activeFingerDiv = this;
             const tempId = this.getAttribute('data-id');
 
-            triggerHardware(ip, searchQuery, tempId, feedback);
+            // Pass userPin to the trigger function
+            triggerHardware(ip, searchQuery, tempId, feedback, userPin);
         });
     });
 
-    function triggerHardware(ip, searchQuery, tempId, feedback) {
+    // Added userPin to parameters
+    function triggerHardware(ip, searchQuery, tempId, feedback, userPin) {
         feedback.innerHTML = `
             <div class="feedback-banner enrolling animate-entrance">
                 <i class="fa-solid fa-fingerprint fa-fade fs-1 text-warning"></i>
@@ -599,15 +746,16 @@
         fetch('/api/enroll_fingerprint', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ ip: ip, search_query: searchQuery, temp_id: tempId })
+            // Included pin in the JSON payload
+            body: JSON.stringify({ ip: ip, search_query: searchQuery, temp_id: tempId, pin: userPin })
         })
-        .then(response => response.json())
-        .then(data => {
-            if (data.status === 'success') {
-                activeFingerDiv.classList.remove('enrolling');
-                activeFingerDiv.classList.add('success');
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    activeFingerDiv.classList.remove('enrolling');
+                    activeFingerDiv.classList.add('success');
 
-                feedback.innerHTML = `
+                    feedback.innerHTML = `
                     <div class="feedback-banner success animate-entrance">
                         <i class="fa-solid fa-check-circle fs-2 text-success"></i>
                         <div>
@@ -615,15 +763,15 @@
                         </div>
                     </div>`;
 
-                document.getElementById('modalEmpName').innerText = data.emp_name;
-                document.getElementById('modalAccessNo').innerText = data.access_no;
+                    document.getElementById('modalEmpName').innerText = data.emp_name;
+                    document.getElementById('modalAccessNo').innerText = data.access_no;
 
-                const modalEl = document.getElementById('successModal');
-                successModalInstance = new bootstrap.Modal(modalEl);
-                successModalInstance.show();
+                    const modalEl = document.getElementById('successModal');
+                    successModalInstance = new bootstrap.Modal(modalEl);
+                    successModalInstance.show();
 
-            } else {
-                feedback.innerHTML = `
+                } else {
+                    feedback.innerHTML = `
                     <div class="feedback-banner error animate-entrance">
                         <i class="fa-solid fa-circle-xmark fs-3 text-danger"></i>
                         <div>
@@ -631,11 +779,11 @@
                             <p class="mb-0 text-secondary" style="font-size: 0.9rem;">${data.message}</p>
                         </div>
                     </div>`;
-                activeFingerDiv.classList.remove('enrolling');
-            }
-        })
-        .catch(error => {
-            feedback.innerHTML = `
+                    activeFingerDiv.classList.remove('enrolling');
+                }
+            })
+            .catch(error => {
+                feedback.innerHTML = `
                 <div class="feedback-banner error animate-entrance">
                     <i class="fa-solid fa-plug-circle-xmark fs-3 text-danger"></i>
                     <div>
@@ -643,8 +791,8 @@
                         <p class="mb-0 text-secondary" style="font-size: 0.9rem;">System Error: ${error}</p>
                     </div>
                 </div>`;
-            activeFingerDiv.classList.remove('enrolling');
-        });
+                activeFingerDiv.classList.remove('enrolling');
+            });
     }
 
     function closeModalAndReset() {
@@ -654,9 +802,10 @@
 
         document.getElementById('searchQuery').value = '';
         document.getElementById('lockedAccessNo').value = '';
+        document.getElementById('userPin').value = ''; // Clear the PIN input
         document.getElementById('enrollFeedback').innerHTML = '';
         document.querySelectorAll('.finger').forEach(f => f.classList.remove('success', 'enrolling'));
-        
+
         document.querySelectorAll('.device-list-item').forEach(item => {
             item.classList.remove('selected');
         });
