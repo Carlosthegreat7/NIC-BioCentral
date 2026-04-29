@@ -164,7 +164,7 @@ def enroll_fingerprint():
         if conn:
             conn.enable_device() 
             conn.disconnect()
-            
+
 @enroll_bp.route('/api/live_search_employee', methods=['GET'])
 def live_search_employee():
     """Returns top 10 employee matches as the user types."""
