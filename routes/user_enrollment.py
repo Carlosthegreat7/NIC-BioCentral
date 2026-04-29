@@ -43,7 +43,6 @@ def fetch_all_devices():
 
 @enroll_bp.route('/new_fingerprint', methods=['GET'])
 def new_fingerprint_page():
-    # Fetch devices from Bio-Central DB before rendering the page
     devices = fetch_all_devices()
     return render_template('new_fingerprint.html', devices=devices)
 
@@ -59,7 +58,6 @@ def fetch_employee_info(search_query):
         f"TrustServerCertificate=yes;"
     )
     
-    # Parameterized query to check either Code or Name
     query = "SELECT [Name], [AccessNo] FROM [dbo].[vBiometricsManagement] WHERE [Code] = ? OR [Name] = ?"
     
     try:
@@ -68,14 +66,14 @@ def fetch_employee_info(search_query):
                 cursor.execute(query, (search_query, search_query))
                 row = cursor.fetchone()
                 if row:
-                    return row[0], row[1] # Returns Name, AccessNo
+                    return row[0], row[1] 
     except pyodbc.Error as e:
         print(f"Database lookup failed: {e}")
         
     return None, None
 
 
-# --- POST Route: Hardware API Endpoint ---
+
 @enroll_bp.route('/api/enroll_fingerprint', methods=['POST'])
 def enroll_fingerprint():
     data = request.json
@@ -83,7 +81,7 @@ def enroll_fingerprint():
     port = int(data.get('port', 4370))
     search_query = data.get('search_query') 
     temp_id = data.get('temp_id')
-    pin = data.get('pin', '') # <-- 1. Extract the pin payload (defaults to empty string)
+    pin = data.get('pin', '') 
     
     if not ip or not search_query or temp_id is None:
         return jsonify({"status": "error", "message": "Store IP, Search Query, and Finger Selection are required."}), 400
@@ -115,19 +113,17 @@ def enroll_fingerprint():
         if target_uid > 65535:
              raise Exception("Scanner's internal index is full (> 65535).")
 
-        # <-- 2. Pass 'pin' to the password parameter
+
         conn.set_user(uid=target_uid, name=employee_name, privilege=const.USER_DEFAULT, password=pin, group_id='', user_id=str(access_no))
         
-        # ⚠️ Blocking call: Waits for success, timeout, or duplicate rejection.
-        conn.enroll_user(uid=target_uid, temp_id=int(temp_id), user_id=str(access_no))
+
+        conn.enroll_user(uid=target_uid, temp_id=int(temp_id), user_id=str(target_uid))
         
-        # --- EXPERT FIX: Hardware Verification ---
-        # Prove the device actually stored the template in memory.
+
         templates = conn.get_templates()
         is_saved = False
         
         for t in templates:
-            # Match the exact internal UID and the specific finger index (fid)
             if str(t.uid) == str(target_uid) and str(t.fid) == str(temp_id):
                 is_saved = True
                 break
@@ -137,7 +133,6 @@ def enroll_fingerprint():
                 "status": "error", 
                 "message": "Device rejected the enrollment. The fingerprint is a DUPLICATE, the scanner timed out, or the user cancelled."
             }), 400
-        # -----------------------------------------
 
         return jsonify({
             "status": "success", 
@@ -163,14 +158,13 @@ def live_search_employee():
 
     conn_str = (
         f"DRIVER={{ODBC Driver 18 for SQL Server}};"
-        f"SERVER={DB_SERVER};" # Using your HRIS credentials
+        f"SERVER={DB_SERVER};" 
         f"DATABASE={DB_NAME};"
         f"UID={DB_UID};"
         f"PWD={DB_PWD};"
         f"TrustServerCertificate=yes;"
     )
     
-    # Use LIKE operator for partial, case-insensitive matching
     query = """
         SELECT TOP 10 [Name], [Code], [AccessNo] 
         FROM [dbo].[vBiometricsManagement] 

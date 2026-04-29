@@ -118,31 +118,22 @@ def fetch_logs():
         
         try:
             conn_zk = zk.connect()
-            # This pulls the raw attendance buffer from the machine
             attendances = conn_zk.get_attendance()
             
             logs_data = []
             for att in attendances:
-                # Filter out logs that don't belong to the selected employee
                 if str(att.user_id) == str(emp_id):
-                    # Interpret punch state (Standard ZKTeco: 0 = In, 1 = Out)
                     punch_type = "TIME IN" if getattr(att, 'punch', -1) == 0 else "TIME OUT" if getattr(att, 'punch', -1) == 1 else "LOGGED"
                     
                     logs_data.append({
                         "date": att.timestamp.strftime('%B %d, %Y'),
                         "time": att.timestamp.strftime('%I:%M %p'),
                         "type": punch_type,
-                        "raw_time": att.timestamp # Kept temporarily for sorting
+                        "raw_time": att.timestamp 
                     })
-            
-            # Sort chronologically (newest first)
             logs_data.sort(key=lambda x: x['raw_time'], reverse=True)
-            
-            # Strip the raw time out of the final payload
             for log in logs_data:
                 del log['raw_time']
-            
-            # Limit to the most recent 50 logs to keep the UI snappy
             return jsonify({"status": "success", "data": logs_data[:50]})
             
         except Exception as e:
@@ -152,15 +143,12 @@ def fetch_logs():
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)})
 
-# --- NEW: BACKUP LOGS ROUTE ---
 @get_employees_bp.route('/api/backup-logs', methods=['GET'])
 @loggedin_required()
 def backup_logs():
     """Fetches logs and users from hardware and returns a formatted CSV with Time In/Out."""
     try:
         device_id = request.args.get('device_id')
-        
-        # Get IP and Key from DB
         conn_db = get_db_connection()
         cursor = conn_db.cursor()
         cursor.execute("SELECT bcc, ip_address, comms_key FROM dbo.device_registry WHERE device_id = ?", (device_id,))
@@ -174,20 +162,13 @@ def backup_logs():
         key = int(device_row.comms_key) if device_row.comms_key.isdigit() else 0
         device_name = device_row.bcc.replace(" ", "_")
 
-        # Connect to Hardware with a slightly longer timeout for heavy data transfer
         zk = ZK(ip, port=4370, timeout=10, password=key, force_udp=False, ommit_ping=False)
         conn_zk = None
         try:
             conn_zk = zk.connect()
-            
-            # 1. Fetch users to map User ID to Employee Name
             users = conn_zk.get_users()
             user_map = {str(u.user_id): (u.name if u.name else "UNNAMED") for u in users}
-            
-            # 2. Fetch raw attendances
             attendances = conn_zk.get_attendance()
-            
-            # 3. Group attendances by User ID and Date
             grouped_logs = defaultdict(list)
             for att in attendances:
                 uid = str(att.user_id)
@@ -195,24 +176,15 @@ def backup_logs():
                 time_obj = att.timestamp.time()
                 grouped_logs[(uid, date_str)].append(time_obj)
             
-            # Create CSV in memory
             output = io.StringIO()
             writer = csv.writer(output)
             
-            # Write the new Header row
             writer.writerow(['Device Location', 'Employee Name', 'Employee ID', 'Date', 'Time In', 'Time Out'])
             
-            # Process and write the grouped logs
             for (uid, date_str), times in grouped_logs.items():
                 emp_name = user_map.get(uid, "UNKNOWN")
-                
-                # Sort times from earliest to latest
                 times.sort()
-                
-                # First punch is Time In
                 time_in = times[0].strftime('%I:%M %p')
-                
-                # If there is more than 1 punch, the last punch is Time Out. Otherwise, leave it blank.
                 time_out = times[-1].strftime('%I:%M %p') if len(times) > 1 else "--"
                 
                 writer.writerow([
@@ -237,7 +209,6 @@ def backup_logs():
     except Exception as e:
         return f"Backup failed: {str(e)}", 500
 
-# --- NEW: PURGE LOGS ROUTE ---
 @get_employees_bp.route('/api/purge-logs', methods=['POST'])
 @loggedin_required()
 def purge_logs():
@@ -249,7 +220,6 @@ def purge_logs():
         if password != "123123":
             return jsonify({"status": "error", "message": "Unauthorized: Invalid PIN."})
 
-        # Get Connection Info
         conn_db = get_db_connection()
         cursor = conn_db.cursor()
         cursor.execute("SELECT ip_address, comms_key FROM dbo.device_registry WHERE device_id = ?", (device_id,))
@@ -262,12 +232,10 @@ def purge_logs():
         ip = device_row.ip_address.strip()
         key = int(device_row.comms_key) if device_row.comms_key.isdigit() else 0
 
-        # Increased timeout here as wiping large storage volumes takes time
         zk = ZK(ip, port=4370, timeout=15, password=key, force_udp=False, ommit_ping=False)
         conn_zk = None
         try:
             conn_zk = zk.connect()
-            # CRITICAL: This wipes the machine storage
             conn_zk.clear_attendance() 
             return jsonify({"status": "success", "message": "Device storage cleared successfully."})
         except Exception as e:
