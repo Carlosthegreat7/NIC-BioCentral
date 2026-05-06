@@ -48,7 +48,7 @@ def new_fingerprint_page():
 
 
 def fetch_employee_info(search_query):
-    """Fetches the official employee name and AccessNo from the vBiometricsManagement view."""
+    """Fetches the official employee name, AccessNo, and Code from the vBiometricsManagement view."""
     conn_str = (
         f"DRIVER={{ODBC Driver 18 for SQL Server}};"
         f"SERVER={DB_SERVER};"
@@ -58,7 +58,8 @@ def fetch_employee_info(search_query):
         f"TrustServerCertificate=yes;"
     )
     
-    query = "SELECT [Name], [AccessNo] FROM [dbo].[vBiometricsManagement] WHERE [Code] = ? OR [Name] = ?"
+    # Modified to pull [Code] so we can display it on the frontend modal
+    query = "SELECT [Name], [AccessNo], [Code] FROM [dbo].[vBiometricsManagement] WHERE [Code] = ? OR [Name] = ?"
     
     try:
         with pyodbc.connect(conn_str) as conn:
@@ -66,11 +67,11 @@ def fetch_employee_info(search_query):
                 cursor.execute(query, (search_query, search_query))
                 row = cursor.fetchone()
                 if row:
-                    return row[0], row[1] 
+                    return row[0], row[1], row[2] 
     except pyodbc.Error as e:
         print(f"Database lookup failed: {e}")
         
-    return None, None
+    return None, None, None
 
 
 
@@ -86,8 +87,10 @@ def enroll_fingerprint():
     if not ip or not search_query or temp_id is None:
         return jsonify({"status": "error", "message": "Store IP, Search Query, and Finger Selection are required."}), 400
 
-    employee_name, access_no = fetch_employee_info(search_query)
-    if not employee_name or not access_no:
+    # Unpack the 3 variables, including employee_code
+    employee_name, access_no, employee_code = fetch_employee_info(search_query)
+    
+    if not employee_name:
          return jsonify({"status": "error", "message": f"Employee '{search_query}' not found."}), 404
 
     zk = ZK(ip, port=port, timeout=5, password=0, force_udp=False, ommit_ping=False)
@@ -101,13 +104,27 @@ def enroll_fingerprint():
         existing_pin = ''
         existing_privilege = const.USER_DEFAULT
         
-        # 1. PRESERVE EXISTING DATA (Stops PIN overwrites)
-        for u in device_users:
-            if str(u.user_id) == str(access_no):
-                target_uid = u.uid
-                existing_pin = u.password  
-                existing_privilege = u.privilege 
-                break
+        # 1. PRESERVE EXISTING DATA & HANDLE MISSING ACCESS_NO
+        clean_emp_name = employee_name.strip()
+        
+        if access_no:
+            for u in device_users:
+                if str(u.user_id) == str(access_no):
+                    target_uid = u.uid
+                    existing_pin = u.password  
+                    existing_privilege = u.privilege 
+                    break
+        else:
+            # Fallback check by Name. 
+            # We use startswith() because hardware usually truncates names longer than 24 chars.
+            for u in device_users:
+                dev_name = u.name.strip() if u.name else ""
+                if dev_name and (clean_emp_name == dev_name or clean_emp_name.startswith(dev_name)):
+                    target_uid = u.uid
+                    access_no = u.user_id # Inherit the device's internal ID to prevent duplication
+                    existing_pin = u.password
+                    existing_privilege = u.privilege
+                    break
                 
         if target_uid is None:
             if device_users:
@@ -118,20 +135,19 @@ def enroll_fingerprint():
         if target_uid > 65535:
              raise Exception("Scanner's internal index is full (> 65535).")
 
-        # Use new PIN if typed, otherwise recycle the existing one
+        # If completely brand new, map the access_no to the internal index just for hardware purposes
+        if not access_no:
+            access_no = str(target_uid)
+
         final_pin = pin if pin else existing_pin
 
         # 2. BIND USER DATA EXACTLY ONCE
         conn.set_user(uid=target_uid, name=employee_name, privilege=existing_privilege, password=final_pin, group_id='', user_id=str(access_no))
         
         # 3. TRIGGER HARDWARE SAFELY
-        # ⚠️ Blocking call: Waits for success, timeout, or duplicate rejection.
         if str(access_no).isdigit():
-            # Standard numeric path (e.g., 11110295). Safe to pass user_id string.
             conn.enroll_user(uid=target_uid, temp_id=int(temp_id), user_id=str(access_no))
         else:
-            # Alphanumeric path (e.g., RW0009). PyZK will crash if we pass letters.
-            # Omitting user_id forces PyZK to use the internal numeric 'uid' under the hood.
             conn.enroll_user(uid=target_uid, temp_id=int(temp_id))
         
         # 4. HARDWARE VERIFICATION
@@ -153,7 +169,8 @@ def enroll_fingerprint():
         return jsonify({
             "status": "success", 
             "emp_name": employee_name,
-            "access_no": access_no,
+            # We inject the employee_code here so the HTML modal displays the ID (e.g., 01111-0295)
+            "access_no": employee_code, 
             "message": "Physical fingerprint verified and saved to hardware."
         })
         
@@ -197,7 +214,7 @@ def live_search_employee():
                     results.append({
                         "name": row[0],
                         "code": row[1],
-                        "access_no": str(row[2])
+                        "access_no": str(row[2]) if row[2] else "Unassigned" 
                     })
     except pyodbc.Error as e:
         print(f"Live search failed: {e}")
