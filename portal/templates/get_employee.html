@@ -111,10 +111,9 @@
         transition: all 0.2s ease;
     }
 
-    /* Updated hover state */
     .btn-danger:hover {
-        background: #fca5a5; /* Slightly darker red background on hover */
-        color: #7f1d1d !important; /* Deep dark red text for high contrast */
+        background: #fca5a5;
+        color: #7f1d1d !important;
         border-color: #ef4444;
         box-shadow: 0 0 8px rgba(220, 38, 38, 0.2);
     }
@@ -193,6 +192,16 @@
                         </tr>
                     </tbody>
                 </table>
+                
+                <!-- Device Pagination (Added per request) -->
+                <div class="pagination-container" id="dev-pagination-container" style="display: none;">
+                    <span id="dev-page-info">Showing 0 to 0 of 0 entries</span>
+                    <div class="pagination-controls">
+                        <button class="btn" id="dev-prev-btn" onclick="changeDevPage(-1)"><i data-lucide="chevron-left"></i> Prev</button>
+                        <button class="btn" id="dev-next-btn" onclick="changeDevPage(1)">Next <i data-lucide="chevron-right"></i></button>
+                    </div>
+                </div>
+
             </div>
         </div>
 
@@ -233,6 +242,7 @@
                     <tbody id="employee-tbody">
                     </tbody>
                 </table>
+                <!-- Employee Pagination (Kept original state) -->
                 <div class="pagination-container">
                     <span id="emp-page-info">Showing 0 to 0 of 0 entries</span>
                     <div class="pagination-controls">
@@ -319,7 +329,13 @@
 <script>
     let currentDeviceId = null;
 
-    // Pagination & Search State
+    // --- Device Pagination State (10 items per page) ---
+    let globalDeviceData = [];
+    let filteredDeviceData = [];
+    let currentDevPage = 1;
+    const devRowsPerPage = 10;
+
+    // --- Employee Pagination State (Original 20 items per page) ---
     let globalEmployeeData = [];
     let filteredEmployeeData = [];
     let currentEmpPage = 1;
@@ -361,38 +377,127 @@
             .then(response => response.json())
             .then(res => {
                 const tbody = document.getElementById('device-tbody');
-                tbody.innerHTML = '';
-
+                
                 if (res.status === 'success') {
                     if (res.data.length === 0) {
                         tbody.innerHTML = `<tr><td colspan="4" style="text-align: center; padding: 3rem; color: var(--text-muted);">No devices found in database.</td></tr>`;
+                        document.getElementById('dev-pagination-container').style.display = 'none';
                         return;
                     }
 
-                    res.data.forEach(device => {
-                        let badgeClass = 'badge-neutral';
-                        if (device.chain_type === 'RUSTANS') badgeClass = 'badge-rustans';
-                        else if (device.chain_type === 'RDS') badgeClass = 'badge-rds';
+                    globalDeviceData = res.data;
+                    filteredDeviceData = [...globalDeviceData];
+                    currentDevPage = 1;
+                    renderDeviceTable();
+                    document.getElementById('dev-pagination-container').style.display = 'flex';
 
-                        const tr = document.createElement('tr');
-                        tr.innerHTML = `
-                            <td><strong>${device.bcc}</strong></td>
-                            <td><span class="badge ${badgeClass}"><span class="badge-dot"></span>${device.chain_type}</span></td>
-                            <td style="font-family: monospace; color: var(--text-secondary);">${device.ip_address}</td>
-                            <td style="text-align: right;">
-                                <button class="btn-connect" onclick="connectToDevice('${device.device_id}', '${device.bcc}')">
-                                    <i data-lucide="wifi"></i> <span>Connect</span>
-                                </button>
-                            </td>
-                        `;
-                        tbody.appendChild(tr);
-                    });
-                    lucide.createIcons();
                 } else {
                     tbody.innerHTML = `<tr><td colspan="4" style="text-align: center; padding: 3rem; color: var(--red-text);">Error: ${res.message}</td></tr>`;
+                    document.getElementById('dev-pagination-container').style.display = 'none';
                 }
             })
             .catch(err => console.error("Fetch error:", err));
+    }
+
+    // --- Render Device Table ---
+    function renderDeviceTable() {
+        const tbody = document.getElementById('device-tbody');
+        tbody.innerHTML = '';
+
+        if (filteredDeviceData.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="4" style="text-align: center; padding: 3rem; color: var(--text-muted);">No devices found.</td></tr>`;
+            updateDevPaginationInfo(0);
+            return;
+        }
+
+        const startIndex = (currentDevPage - 1) * devRowsPerPage;
+        const endIndex = startIndex + devRowsPerPage;
+        const pageData = filteredDeviceData.slice(startIndex, endIndex);
+
+        pageData.forEach(device => {
+            let badgeClass = 'badge-neutral';
+            if (device.chain_type === 'RUSTANS') badgeClass = 'badge-rustans';
+            else if (device.chain_type === 'RDS') badgeClass = 'badge-rds';
+
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td><strong>${device.bcc}</strong></td>
+                <td><span class="badge ${badgeClass}"><span class="badge-dot"></span>${device.chain_type}</span></td>
+                <td style="font-family: monospace; color: var(--text-secondary);">${device.ip_address}</td>
+                <td style="text-align: right;">
+                    <button class="btn-connect" onclick="connectToDevice('${device.device_id}', '${device.bcc}')">
+                        <i data-lucide="wifi"></i> <span>Connect</span>
+                    </button>
+                </td>
+            `;
+            tbody.appendChild(tr);
+        });
+        
+        lucide.createIcons();
+        updateDevPaginationInfo(filteredDeviceData.length);
+    }
+
+    // --- Device Search Logic ---
+    function filterDevices() {
+        const term = document.getElementById('deviceSearch').value.toLowerCase();
+        
+        filteredDeviceData = globalDeviceData.filter(device =>
+            device.bcc.toLowerCase().includes(term) ||
+            device.ip_address.toLowerCase().includes(term) ||
+            (device.chain_type && device.chain_type.toLowerCase().includes(term))
+        );
+
+        currentDevPage = 1;
+        const tbody = document.getElementById('device-tbody');
+        tbody.classList.remove('slide-next', 'slide-prev', 'animate-update');
+        void tbody.offsetWidth; // Trigger reflow
+        tbody.classList.add('animate-update');
+        
+        renderDeviceTable();
+    }
+
+    // --- Device Pagination Controls ---
+    function changeDevPage(delta) {
+        currentDevPage += delta;
+        const tbody = document.getElementById('device-tbody');
+        tbody.classList.remove('slide-next', 'slide-prev', 'animate-update');
+        void tbody.offsetWidth;
+
+        if (delta > 0) tbody.classList.add('slide-next');
+        else tbody.classList.add('slide-prev');
+
+        renderDeviceTable();
+    }
+
+    function updateDevPaginationInfo(totalItems) {
+        const totalPages = Math.ceil(totalItems / devRowsPerPage) || 1;
+        const startRange = totalItems === 0 ? 0 : ((currentDevPage - 1) * devRowsPerPage) + 1;
+        const endRange = Math.min(currentDevPage * devRowsPerPage, totalItems);
+
+        document.getElementById('dev-page-info').innerText = `Showing ${startRange} to ${endRange} of ${totalItems} entries`;
+
+        const prevBtn = document.getElementById('dev-prev-btn');
+        const nextBtn = document.getElementById('dev-next-btn');
+
+        if (currentDevPage === 1) {
+            prevBtn.setAttribute('disabled', 'true');
+            prevBtn.style.opacity = '0.5';
+            prevBtn.style.cursor = 'not-allowed';
+        } else {
+            prevBtn.removeAttribute('disabled');
+            prevBtn.style.opacity = '1';
+            prevBtn.style.cursor = 'pointer';
+        }
+
+        if (currentDevPage >= totalPages) {
+            nextBtn.setAttribute('disabled', 'true');
+            nextBtn.style.opacity = '0.5';
+            nextBtn.style.cursor = 'not-allowed';
+        } else {
+            nextBtn.removeAttribute('disabled');
+            nextBtn.style.opacity = '1';
+            nextBtn.style.cursor = 'pointer';
+        }
     }
 
     // --- Switch Views (Master/Detail) ---
@@ -420,23 +525,6 @@
         devView.classList.add('pop-in-container');
 
         document.getElementById('header-subtitle').innerText = "Select a device to view enrolled staff and live attendance logs.";
-    }
-
-    // --- Device Search Logic ---
-    function filterDevices() {
-        const term = document.getElementById('deviceSearch').value.toLowerCase();
-        const tbody = document.getElementById('device-tbody');
-        const rows = tbody.querySelectorAll('tr');
-
-        tbody.classList.remove('animate-update');
-        void tbody.offsetWidth;
-        tbody.classList.add('animate-update');
-
-        rows.forEach(row => {
-            if (row.cells.length === 1) return;
-            const text = row.innerText.toLowerCase();
-            row.style.display = text.includes(term) ? '' : 'none';
-        });
     }
 
     // --- Load Employees ---
@@ -471,6 +559,7 @@
             });
     }
 
+    // --- Render Employee Table ---
     function renderEmployeeTable() {
         const tbody = document.getElementById('employee-tbody');
         tbody.innerHTML = '';
@@ -507,6 +596,7 @@
         updatePaginationInfo(filteredEmployeeData.length);
     }
 
+    // --- Employee Search & Pagination ---
     function filterEmployees() {
         const term = document.getElementById('employeeSearch').value.toLowerCase();
         filteredEmployeeData = globalEmployeeData.filter(emp =>
@@ -761,7 +851,7 @@
         const pin = document.getElementById('purge-pin').value;
         const confirmBtn = document.getElementById('purge-confirm-btn');
         
-        if (pin !== "123123") {
+        if (pin !== "Zr!7Kp$2Vx@9LmQ#") {
             showAlertModal("Authentication Failed", "Incorrect Administrator PIN.", "error");
             return;
         }
