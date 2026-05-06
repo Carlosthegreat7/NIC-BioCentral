@@ -21,6 +21,8 @@
     --blue-text: #1d4ed8;
     --green-bg: #f0fdf4;
     --green-text: #15803d;
+    --red-bg: #fef2f2;
+    --red-text: #b91c1c;
 
     /* Table Colors */
     --tbl-bg: #ffffff;
@@ -36,7 +38,6 @@
   }
 
   body {
-    /* background: var(--bg-page) !important; */
     color: var(--text-primary) !important;
   }
 
@@ -47,7 +48,6 @@
     width: 100%;
     min-height: 100vh;
     padding: 1rem 2rem;
-    /* Removed padding-top: 4.5rem to fix the gap */
     box-sizing: border-box;
   }
 
@@ -57,7 +57,6 @@
     width: 100%;
     max-width: 1200px;
     gap: 1rem;
-    /* Tightened from 1.5rem */
   }
 
   .page-header-bar {
@@ -68,7 +67,6 @@
     display: flex;
     align-items: center;
     padding: 1rem 1.5rem;
-    /* Tightened padding */
     gap: 1.5rem;
     box-shadow: var(--shadow-sm);
     animation: fadeInDown 0.5s ease-out forwards;
@@ -97,7 +95,6 @@
     flex: 1;
   }
 
-  /* Text adjustments to Light Theme */
   .welcome-title {
     font-size: 1.35rem;
     font-weight: 700;
@@ -269,9 +266,12 @@
     display: flex;
   }
 
-  /* Inputs & Search Light Mode */
+  /* Inputs & Search */
   .search-wrap {
     position: relative;
+    display: flex;
+    gap: 10px;
+    align-items: center;
   }
 
   .search-wrap .si {
@@ -283,7 +283,7 @@
   }
 
   .search-input {
-    width: 100%;
+    flex: 1;
     padding: 10px 14px 10px 36px;
     background: var(--bg-surface);
     border: 1px solid var(--border);
@@ -297,7 +297,7 @@
     border-color: var(--accent);
   }
 
-  /* Table Light Mode */
+  /* Table */
   .table-shell {
     background: var(--tbl-bg);
     border-radius: 10px;
@@ -354,6 +354,12 @@
   .clickable-row.selected td:first-child {
     border-left: 3px solid var(--tbl-sel-border);
     padding-left: 11px;
+  }
+
+  .target-row.disabled-row {
+    opacity: 0.4;
+    cursor: not-allowed;
+    background: var(--bg-muted);
   }
 
   /* Pagination Controls */
@@ -493,21 +499,21 @@
     font-weight: 500;
   }
 
-  /* ── Modals Layering Fix ── */
+  /* ── Modals & Timers ── */
+  /* Find this block in your <style> section */
   .modal-backdrop {
-    position: fixed;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.4);
-    backdrop-filter: blur(4px);
-    display: none;
-    justify-content: center;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(4px);
+      display: none;
+      justify-content: center;
 
-    /* Pushes the modal up visually */
-    align-items: flex-start;
-    padding-top: 10vh;
+      /* CHANGE THESE TWO LINES: */
+      align-items: center;    /* Changed from flex-start to center */
+      padding-top: 0;         /* Changed from 10vh to 0 */
 
-    /* Forces it above the navbar (z-index 1050) */
-    z-index: 1060;
+      z-index: 1060;
   }
 
   .modal-backdrop.open {
@@ -522,6 +528,8 @@
     border: 1px solid var(--border);
     box-shadow: 0 25px 50px rgba(0, 0, 0, 0.2);
     animation: popIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    position: relative;
+    overflow: hidden;
   }
 
   .modal-head {
@@ -553,6 +561,11 @@
     display: flex;
     justify-content: center;
     align-items: center;
+    transition: background 0.2s;
+  }
+
+  .modal-close-btn:hover {
+    background: var(--border);
   }
 
   .modal-body {
@@ -578,6 +591,10 @@
     font-weight: 600;
   }
 
+  .btn-cancel:hover {
+    background: var(--bg-muted);
+  }
+
   .btn-confirm {
     flex: 2;
     display: flex;
@@ -594,28 +611,41 @@
     transition: 0.2s;
   }
 
-  @keyframes fadeInDown {
-    from {
-      opacity: 0;
-      transform: translateY(-12px);
-    }
+  /* Timer UI Elements */
+  .timer-bar-container {
+    height: 4px;
+    width: 100%;
+    background: var(--bg-muted);
+    position: absolute;
+    bottom: 0;
+    left: 0;
+  }
 
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
+  .timer-progress {
+    height: 100%;
+    width: 100%;
+    background: var(--accent);
+    transform-origin: left;
+  }
+
+  .timer-progress.success { background: var(--success); }
+  .timer-progress.error { background: var(--error); }
+
+  .timer-text {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    margin-top: 0.5rem;
+    font-weight: 600;
+  }
+
+  @keyframes fadeInDown {
+    from { opacity: 0; transform: translateY(-12px); }
+    to { opacity: 1; transform: translateY(0); }
   }
 
   @keyframes popIn {
-    from {
-      opacity: 0;
-      transform: scale(0.92);
-    }
-
-    to {
-      opacity: 1;
-      transform: scale(1);
-    }
+    from { opacity: 0; transform: scale(0.92); }
+    to { opacity: 1; transform: scale(1); }
   }
 </style>
 
@@ -626,7 +656,7 @@
       <div class="header-left-group">
         <div class="header-icon-wrap"><i class="fas fa-exchange-alt"></i></div>
         <div class="page-header-left">
-          <h1 class="welcome-title">Employee Transfer</h1>
+          <h1 class="welcome-title">Employee Copy</h1>
           <p class="welcome-subtitle">Select a store, pick employees, then assign target locations.</p>
         </div>
       </div>
@@ -656,8 +686,10 @@
           <div class="store-badge" id="storeBadge"><i class="fas fa-map-marker-alt"></i><span
               id="storeBadgeText">—</span></div>
         </div>
-        <div class="search-wrap"><i class="fas fa-search si"></i><input type="text" id="originStoreSearch"
-            class="search-input" placeholder="Search store name or IP…"></div>
+        <div class="search-wrap">
+          <i class="fas fa-search si"></i>
+          <input type="text" id="originStoreSearch" class="search-input" placeholder="Search store name or IP…">
+        </div>
         <div class="table-shell">
           <div class="table-scroll">
             <table class="design-table">
@@ -692,12 +724,16 @@
 
         <div class="select-all-bar" id="selectAllBar">
           <span><i class="fas fa-users" style="margin-right:6px;"></i><span id="selectAllLabel">—</span></span>
-          <div style="display:flex;gap:14px;"><button class="link-btn" onclick="selectAllEmployees()">Select
-              All</button><button class="link-btn danger" onclick="clearAllEmployees()">Clear</button></div>
+          <div style="display:flex;gap:14px;">
+            <button class="link-btn" onclick="selectAllEmployees()">Select All</button>
+            <button class="link-btn danger" onclick="clearAllEmployees()">Clear</button>
+          </div>
         </div>
 
-        <div class="search-wrap"><i class="fas fa-search si"></i><input type="text" id="employeeSearch"
-            class="search-input" placeholder="Search by ID or name…"></div>
+        <div class="search-wrap">
+          <i class="fas fa-search si"></i>
+          <input type="text" id="employeeSearch" class="search-input" placeholder="Search by ID or name…">
+        </div>
 
         <div class="table-shell">
           <div class="table-scroll">
@@ -747,13 +783,15 @@
           style="width:32px;height:32px;background:var(--accent);color:#fff;border-radius:8px;display:flex;align-items:center;justify-content:center;">
           <i class="fas fa-map-pin"></i>
         </div>
-        Select Target Store(s)
+        Select Target Store
       </h3>
       <button class="modal-close-btn" onclick="toggleModal(false)"><i class="fas fa-times"></i></button>
     </div>
     <div class="modal-body">
-      <div class="search-wrap" style="margin-bottom:0.85rem;"><i class="fas fa-search si"></i><input type="text"
-          id="modalStoreSearch" class="search-input" placeholder="Search target stores…"></div>
+      <div class="search-wrap" style="margin-bottom:0.85rem;">
+        <i class="fas fa-search si"></i>
+        <input type="text" id="modalStoreSearch" class="search-input" placeholder="Search target store…">
+      </div>
       <div class="table-shell">
         <div class="table-scroll" style="max-height: 250px;">
           <table class="design-table">
@@ -767,7 +805,7 @@
             <tbody id="targetStoreBody">
               {% for device in devices %}
               <tr class="target-row">
-                <td><input type="checkbox" value="{{ device.ip }}" class="target-cb" style="accent-color: #3b82f6;">
+                <td><input type="radio" name="targetStore" value="{{ device.ip }}" class="target-cb" style="accent-color: #3b82f6;">
                 </td>
                 <td><strong>{{ device.name }}</strong></td>
                 <td style="color:var(--tbl-muted);">{{ device.ip }}</td>
@@ -787,16 +825,44 @@
 </div>
 
 <div id="successModal" class="modal-backdrop">
-  <div class="modal-window" style="max-width: 420px; text-align: center; padding: 3rem 2rem;">
+  <div class="modal-window" style="max-width: 420px; text-align: center; padding: 3rem 2rem 2.5rem;">
     <div style="font-size: 4rem; color: var(--success); margin-bottom: 1rem; animation: popIn 0.5s ease forwards;">
       <i class="fas fa-check-circle"></i>
     </div>
     <h3 style="color: var(--text-primary); font-size: 1.6rem; margin-top: 0; margin-bottom: 0.5rem; font-weight: 700;">
       Transfer Complete</h3>
-    <p id="successMessage"
-      style="color: var(--text-secondary); font-size: 0.95rem; margin-bottom: 2rem; line-height: 1.5;"></p>
-    <button class="btn-proceed" style="width: 100%; justify-content: center; padding: 12px;"
-      onclick="window.location.reload()">Done</button>
+    <p id="successMessage" style="color: var(--text-secondary); font-size: 0.95rem; line-height: 1.5; margin-bottom: 5px;"></p>
+    <div class="timer-text" id="successTimerText">Closing in 3s...</div>
+    
+    <div style="margin-top: 2rem;">
+      <button class="btn-proceed" style="width: 100%; justify-content: center; padding: 12px; background: var(--success);"
+        onclick="forceCloseSuccess()">Done</button>
+    </div>
+    
+    <div class="timer-bar-container">
+      <div class="timer-progress success" id="successProgressBar"></div>
+    </div>
+  </div>
+</div>
+
+<div id="errorModal" class="modal-backdrop">
+  <div class="modal-window" style="max-width: 420px; text-align: center; padding: 3rem 2rem 2.5rem;">
+    <div style="font-size: 4rem; color: var(--error); margin-bottom: 1rem; animation: popIn 0.5s ease forwards;">
+      <i class="fas fa-times-circle"></i>
+    </div>
+    <h3 style="color: var(--text-primary); font-size: 1.6rem; margin-top: 0; margin-bottom: 0.5rem; font-weight: 700;">
+      Transfer Failed</h3>
+    <p id="errorMessage" style="color: var(--text-secondary); font-size: 0.95rem; line-height: 1.5; margin-bottom: 5px;"></p>
+    <div class="timer-text" id="errorTimerText">Closing in 3s...</div>
+    
+    <div style="margin-top: 2rem;">
+      <button class="btn-cancel" style="width: 100%; justify-content: center; padding: 12px; background: var(--bg-muted);"
+        onclick="forceCloseError()">Try Again</button>
+    </div>
+
+    <div class="timer-bar-container">
+      <div class="timer-progress error" id="errorProgressBar"></div>
+    </div>
   </div>
 </div>
 
@@ -809,6 +875,9 @@
   let filteredEmployees = [];
   let currentPage = 1;
   const pageSize = 15;
+
+  let countdownInterval;
+  let timerTimeout;
 
   function setStep(n) {
     [1, 2, 3].forEach(i => {
@@ -963,25 +1032,92 @@
 
   function refreshBtn() { document.getElementById('proceedBtn').disabled = selectedEmployees.size === 0; }
 
+  // Target Modal logic
   function toggleModal(show) {
     document.getElementById('assignModal').classList.toggle('open', show);
     if (show) {
-      document.querySelectorAll('.target-cb').forEach(cb => {
+      document.querySelectorAll('.target-row').forEach(row => {
+        const cb = row.querySelector('.target-cb');
         const isOrigin = cb.value === selectedOrigin;
-        cb.disabled = isOrigin; if (isOrigin) cb.checked = false;
-        cb.closest('tr').style.opacity = isOrigin ? '0.3' : '1';
+        
+        cb.disabled = isOrigin; 
+        if (isOrigin) {
+          cb.checked = false;
+          row.classList.add('disabled-row');
+        } else {
+          row.classList.remove('disabled-row');
+        }
+        
+        // Add row click assignment if not already added
+        if(!row.dataset.clickBound) {
+            row.addEventListener('click', e => { 
+                if (!cb.disabled) cb.checked = true; // Radio button behavior enforces single selection
+            });
+            row.dataset.clickBound = "true";
+        }
       });
     }
   }
 
+  // --- Auto-Close Modals Logic ---
+  function showAutoCloseModal(modalId, textId, progressId, msgElementId, message, isSuccess) {
+      const modal = document.getElementById(modalId);
+      document.getElementById(msgElementId).textContent = message;
+      
+      const textEl = document.getElementById(textId);
+      const progressEl = document.getElementById(progressId);
+      
+      let timeLeft = 3; // 3 seconds
+      textEl.textContent = `Closing in ${timeLeft}s...`;
+      
+      // Reset progress bar
+      progressEl.style.transition = 'none';
+      progressEl.style.transform = 'scaleX(1)';
+      
+      modal.classList.add('open');
+
+      // Start animation
+      clearTimeout(timerTimeout);
+      timerTimeout = setTimeout(() => {
+          progressEl.style.transition = 'transform 3s linear';
+          progressEl.style.transform = 'scaleX(0)';
+      }, 50);
+
+      clearInterval(countdownInterval);
+      countdownInterval = setInterval(() => {
+          timeLeft--;
+          textEl.textContent = `Closing in ${timeLeft}s...`;
+          
+          if (timeLeft <= 0) {
+              clearInterval(countdownInterval);
+              modal.classList.remove('open');
+              if (isSuccess) window.location.reload();
+          }
+      }, 1000);
+  }
+
+  function forceCloseSuccess() {
+      clearInterval(countdownInterval);
+      clearTimeout(timerTimeout);
+      window.location.reload();
+  }
+
+  function forceCloseError() {
+      clearInterval(countdownInterval);
+      clearTimeout(timerTimeout);
+      document.getElementById('errorModal').classList.remove('open');
+  }
+
   function submitTransfer() {
-    const targets = Array.from(document.querySelectorAll('.target-cb:checked')).map(c => c.value);
-    if (!targets.length) return alert('Select at least one target location.');
+    const selectedTarget = document.querySelector('.target-cb:checked');
+    if (!selectedTarget) return alert('Select a target location.');
+
+    const targetIp = selectedTarget.value;
 
     const fd = new FormData();
     fd.append('source_branch', selectedOrigin);
     selectedEmployees.forEach((_, code) => fd.append('employee_id', code));
-    targets.forEach(t => fd.append('dest_branch', t));
+    fd.append('dest_branch', targetIp);
 
     const submitBtn = document.getElementById('confirmTransferBtn');
     const originalContent = submitBtn.innerHTML;
@@ -991,16 +1127,16 @@
     fetch('/move_registration', { method: 'POST', body: fd })
       .then(response => response.json())
       .then(data => {
+        toggleModal(false);
         if (data.status === 'success') {
-          toggleModal(false);
-          document.getElementById('successMessage').textContent = data.message;
-          document.getElementById('successModal').classList.add('open');
+            showAutoCloseModal('successModal', 'successTimerText', 'successProgressBar', 'successMessage', data.message, true);
         } else {
-          alert("Error: " + data.message);
+            showAutoCloseModal('errorModal', 'errorTimerText', 'errorProgressBar', 'errorMessage', data.message || "An unknown error occurred during transfer.", false);
         }
       })
       .catch(err => {
-        alert("A network error occurred. Please try again.");
+        toggleModal(false);
+        showAutoCloseModal('errorModal', 'errorTimerText', 'errorProgressBar', 'errorMessage', "A network error occurred. Please check your connection and try again.", false);
         console.error(err);
       })
       .finally(() => {

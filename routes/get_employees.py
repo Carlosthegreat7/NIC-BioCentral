@@ -1,5 +1,8 @@
+import csv
+import io
 import pyodbc
-from flask import Blueprint, render_template, request, jsonify, session
+from collections import defaultdict
+from flask import Blueprint, render_template, request, jsonify, session, Response
 from portal import app, loggedin_required
 from zk import ZK, const
 
@@ -115,33 +118,126 @@ def fetch_logs():
         
         try:
             conn_zk = zk.connect()
-            # This pulls the raw attendance buffer from the machine
             attendances = conn_zk.get_attendance()
             
             logs_data = []
             for att in attendances:
-                # Filter out logs that don't belong to the selected employee
                 if str(att.user_id) == str(emp_id):
-                    # Interpret punch state (Standard ZKTeco: 0 = In, 1 = Out)
                     punch_type = "TIME IN" if getattr(att, 'punch', -1) == 0 else "TIME OUT" if getattr(att, 'punch', -1) == 1 else "LOGGED"
                     
                     logs_data.append({
                         "date": att.timestamp.strftime('%B %d, %Y'),
                         "time": att.timestamp.strftime('%I:%M %p'),
                         "type": punch_type,
-                        "raw_time": att.timestamp # Kept temporarily for sorting
+                        "raw_time": att.timestamp 
                     })
-            
-            # Sort chronologically (newest first)
             logs_data.sort(key=lambda x: x['raw_time'], reverse=True)
-            
-            # Strip the raw time out of the final payload
             for log in logs_data:
                 del log['raw_time']
-            
-            # Limit to the most recent 50 logs to keep the UI snappy
             return jsonify({"status": "success", "data": logs_data[:50]})
             
+        except Exception as e:
+            return jsonify({"status": "error", "message": f"Hardware Connection Error: {str(e)}"})
+        finally:
+            if conn_zk: conn_zk.disconnect()
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)})
+
+@get_employees_bp.route('/api/backup-logs', methods=['GET'])
+@loggedin_required()
+def backup_logs():
+    """Fetches logs and users from hardware and returns a formatted CSV with Time In/Out."""
+    try:
+        device_id = request.args.get('device_id')
+        conn_db = get_db_connection()
+        cursor = conn_db.cursor()
+        cursor.execute("SELECT bcc, ip_address, comms_key FROM dbo.device_registry WHERE device_id = ?", (device_id,))
+        device_row = cursor.fetchone()
+        conn_db.close()
+
+        if not device_row:
+            return "Device not found in SQL registry.", 404
+
+        ip = device_row.ip_address.strip()
+        key = int(device_row.comms_key) if device_row.comms_key.isdigit() else 0
+        device_name = device_row.bcc.replace(" ", "_")
+
+        zk = ZK(ip, port=4370, timeout=10, password=key, force_udp=False, ommit_ping=False)
+        conn_zk = None
+        try:
+            conn_zk = zk.connect()
+            users = conn_zk.get_users()
+            user_map = {str(u.user_id): (u.name if u.name else "UNNAMED") for u in users}
+            attendances = conn_zk.get_attendance()
+            grouped_logs = defaultdict(list)
+            for att in attendances:
+                uid = str(att.user_id)
+                date_str = att.timestamp.strftime('%Y-%m-%d')
+                time_obj = att.timestamp.time()
+                grouped_logs[(uid, date_str)].append(time_obj)
+            
+            output = io.StringIO()
+            writer = csv.writer(output)
+            
+            writer.writerow(['Device Location', 'Employee Name', 'Employee ID', 'Date', 'Time In', 'Time Out'])
+            
+            for (uid, date_str), times in grouped_logs.items():
+                emp_name = user_map.get(uid, "UNKNOWN")
+                times.sort()
+                time_in = times[0].strftime('%I:%M %p')
+                time_out = times[-1].strftime('%I:%M %p') if len(times) > 1 else "--"
+                
+                writer.writerow([
+                    device_row.bcc, 
+                    emp_name, 
+                    uid, 
+                    date_str, 
+                    time_in, 
+                    time_out
+                ])
+
+            output.seek(0)
+            return Response(
+                output.getvalue(),
+                mimetype="text/csv",
+                headers={"Content-disposition": f"attachment; filename={device_name}_backup.csv"}
+            )
+        except Exception as e:
+            return f"Hardware Connection Error: {str(e)}", 500
+        finally:
+            if conn_zk: conn_zk.disconnect()
+    except Exception as e:
+        return f"Backup failed: {str(e)}", 500
+
+@get_employees_bp.route('/api/purge-logs', methods=['POST'])
+@loggedin_required()
+def purge_logs():
+    """Wipes the attendance buffer on the physical ZKTeco device."""
+    try:
+        device_id = request.form.get('device_id')
+        password = request.form.get('password')
+
+        if password != "123123":
+            return jsonify({"status": "error", "message": "Unauthorized: Invalid PIN."})
+
+        conn_db = get_db_connection()
+        cursor = conn_db.cursor()
+        cursor.execute("SELECT ip_address, comms_key FROM dbo.device_registry WHERE device_id = ?", (device_id,))
+        device_row = cursor.fetchone()
+        conn_db.close()
+
+        if not device_row:
+            return jsonify({"status": "error", "message": "Device not found in SQL registry."})
+
+        ip = device_row.ip_address.strip()
+        key = int(device_row.comms_key) if device_row.comms_key.isdigit() else 0
+
+        zk = ZK(ip, port=4370, timeout=15, password=key, force_udp=False, ommit_ping=False)
+        conn_zk = None
+        try:
+            conn_zk = zk.connect()
+            conn_zk.clear_attendance() 
+            return jsonify({"status": "success", "message": "Device storage cleared successfully."})
         except Exception as e:
             return jsonify({"status": "error", "message": f"Hardware Connection Error: {str(e)}"})
         finally:

@@ -40,7 +40,7 @@
            PREMIUM CYBERPUNK NAVBAR
         ========================================= */
         .bento-header {
-            position: fixed; /* Changed to Fixed for guaranteed stickiness */
+            position: fixed; 
             top: 0;
             left: 0;
             width: 100%;
@@ -78,10 +78,10 @@
         /* Brand Area - Perfectly Centered Layout */
         .header-brand {
             display: flex;
-            align-items: center; /* Mathematically centers all items vertically */
+            align-items: center; 
             gap: 12px;
             text-decoration: none;
-            transition: all 0.3s ease;
+            transition: all 0.1s ease-out;
             border-radius: 12px;
             padding: 4px;
         }
@@ -93,15 +93,17 @@
         .nav-brand-img {
             height: 32px; 
             width: auto;
-            display: block; /* Removes bottom invisible margin */
-            filter: brightness(0) invert(1); /* Pure white */
+            display: block; 
+            filter: brightness(0) invert(1); 
             opacity: 1;
-            transition: all 0.3s;
+            transition: all 0.1s ease-out; /* Sped up transition */
+            transform: translateY(-5px); 
         }
 
+        /* Hover Glow State */
         .header-brand:hover .nav-brand-img {
-            filter: brightness(0) invert(1) drop-shadow(0 0 10px rgba(255,255,255,0.4));
-            transform: translateY(-1px);
+            transform: translateY(-5px); 
+            filter: brightness(0) invert(1) drop-shadow(0 0 8px rgba(255, 255, 255, 0.8));
         }
 
         /* Subtle divider between logo and text */
@@ -115,13 +117,19 @@
         .brand-text {
             display: flex;
             flex-direction: column;
-            justify-content: center; /* Internal vertical centering */
-            line-height: 1.1; /* Tightened line height */
-            transition: transform 0.3s;
+            justify-content: center; 
+            line-height: 1.1; 
+            transition: transform 0.1s ease-out; /* Sped up transition */
         }
 
         .header-brand:hover .brand-text {
-            transform: translateX(4px);
+            transform: none;
+        }
+
+        .header-brand:hover .brand-sub {
+            color: #ffffff; 
+            text-shadow: 0 0 10px rgba(77, 163, 255, 0.8), 0 0 20px rgba(77, 163, 255, 0.4);
+            opacity: 1;
         }
 
         .brand-name {
@@ -130,7 +138,7 @@
             color: #ffffff;
             letter-spacing: 0.5px;
             text-shadow: 0 0 10px rgba(77, 163, 255, 0.2);
-            margin-bottom: 2px; /* Balances the top and bottom text */
+            margin-bottom: 2px; 
         }
 
         .brand-sub {
@@ -140,6 +148,16 @@
             text-transform: uppercase;
             letter-spacing: 0.15em;
             opacity: 0.8;
+            transition: all 0.1s ease-out; /* Added to sub for snappy glow transition */
+        }
+
+        /* INSTANT CLICK RESPONSE (NO DELAY) */
+        .header-brand:active .nav-brand-img,
+        .header-brand:active .brand-sub {
+            transition: none !important; /* Kills the delay immediately */
+            filter: brightness(0) invert(1) drop-shadow(0 0 15px rgba(255, 255, 255, 1)) !important;
+            text-shadow: 0 0 15px rgba(77, 163, 255, 1) !important;
+            color: #ffffff !important;
         }
 
         /* Nav area & Burger menu button */
@@ -345,7 +363,7 @@
     <header class="bento-header">
         <a href="{{ url_for('home') }}" class="header-brand">
             
-            <img src="{{ url_for('static', filename='newtrends_long-removebg-preview.png') }}" alt="NIC Logo" class="nav-brand-img">
+            <img src="{{ url_for('static', filename='print-removebg-preview.png') }}" alt="NIC Logo" class="nav-brand-img">
             
             <div class="nav-divider"></div>
 

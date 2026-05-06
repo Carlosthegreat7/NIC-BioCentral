@@ -86,7 +86,7 @@ def save_device():
         conn = get_db_connection()
         cursor = conn.cursor()
  
-        if d_id: # UPDATE EXISTING
+        if d_id:
             cursor.execute("""
                 UPDATE dbo.device_registry
                 SET bcc = ?, ip_address = ?, comms_key = ?, chain_type = ?
@@ -96,7 +96,7 @@ def save_device():
             action_type, target_val = "UPDATE", str(d_id)
             action_desc = f"Updated terminal {bcc} at {ip}"
            
-        else: # INSERT NEW
+        else:
             cursor.execute("""
                 INSERT INTO dbo.device_registry (bcc, ip_address, comms_key, chain_type)
                 OUTPUT INSERTED.device_id
@@ -106,7 +106,6 @@ def save_device():
             target_val = str(cursor.fetchone()[0])
             action_type, action_desc = "REGISTER", f"Registered new terminal {bcc} at {ip}"
  
-        # Unified Audit Entry
         cursor.execute("""
             INSERT INTO dbo.biocentral_audit_logs (module, target, action, action_details, action_by, action_at)
             VALUES ('DEVICE', ?, ?, ?, ?, GETDATE())
@@ -135,7 +134,6 @@ def delete_device():
        
         cursor.execute("DELETE FROM dbo.device_registry WHERE device_id = ?", (d_id,))
        
-        # Corrected: Added action_at and GETDATE() to prevent the NULL constraint crash
         cursor.execute("""
             INSERT INTO dbo.biocentral_audit_logs (module, target, action, action_details, action_by, action_at)
             VALUES ('DEVICE', ?, 'DELETE', ?, ?, GETDATE())

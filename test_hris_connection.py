@@ -24,7 +24,7 @@ def test_db_connection():
         cursor = conn.cursor()
 
         # Query the top 100 records
-        query = f"SELECT TOP 100 [Code], [Name], [AccessNo] FROM {table}"
+        query = f"SELECT TOP 5000 [Code], [Name], [AccessNo] FROM {table}"
         cursor.execute(query)
         
         rows = cursor.fetchall()
