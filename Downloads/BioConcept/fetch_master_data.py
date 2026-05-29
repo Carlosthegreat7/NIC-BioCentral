@@ -5,7 +5,7 @@ from datetime import datetime
 from zk import ZK
 
 # --- CONFIGURATION ---
-DEVICE_IP = '192.168.100.162'  # Update this to your device IP
+DEVICE_IP = '10.39.29.3'  # Update this to your device IP
 DEVICE_PORT = 4370
 OUTPUT_FILE = 'master_user_data.json'
 
@@ -33,13 +33,13 @@ def fetch_master_data():
                 "user_id": user.user_id,
                 "name": user_name,
                 "privilege": user.privilege,
+                "pin": user.password,        # <-- added
                 "template_count": len(user_templates),
                 "templates": [
                     {
                         "fid": t.fid,
                         "valid": t.valid,
-                        # FIX: Encode binary template to Base64 string
-                        "template": base64.b64encode(t.template).decode('utf-8') 
+                        "template": base64.b64encode(t.template).decode('utf-8')
                     } for t in user_templates
                 ]
             }
